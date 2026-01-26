@@ -1,0 +1,20 @@
+{
+	"$NodeId":	"Biome-94ca3905-4323-4283-bd16-5bddffb056e3",
+	"$NodeEditorMetadata":	{
+		"$Nodes":	{
+			"Biome-94ca3905-4323-4283-bd16-5bddffb056e3":	{
+				"$Position":	{
+					"$x":	250,
+					"$y":	250
+				},
+				"$Title":	"[ROOT] Biome"
+			}
+		},
+		"$FloatingNodes":	[],
+		"$Links":	{
+		},
+		"$Groups":	[],
+		"$Comments":	[],
+		"$WorkspaceID":	"HytaleGenerator - Biome"
+	}
+}

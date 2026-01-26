@@ -1,0 +1,159 @@
+{
+	"$Title":	"[ROOT] Biome",
+	"$Position":	{
+		"$x":	-4228,
+		"$y":	-4226
+	},
+	"Name":	"Basic",
+	"Terrain":	{
+		"$Position":	{
+			"$x":	-3394,
+			"$y":	-4947
+		},
+		"Type":	"DAOTerrain",
+		"Density":	{
+			"$Position":	{
+				"$x":	-3170,
+				"$y":	-4971
+			},
+			"Type":	"Multiplier",
+			"Skip":	false,
+			"Inputs":	[{
+					"$Position":	{
+						"$x":	-2547,
+						"$y":	-4971
+					},
+					"Type":	"Sum",
+					"Skip":	false,
+					"Inputs":	[{
+							"$Position":	{
+								"$x":	-1893,
+								"$y":	-5144
+							},
+							"Type":	"SimplexNoise2D",
+							"Skip":	false,
+							"Lacunarity":	2,
+							"Persistence":	0.5,
+							"Octaves":	1,
+							"Scale":	50,
+							"Seed":	"A"
+						}, {
+							"$Position":	{
+								"$x":	-1893,
+								"$y":	-4796
+							},
+							"Type":	"CurveMapper",
+							"Skip":	false,
+							"Curve":	{
+								"$Position":	{
+									"$x":	-1272,
+									"$y":	-4560
+								},
+								"Type":	"Manual",
+								"Points":	[{
+										"$Position":	{
+											"$x":	-619,
+											"$y":	-4702
+										},
+										"In":	0,
+										"Out":	2
+									}, {
+										"$Position":	{
+											"$x":	-612,
+											"$y":	-4550
+										},
+										"In":	5,
+										"Out":	-1
+									}, {
+										"$Position":	{
+											"$x":	-603,
+											"$y":	-4382
+										},
+										"In":	50,
+										"Out":	-2
+									}]
+							},
+							"Inputs":	[{
+									"$Position":	{
+										"$x":	-1255,
+										"$y":	-4806
+									},
+									"Type":	"BaseHeight",
+									"Skip":	false,
+									"BaseHeightName":	"Base",
+									"Distance":	true
+								}]
+						}]
+				}, {
+					"$Position":	{
+						"$x":	-2546,
+						"$y":	-4791
+					},
+					"Type":	"Constant",
+					"Skip":	false,
+					"Value":	0.5
+				}]
+		}
+	},
+	"MaterialProvider":	{
+		"$Position":	{
+			"$x":	-3132,
+			"$y":	-4137
+		},
+		"Type":	"Solidity",
+		"Solid":	{
+			"$Position":	{
+				"$x":	-2333,
+				"$y":	-4105
+			},
+			"Type":	"Queue",
+			"Queue":	[{
+					"$Position":	{
+						"$x":	-1703,
+						"$y":	-4115
+					},
+					"Type":	"Constant",
+					"Material":	{
+						"$Position":	{
+							"$x":	-1060,
+							"$y":	-4123
+						},
+						"Solid":	"Rock_Bedrock"
+					}
+				}]
+		},
+		"Empty":	{
+			"$Comment":	"REQUIRED",
+			"$Position":	{
+				"$x":	-2330,
+				"$y":	-3812
+			},
+			"Type":	"Constant",
+			"Material":	{
+				"$Position":	{
+					"$x":	-1634,
+					"$y":	-3783
+				},
+				"Solid":	"Empty"
+			}
+		}
+	},
+	"EnvironmentProvider":	{
+		"$Position":	{
+			"$x":	-3315,
+			"$y":	-3714
+		},
+		"Type":	"Constant",
+		"Environment":	"Env_Void"
+	},
+	"TintProvider":	{
+		"$Position":	{
+			"$x":	-3283,
+			"$y":	-3483
+		},
+		"Type":	"Constant",
+		"Color":	"#5b9e28"
+	},
+	"$WorkspaceID":	"HytaleGenerator - Biome",
+	"$Groups":	[]
+}

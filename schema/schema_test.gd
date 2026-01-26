@@ -1,8 +1,12 @@
 extends SceneTree
 
 const TEST_FILES = [
-	"test_files/Cammymoop Games.cammy-worldgen-test/Server/HytaleGenerator/Biomes/Basic_.json",
-	"test_files/Cammymoop Games.cammy-worldgen-test/Server/HytaleGenerator/Biomes/Basic.json"
+	"test_files/example_biomes/Basic_.json",
+	"test_files/example_biomes/Basic.json",
+	"test_files/asset_node_test_data/all_densities.json",
+	"test_files/asset_node_test_data/all_positions_curves_vectors.json",
+	"test_files/asset_node_test_data/all_materials_and_props.json",
+	"test_files/asset_node_test_data/biome_and_misc.json",
 ]
 
 var schema: AssetNodesSchema

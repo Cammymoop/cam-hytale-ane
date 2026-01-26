@@ -1,0 +1,336 @@
+{
+	"$Title":	"[ROOT] Biome",
+	"$Position":	{
+		"$x":	-4228,
+		"$y":	-4226
+	},
+	"Name":	"Basic",
+	"Terrain":	{
+		"$Position":	{
+			"$x":	-3394,
+			"$y":	-4947
+		},
+		"Type":	"DAOTerrain",
+		"Density":	{
+			"$Position":	{
+				"$x":	-3170,
+				"$y":	-4971
+			},
+			"Type":	"Multiplier",
+			"Skip":	false,
+			"Inputs":	[{
+					"$Position":	{
+						"$x":	-2255,
+						"$y":	-6140
+					},
+					"Type":	"Mix",
+					"Skip":	false,
+					"Inputs":	[{
+							"$Position":	{
+								"$x":	-969,
+								"$y":	-10282
+							},
+							"Type":	"Exported",
+							"ExportAs":	"Void_Buffer_Oasis_SI",
+							"SingleInstance":	true,
+							"Skip":	false,
+							"Inputs":	[{
+									"$Position":	{
+										"$x":	-221,
+										"$y":	-10289
+									},
+									"Type":	"Cache",
+									"Skip":	false,
+									"Capacity":	3,
+									"Inputs":	[{
+											"$Position":	{
+												"$x":	421,
+												"$y":	-10276
+											},
+											"Type":	"Sum",
+											"Skip":	false,
+											"Inputs":	[{
+													"$Position":	{
+														"$x":	1075,
+														"$y":	-10449
+													},
+													"Type":	"SimplexNoise2D",
+													"Skip":	false,
+													"Lacunarity":	2,
+													"Persistence":	0.5,
+													"Octaves":	1,
+													"Scale":	50,
+													"Seed":	"A"
+												}, {
+													"$Position":	{
+														"$x":	1075,
+														"$y":	-10101
+													},
+													"Type":	"CurveMapper",
+													"Skip":	false,
+													"Curve":	{
+														"$Position":	{
+															"$x":	1696,
+															"$y":	-9865
+														},
+														"Type":	"Manual",
+														"Points":	[{
+																"$Position":	{
+																	"$x":	2349,
+																	"$y":	-10007
+																},
+																"In":	0,
+																"Out":	2
+															}, {
+																"$Position":	{
+																	"$x":	2356,
+																	"$y":	-9855
+																},
+																"In":	5,
+																"Out":	-1
+															}, {
+																"$Position":	{
+																	"$x":	2365,
+																	"$y":	-9687
+																},
+																"In":	50,
+																"Out":	-2
+															}]
+													},
+													"Inputs":	[{
+															"$Position":	{
+																"$x":	1713,
+																"$y":	-10111
+															},
+															"Type":	"BaseHeight",
+															"Skip":	false,
+															"BaseHeightName":	"Base",
+															"Distance":	true
+														}]
+												}]
+										}]
+								}]
+						}, {
+							"$Position":	{
+								"$x":	-495,
+								"$y":	-8114
+							},
+							"Type":	"Min",
+							"Skip":	false,
+							"Inputs":	[{
+									"$Position":	{
+										"$x":	357,
+										"$y":	-8701
+									},
+									"Type":	"Imported",
+									"Skip":	false,
+									"Name":	"Void_Buffer_Oasis_SI"
+								}, {
+									"$Position":	{
+										"$x":	1096,
+										"$y":	-8108
+									},
+									"Type":	"Sum",
+									"Skip":	false,
+									"Inputs":	[{
+											"$Position":	{
+												"$x":	1924,
+												"$y":	-8123
+											},
+											"Type":	"Imported",
+											"Skip":	false,
+											"Name":	"Oasis_Biome_Distance_SI"
+										}, {
+											"$Position":	{
+												"$x":	1920,
+												"$y":	-7898
+											},
+											"Type":	"CurveMapper",
+											"Skip":	false,
+											"Curve":	{
+												"$Position":	{
+													"$x":	2573,
+													"$y":	-7623
+												},
+												"Type":	"Manual",
+												"Points":	[{
+														"$Position":	{
+															"$x":	3256,
+															"$y":	-7656
+														},
+														"In":	50,
+														"Out":	0
+													}, {
+														"$Position":	{
+															"$x":	3260,
+															"$y":	-7490
+														},
+														"In":	-40,
+														"Out":	0.35
+													}, {
+														"$Position":	{
+															"$x":	3258,
+															"$y":	-7309
+														},
+														"In":	-24,
+														"Out":	0.28
+													}, {
+														"$Position":	{
+															"$x":	3248,
+															"$y":	-7158
+														},
+														"In":	-19,
+														"Out":	0.25
+													}, {
+														"$Position":	{
+															"$x":	3254,
+															"$y":	-7004
+														},
+														"In":	-12,
+														"Out":	0.22
+													}, {
+														"$Position":	{
+															"$x":	3247,
+															"$y":	-6847
+														},
+														"In":	10,
+														"Out":	0.15
+													}, {
+														"$Position":	{
+															"$x":	3239,
+															"$y":	-6679
+														},
+														"In":	-60,
+														"Out":	1
+													}]
+											},
+											"Inputs":	[{
+													"$Position":	{
+														"$x":	2581,
+														"$y":	-7905
+													},
+													"Type":	"BaseHeight",
+													"Skip":	false,
+													"BaseHeightName":	"Base",
+													"Distance":	true
+												}]
+										}]
+								}]
+						}, {
+							"$Position":	{
+								"$x":	-859,
+								"$y":	-5448
+							},
+							"Type":	"Normalizer",
+							"Skip":	false,
+							"FromMin":	0,
+							"FromMax":	0,
+							"ToMin":	0,
+							"ToMax":	1,
+							"Inputs":	[{
+									"$Position":	{
+										"$x":	-122,
+										"$y":	-5437
+									},
+									"Type":	"Inverter",
+									"Skip":	false,
+									"Inputs":	[{
+											"$Position":	{
+												"$x":	504,
+												"$y":	-5438
+											},
+											"Type":	"Imported",
+											"Skip":	false,
+											"Name":	"Oasis_Biome_Distance_SI"
+										}]
+								}]
+						}]
+				}, {
+					"$Position":	{
+						"$x":	-2546,
+						"$y":	-4791
+					},
+					"Type":	"Constant",
+					"Skip":	false,
+					"Value":	0.5
+				}]
+		}
+	},
+	"MaterialProvider":	{
+		"$Position":	{
+			"$x":	-3132,
+			"$y":	-4137
+		},
+		"Type":	"Solidity",
+		"Solid":	{
+			"$Position":	{
+				"$x":	-2333,
+				"$y":	-4105
+			},
+			"Type":	"Queue",
+			"Queue":	[{
+					"$Position":	{
+						"$x":	-1703,
+						"$y":	-4115
+					},
+					"Type":	"Constant",
+					"Material":	{
+						"$Position":	{
+							"$x":	-1060,
+							"$y":	-4123
+						},
+						"Solid":	"Rock_Bedrock"
+					}
+				}]
+		},
+		"Empty":	{
+			"$Comment":	"REQUIRED",
+			"$Position":	{
+				"$x":	-2330,
+				"$y":	-3812
+			},
+			"Type":	"Constant",
+			"Material":	{
+				"$Position":	{
+					"$x":	-1634,
+					"$y":	-3783
+				},
+				"Solid":	"Empty"
+			}
+		}
+	},
+	"EnvironmentProvider":	{
+		"$Position":	{
+			"$x":	-3315,
+			"$y":	-3714
+		},
+		"Type":	"Constant",
+		"Environment":	"Env_Void"
+	},
+	"TintProvider":	{
+		"$Position":	{
+			"$x":	-3283,
+			"$y":	-3483
+		},
+		"Type":	"Constant",
+		"Color":	"#5b9e28"
+	},
+	"$WorkspaceID":	"HytaleGenerator - Biome",
+	"$Groups":	[{
+			"$Position":	{
+				"$x":	997.75,
+				"$y":	-8307.3125
+			},
+			"$width":	2693.0625,
+			"$height":	1879.4375,
+			"$name":	"Oasis Crater Slope Shape"
+		}, {
+			"$Position":	{
+				"$x":	-955.8125,
+				"$y":	-5599.8125
+			},
+			"$width":	2125.8125,
+			"$height":	506,
+			"$name":	"Mix bottom of oasis and cliffs"
+		}]
+}

@@ -1,0 +1,57 @@
+{
+	"$Title":	"[ROOT] Biome",
+	"$Position":	{
+		"$x":	-4228,
+		"$y":	-4226
+	},
+	"Name":	"Basic",
+	"Terrain":	{
+		"$Position":	{
+			"$x":	-3248,
+			"$y":	-5006
+		},
+		"Type":	"DAOTerrain",
+		"Density":	{
+			"$Position":	{
+				"$x":	-3069,
+				"$y":	-4993
+			},
+			"Type":	"Constant",
+			"Skip":	false,
+			"Value":	0
+		}
+	},
+	"MaterialProvider":	{
+		"$Comment":	"REQUIRED",
+		"$Position":	{
+			"$x":	-3332,
+			"$y":	-4149
+		},
+		"Type":	"Constant",
+		"Material":	{
+			"$Position":	{
+				"$x":	-2636,
+				"$y":	-4120
+			},
+			"Solid":	"Empty"
+		}
+	},
+	"EnvironmentProvider":	{
+		"$Position":	{
+			"$x":	-3315,
+			"$y":	-3714
+		},
+		"Type":	"Constant",
+		"Environment":	"Env_Void"
+	},
+	"TintProvider":	{
+		"$Position":	{
+			"$x":	-3283,
+			"$y":	-3483
+		},
+		"Type":	"Constant",
+		"Color":	"#5b9e28"
+	},
+	"$WorkspaceID":	"HytaleGenerator - Biome",
+	"$Groups":	[]
+}
