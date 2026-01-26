@@ -3,7 +3,7 @@
 [ext_resource type="Theme" uid="uid://cv3cabit36ilb" path="res://ui/main_theme.tres" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://b2hqpos1gajgs" path="res://asset_node_graph_edit.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://dit1s6nyie23m" path="res://model/asset_nodes_schema.gd" id="3_h2yge"]
-[ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://custom_graph_nodes/manual_curve_special.gd" id="4_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://b2bmrn4q5gtsa" path="res://custom_graph_nodes/manual_curve_special.tscn" id="5_7mycd"]
 [ext_resource type="Script" uid="uid://d2ucs5vp8diew" path="res://custom_graph_nodes/special_gn_factory.gd" id="5_lquwl"]
 
 [sub_resource type="Resource" id="Resource_1bvp3"]
@@ -37,13 +37,6 @@ show_zoom_label = true
 script = ExtResource("1_ig7tw")
 test_json_file = "res://test_files/example_biomes/Basic_.json"
 schema = SubResource("Resource_1bvp3")
-no_left_types = null
-use_json_positions = null
-json_positions_scale = null
-gn_min_width = null
-text_field_def_characters = null
-type_colors = null
-verbose = null
 
 [node name="SpecialGNFactory" type="Node" parent="AssetNodeGraphEdit"]
 script = ExtResource("5_lquwl")
@@ -117,60 +110,7 @@ size_flags_horizontal = 3
 text = "asd"
 clear_button_enabled = true
 
-[node name="ManualCurveSpecial" type="GraphNode" parent="AssetNodeGraphEdit"]
+[node name="ManualCurveSpecial" parent="AssetNodeGraphEdit" instance=ExtResource("5_7mycd")]
 layout_mode = 0
-offset_left = 341.4375
-offset_top = 164.25
-offset_right = 554.4375
-offset_bottom = 281.25
-scale = Vector2(0.75, 0.75)
-mouse_filter = 1
-position_offset = Vector2(263.25, 111)
-title = "Manual Curve Points"
-slot/0/left_enabled = true
-slot/0/left_type = 0
-slot/0/left_color = Color(1, 1, 1, 1)
-slot/0/left_icon = null
-slot/0/right_enabled = false
-slot/0/right_type = 0
-slot/0/right_color = Color(1, 1, 1, 1)
-slot/0/right_icon = null
-slot/0/draw_stylebox = true
-slot/1/left_enabled = false
-slot/1/left_type = 0
-slot/1/left_color = Color(1, 1, 1, 1)
-slot/1/left_icon = null
-slot/1/right_enabled = false
-slot/1/right_type = 0
-slot/1/right_color = Color(1, 1, 1, 1)
-slot/1/right_icon = null
-slot/1/draw_stylebox = true
-script = ExtResource("4_1bvp3")
-
-[node name="Label" type="Label" parent="AssetNodeGraphEdit/ManualCurveSpecial"]
-layout_mode = 2
-text = "Points"
-horizontal_alignment = 1
-
-[node name="GridContainer" type="GridContainer" parent="AssetNodeGraphEdit/ManualCurveSpecial"]
-layout_mode = 2
-columns = 4
-
-[node name="Label" type="Label" parent="AssetNodeGraphEdit/ManualCurveSpecial/GridContainer"]
-layout_mode = 2
-text = "in"
-
-[node name="LineEdit" type="LineEdit" parent="AssetNodeGraphEdit/ManualCurveSpecial/GridContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Label2" type="Label" parent="AssetNodeGraphEdit/ManualCurveSpecial/GridContainer"]
-layout_mode = 2
-text = "out"
-
-[node name="LineEdit2" type="LineEdit" parent="AssetNodeGraphEdit/ManualCurveSpecial/GridContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
 
 [connection signal="ready" from="AssetNodeGraphEdit/TestGN" to="AssetNodeGraphEdit/TestGN" method="hide"]
-[connection signal="ready" from="AssetNodeGraphEdit/ManualCurveSpecial" to="AssetNodeGraphEdit/ManualCurveSpecial" method="hide"]

@@ -8,10 +8,13 @@ var my_points: Array[Vector2] = []
 
 const POINTS_CONNECTION_NAME: String = "Points"
 
-func filter_child_connection_nodes(conn_name: String) -> Array[HyAssetNode]:
-    setup_asset_node()
+func get_current_connection_list() -> Array[String]:
+    #setup_asset_node()
+    return []
 
-    return asset_node.get_all_connected_nodes(conn_name)
+func filter_child_connection_nodes(conn_name: String) -> Array[HyAssetNode]:
+    #setup_asset_node()
+    return []
 
 func setup(the_graph_edit: AssetNodeGraphEdit) -> void:
     graph_edit = the_graph_edit

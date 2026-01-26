@@ -4,7 +4,7 @@ class_name AssetNodesSchema
 var full_id_prefix_lookup: Dictionary[String, String] = {}
 
 func load_full_id_prefix_lookup() -> void:
-    for node_type in node_types:
+    for node_type in node_schema.keys():
         full_id_prefix_lookup[get_id_prefix_for_node_type(node_type)] = node_type
 
 func get_node_type_default_name(node_type: String) -> String:

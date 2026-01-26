@@ -1,0 +1,54 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2bmrn4q5gtsa"]
+
+[ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://custom_graph_nodes/manual_curve_special.gd" id="1_dv77j"]
+
+[node name="ManualCurveSpecial" type="GraphNode"]
+offset_right = 226.0
+offset_bottom = 117.0
+scale = Vector2(0.75, 0.75)
+mouse_filter = 1
+title = "Manual Curve Points"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = false
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+script = ExtResource("1_dv77j")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Points"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 4
+
+[node name="Label" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "in"
+
+[node name="LineEdit" type="LineEdit" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "out"
+
+[node name="LineEdit2" type="LineEdit" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3

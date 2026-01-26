@@ -198,6 +198,8 @@ func parse_asset_node_shallow(asset_node_data: Dictionary, output_value_type: St
         asset_node.an_type = known_node_type
     elif output_value_type != "ROOT":
         asset_node.an_type = schema.resolve_asset_node_type(asset_node_data.get("Type", "NO_TYPE_KEY"), output_value_type, asset_node.an_node_id)
+        if output_value_type == "":
+            print_debug("No output value type provided, inferred type from ID prefix: %s" % asset_node.an_type)
     
     var type_schema: = {}
     if asset_node.an_type and asset_node.an_type != "Unknown":
@@ -342,26 +344,18 @@ func make_graph_stuff() -> void:
                 new_gn.size.x = gn_min_width
         
         if use_json_positions:
-            connect_children(tree_root_node.an_node_id)
+            connect_children(new_graph_nodes[0])
         else:
             var last_y: int = move_and_connect_children(tree_root_node.an_node_id, base_tree_pos)
             base_tree_pos.y = last_y + 40
     
-func connect_children(asset_node_id: String) -> void:
-    var graph_node: = gn_lookup[asset_node_id]
-    var asset_node: = an_lookup[asset_node_id]
-    var connection_names: Array[String] = asset_node.connections.keys()
+func connect_children(graph_node: CustomGraphNode) -> void:
+    var connection_names: Array[String] = get_graph_connections_for(graph_node)
     for conn_idx in connection_names.size():
-        var conn_name: = connection_names[conn_idx]
-        for connected_node_idx in asset_node.num_connected_asset_nodes(conn_name):
-            var conn_an: = asset_node.get_connected_node(conn_name, connected_node_idx)
-            if not conn_an:
-                continue
-            var conn_gn: = gn_lookup[conn_an.an_node_id]
-            connect_node(graph_node.name, conn_idx, conn_gn.name, 0)
-            
-            if conn_an.connections.size() > 0:
-                connect_children(conn_an.an_node_id)
+        var connected_graph_nodes: Array[GraphNode] = get_graph_connected_graph_nodes(graph_node, connection_names[conn_idx])
+        for connected_gn in connected_graph_nodes:
+            connect_node(graph_node.name, conn_idx, connected_gn.name, 0)
+            connect_children(connected_gn)
 
 func move_and_connect_children(asset_node_id: String, pos: Vector2) -> int:
     var graph_node: = gn_lookup[asset_node_id]
@@ -396,19 +390,47 @@ func new_graph_nodes_for_tree(tree_root_node: HyAssetNode) -> Array[CustomGraphN
 
 func _recursive_new_graph_nodes(at_asset_node: HyAssetNode, root_asset_node: HyAssetNode) -> Array[CustomGraphNode]:
     var new_graph_nodes: Array[CustomGraphNode] = []
-    new_graph_nodes.append(new_graph_node(at_asset_node, root_asset_node))
-    for conn_name in at_asset_node.connection_list:
-        for connected_asset_node in at_asset_node.get_all_connected_nodes(conn_name):
+
+    var this_gn: = new_graph_node(at_asset_node, root_asset_node)
+    new_graph_nodes.append(this_gn)
+
+    for conn_name in get_graph_connections_for(this_gn):
+        var connected_nodes: Array[HyAssetNode] = get_graph_connected_asset_nodes(this_gn, conn_name)
+        for connected_asset_node in connected_nodes:
             new_graph_nodes.append_array(_recursive_new_graph_nodes(connected_asset_node, root_asset_node))
     return new_graph_nodes
 
+func get_graph_connections_for(graph_node: CustomGraphNode) -> Array[String]:
+    if graph_node.get_meta("is_special_gn", false):
+        return graph_node.get_current_connection_list()
+    else:
+        var asset_node: = an_lookup[graph_node.get_meta("hy_asset_node_id")]
+        return asset_node.connection_list
+
+func get_graph_connected_asset_nodes(graph_node: CustomGraphNode, conn_name: String) -> Array[HyAssetNode]:
+    if graph_node.get_meta("is_special_gn", false):
+        return graph_node.filter_child_connection_nodes(conn_name)
+    else:
+        var asset_node: = an_lookup[graph_node.get_meta("hy_asset_node_id")]
+        return asset_node.get_all_connected_nodes(conn_name)
+
+func get_graph_connected_graph_nodes(graph_node: CustomGraphNode, conn_name: String) -> Array[GraphNode]:
+    var connected_asset_nodes: Array[HyAssetNode] = get_graph_connected_asset_nodes(graph_node, conn_name)
+    var connected_graph_nodes: Array[GraphNode] = []
+    for connected_asset_node in connected_asset_nodes:
+        connected_graph_nodes.append(gn_lookup[connected_asset_node.an_node_id])
+    return connected_graph_nodes
+
+
+func should_be_special_gn(asset_node: HyAssetNode) -> bool:
+    return special_gn_factory.types_with_special_nodes.has(asset_node.an_type)
 
 func new_graph_node(asset_node: HyAssetNode, root_asset_node: HyAssetNode) -> CustomGraphNode:
     var graph_node: CustomGraphNode = null
-    var is_special: = false
-    if special_gn_factory.special_handling_types.has(asset_node.an_type):
-        is_special = true
-        graph_node = special_gn_factory.make_special_gn(asset_node, root_asset_node)
+    var is_special: = should_be_special_gn(asset_node)
+    if is_special:
+        print_debug("Making special GN for asset node type %s" % asset_node.an_type)
+        graph_node = special_gn_factory.make_special_gn(root_asset_node, asset_node)
     else:
         graph_node = CustomGraphNode.new()
 
