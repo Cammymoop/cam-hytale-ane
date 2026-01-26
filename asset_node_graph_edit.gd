@@ -16,7 +16,7 @@ var root_node: HyAssetNode = null
 var asset_node_meta: Dictionary[String, Dictionary] = {}
 
 @export var no_left_types: Array[String] = [
-    "__BiomeRoot",
+    "BiomeRoot",
 ]
 
 
@@ -32,7 +32,7 @@ var more_type_names: Dictionary[String, int] = {
 var type_id_lookup: Dictionary[String, int] = {}
 
 @export var use_json_positions: = true
-@export var json_positions_scale: Vector2 = Vector2(0.75, 0.75)
+@export var json_positions_scale: Vector2 = Vector2(0.5, 0.5)
 var relative_root_position: Vector2 = Vector2(0, 0)
 
 var temp_pos: Vector2 = Vector2(-2200, 600)
@@ -301,7 +301,9 @@ func make_graph_stuff() -> void:
         move_and_connect_children(root_node.an_node_id, Vector2(0, 100))
     
     for floating_root in floating_tree_roots:
-        var graph_node: = gn_lookup[floating_root.an_node_id]
+        var graph_node: GraphNode = gn_lookup.get(floating_root.an_node_id, null)
+        if not graph_node:
+            continue
         temp_pos.x += temp_x_sep
         if temp_pos.x >= temp_x_sep * temp_x_elements:
             temp_pos.x = temp_origin.x
@@ -429,15 +431,3 @@ func new_graph_node(asset_node: HyAssetNode) -> CustomGraphNode:
         graph_node.position_offset = meta_pos - relative_root_position
     
     return graph_node
-
-func get_fallback_root_type(root_node_data: Dictionary) -> String:
-    if not root_node_data.has("$NodeEditorMetadata"):
-        return "__Root"
-    var metadata: = root_node_data["$NodeEditorMetadata"] as Dictionary
-    if not metadata.has("$WorkspaceID"):
-        return "__Root"
-    var workspace_id := str(metadata["$WorkspaceID"])
-    if not schema.workspace_root_types.has(workspace_id):
-        print_debug("Workspace ID %s not found in workspace_root_types overrides" % workspace_id)
-        return "__Root"
-    return schema.workspace_root_types[workspace_id]

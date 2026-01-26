@@ -33,7 +33,7 @@ zoom_min = 0.117
 zoom_max = 2.0
 show_zoom_label = true
 script = ExtResource("1_ig7tw")
-test_json_file = "res://test_files/example_biomes/Void_Buffer_Oasis.json"
+test_json_file = "res://test_files/example_biomes/Basic_.json"
 schema = SubResource("Resource_1bvp3")
 
 [node name="TestGN" type="GraphNode" parent="AssetNodeGraphEdit"]
