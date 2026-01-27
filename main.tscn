@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://cgmj8na2ili3j"]
+[gd_scene load_steps=6 format=3 uid="uid://cgmj8na2ili3j"]
 
 [ext_resource type="Theme" uid="uid://cv3cabit36ilb" path="res://ui/main_theme.tres" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://b2hqpos1gajgs" path="res://asset_node_graph_edit.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://dit1s6nyie23m" path="res://model/asset_nodes_schema.gd" id="3_h2yge"]
-[ext_resource type="PackedScene" uid="uid://b2bmrn4q5gtsa" path="res://custom_graph_nodes/manual_curve_special.tscn" id="5_7mycd"]
 [ext_resource type="Script" uid="uid://d2ucs5vp8diew" path="res://custom_graph_nodes/special_gn_factory.gd" id="5_lquwl"]
 
 [sub_resource type="Resource" id="Resource_1bvp3"]
@@ -26,7 +25,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-scroll_offset = Vector2(-144, -81)
 grid_pattern = 1
 right_disconnects = true
 connection_lines_curvature = 0.2
@@ -43,11 +41,12 @@ script = ExtResource("5_lquwl")
 metadata/_custom_type_script = "uid://d2ucs5vp8diew"
 
 [node name="TestGN" type="GraphNode" parent="AssetNodeGraphEdit"]
+visible = false
 layout_mode = 0
-offset_left = 207.75
-offset_top = 184.5
-offset_right = 349.75
-offset_bottom = 301.5
+offset_left = 63.75
+offset_top = 103.5
+offset_right = 205.75
+offset_bottom = 220.5
 scale = Vector2(0.75, 0.75)
 mouse_filter = 1
 position_offset = Vector2(85, 138)
@@ -109,8 +108,5 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "asd"
 clear_button_enabled = true
-
-[node name="ManualCurveSpecial" parent="AssetNodeGraphEdit" instance=ExtResource("5_7mycd")]
-layout_mode = 0
 
 [connection signal="ready" from="AssetNodeGraphEdit/TestGN" to="AssetNodeGraphEdit/TestGN" method="hide"]

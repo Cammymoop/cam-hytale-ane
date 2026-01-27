@@ -1,12 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://b2bmrn4q5gtsa"]
+[gd_scene load_steps=4 format=3 uid="uid://b2bmrn4q5gtsa"]
 
+[ext_resource type="Theme" uid="uid://cv3cabit36ilb" path="res://ui/main_theme.tres" id="1_4erfq"]
 [ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://custom_graph_nodes/manual_curve_special.gd" id="1_dv77j"]
+[ext_resource type="Script" uid="uid://gxuxbfatctg6" path="res://ui/h_toggle_buttons.gd" id="3_o8u1p"]
 
 [node name="ManualCurveSpecial" type="GraphNode"]
-offset_right = 226.0
-offset_bottom = 117.0
+offset_left = 70.0
+offset_top = 1.0
+offset_right = 296.0
+offset_bottom = 118.0
 scale = Vector2(0.75, 0.75)
 mouse_filter = 1
+theme = ExtResource("1_4erfq")
 title = "Manual Curve Points"
 slot/0/left_enabled = true
 slot/0/left_type = 0
@@ -26,29 +31,76 @@ slot/1/right_type = 0
 slot/1/right_color = Color(1, 1, 1, 1)
 slot/1/right_icon = null
 slot/1/draw_stylebox = true
+slot/2/left_enabled = false
+slot/2/left_type = 0
+slot/2/left_color = Color(1, 1, 1, 1)
+slot/2/left_icon = null
+slot/2/right_enabled = false
+slot/2/right_type = 0
+slot/2/right_color = Color(1, 1, 1, 1)
+slot/2/right_icon = null
+slot/2/draw_stylebox = true
+slot/3/left_enabled = false
+slot/3/left_type = 0
+slot/3/left_color = Color(1, 1, 1, 1)
+slot/3/left_icon = null
+slot/3/right_enabled = false
+slot/3/right_type = 0
+slot/3/right_color = Color(1, 1, 1, 1)
+slot/3/right_icon = null
+slot/3/draw_stylebox = true
 script = ExtResource("1_dv77j")
 
-[node name="Label" type="Label" parent="."]
+[node name="ModeButtons" type="HBoxContainer" parent="."]
 layout_mode = 2
-text = "Points"
-horizontal_alignment = 1
+theme_override_constants/separation = 0
+alignment = 1
+script = ExtResource("3_o8u1p")
 
-[node name="GridContainer" type="GridContainer" parent="."]
+[node name="TableButton" type="Button" parent="ModeButtons"]
 layout_mode = 2
-columns = 4
+theme_type_variation = &"ButtonOptLeft"
+toggle_mode = true
+button_pressed = true
+text = "Table"
 
-[node name="Label" type="Label" parent="GridContainer"]
+[node name="GraphButton" type="Button" parent="ModeButtons"]
+layout_mode = 2
+theme_type_variation = &"ButtonOptRight"
+toggle_mode = true
+text = "Graph"
+
+[node name="PointsTable" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 5
+
+[node name="Label" type="Label" parent="PointsTable"]
 layout_mode = 2
 text = "in"
 
-[node name="LineEdit" type="LineEdit" parent="GridContainer"]
+[node name="LineEdit" type="LineEdit" parent="PointsTable"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label2" type="Label" parent="GridContainer"]
+[node name="Label2" type="Label" parent="PointsTable"]
 layout_mode = 2
 text = "out"
 
-[node name="LineEdit2" type="LineEdit" parent="GridContainer"]
+[node name="LineEdit2" type="LineEdit" parent="PointsTable"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="PointsTable"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "x"
+
+[node name="NewPointButton" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 12
+text = "New"
+
+[node name="GraphContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2

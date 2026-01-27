@@ -101,6 +101,12 @@ func _disconnection_request(from_gn_name: StringName, from_port: int, to_gn_name
     #prints("Disconnection request:", from_gn_name, from_port, to_gn_name, to_port)
     disconnect_node(from_gn_name, from_port, to_gn_name, to_port)
 
+func remove_asset_node(asset_node: HyAssetNode) -> void:
+    all_asset_nodes.erase(asset_node)
+    an_lookup.erase(asset_node.an_node_id)
+    gn_lookup.erase(asset_node.an_node_id)
+    asset_node.queue_free()
+
 func _delete_request(delete_gn_names: Array[StringName]) -> void:
     for gn_name in delete_gn_names:
         var gn: GraphNode = get_node(NodePath(gn_name))
@@ -198,8 +204,6 @@ func parse_asset_node_shallow(asset_node_data: Dictionary, output_value_type: St
         asset_node.an_type = known_node_type
     elif output_value_type != "ROOT":
         asset_node.an_type = schema.resolve_asset_node_type(asset_node_data.get("Type", "NO_TYPE_KEY"), output_value_type, asset_node.an_node_id)
-        if output_value_type == "":
-            print_debug("No output value type provided, inferred type from ID prefix: %s" % asset_node.an_type)
     
     var type_schema: = {}
     if asset_node.an_type and asset_node.an_type != "Unknown":

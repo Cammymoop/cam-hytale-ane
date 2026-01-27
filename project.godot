@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Util="*res://util.gd"
+ThemeColorVariants="*res://ui/theme_color_variants.gd"
 
 [display]
 

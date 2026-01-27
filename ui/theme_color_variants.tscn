@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dy4m7qppu28it"]
+
+[ext_resource type="Script" uid="uid://d4bhc8xnybdw3" path="res://ui/theme_color_variants.gd" id="1_4ov32"]
+
+[node name="ThemeColorVariants" type="Node"]
+script = ExtResource("1_4ov32")
+theme_colors = Dictionary[String, Color]({
+"blue": Color(0.050938904, 0.4467247, 0.64619416, 1),
+"green": Color(0.147, 0.474, 0.242, 1),
+"orange": Color(0.787175, 0.52734774, 0.08356921, 1),
+"purple": Color(0.48474133, 0.3782017, 0.741389, 1)
+})
