@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b2bmrn4q5gtsa"]
 
-[ext_resource type="Theme" uid="uid://cv3cabit36ilb" path="res://ui/main_theme.tres" id="1_4erfq"]
 [ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://custom_graph_nodes/manual_curve_special.gd" id="1_dv77j"]
+[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/grey_theme.tres" id="1_o8u1p"]
 [ext_resource type="Script" uid="uid://gxuxbfatctg6" path="res://ui/h_toggle_buttons.gd" id="3_o8u1p"]
 
 [node name="ManualCurveSpecial" type="GraphNode"]
@@ -11,7 +11,7 @@ offset_right = 296.0
 offset_bottom = 118.0
 scale = Vector2(0.75, 0.75)
 mouse_filter = 1
-theme = ExtResource("1_4erfq")
+theme = ExtResource("1_o8u1p")
 title = "Manual Curve Points"
 slot/0/left_enabled = true
 slot/0/left_type = 0
@@ -102,5 +102,6 @@ theme_override_font_sizes/font_size = 12
 text = "New"
 
 [node name="GraphContainer" type="PanelContainer" parent="."]
+visible = false
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2

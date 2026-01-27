@@ -47,17 +47,6 @@ var temp_x_elements: = 10
 @export var gn_min_width: = 140
 @export var text_field_def_characters: = 12
 
-@export var type_colors: Array[Color] = [
-    Color.LIGHT_BLUE,
-    Color.RED,
-    Color.GREEN,
-    Color.BLUE,
-    Color.YELLOW,
-    Color.PURPLE,
-    Color.ORANGE,
-    Color.BROWN,
-]
-
 @export var verbose: = false
 
 var copied_nodes: Array[GraphNode] = []
@@ -92,6 +81,8 @@ func _ready() -> void:
         prints("Loaded %s, Workspace ID: %s" % [test_json_file, hy_workspace_id])
     else:
         print("No test JSON file specified")
+    
+    setup_value_type_colors()
 
 func _connection_request(from_gn_name: StringName, from_port: int, to_gn_name: StringName, to_port: int) -> void:
     #prints("Connection request:", from_gn_name, from_port, to_gn_name, to_port)
@@ -437,6 +428,14 @@ func new_graph_node(asset_node: HyAssetNode, root_asset_node: HyAssetNode) -> Cu
         graph_node = special_gn_factory.make_special_gn(root_asset_node, asset_node)
     else:
         graph_node = CustomGraphNode.new()
+    
+    var output_type: String = schema.node_schema[asset_node.an_type].get("output_value_type", "")
+    var theme_var_color: String = TypeColors.get_color_for_type(output_type)
+    if ThemeColorVariants.theme_colors.has(theme_var_color):
+        graph_node.theme = ThemeColorVariants.get_theme_color_variant(theme_var_color)
+    else:
+        push_warning("No theme color variant found for color '%s'" % theme_var_color)
+        print("No theme color variant found for color '%s'" % theme_var_color)
 
     graph_node.set_meta("hy_asset_node_id", asset_node.an_node_id)
     gn_lookup[asset_node.an_node_id] = graph_node
@@ -502,8 +501,20 @@ func new_graph_node(asset_node: HyAssetNode, root_asset_node: HyAssetNode) -> Cu
                     slot_node.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
                     slot_node.text = connection_names[i]
     
+    graph_node.update_port_colors(self, asset_node)
+    
     if use_json_positions:
         var meta_pos: = get_node_position_from_meta(asset_node.an_node_id) * json_positions_scale
         graph_node.position_offset = meta_pos - relative_root_position
     
     return graph_node
+
+
+func setup_value_type_colors() -> void:
+    for value_type_name in schema.value_types:
+        var value_type_index: int = schema.value_types.find(value_type_name) + 5
+        type_names[value_type_index] = value_type_name
+
+        var theme_color_name: String = TypeColors.get_color_for_type(value_type_name)
+        if not ThemeColorVariants.theme_colors.has(theme_color_name):
+            continue

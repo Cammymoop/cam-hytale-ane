@@ -4,12 +4,16 @@ var base_theme: Theme = preload("res://ui/main_theme.tres")
 var base_theme_base_color: Color
 
 @export var theme_colors: Dictionary[String, Color] = {
+    "grey": Color(0.44, 0.44, 0.44),
     "green": Color(0.147, 0.474, 0.242),
 }
 
 var color_variants: Dictionary = {
+    "grey": preload("res://ui/grey_theme.tres"),
     "green": base_theme,
 }
+
+var themes_created: = false
 
 func _ready() -> void:
     base_theme_base_color = base_theme.get_stylebox("normal", "LineEdit").bg_color
@@ -17,18 +21,22 @@ func _ready() -> void:
     _make_all_theme_color_variants()
 
 func get_theme_color_variant(color_name: String) -> Theme:
-    if color_name not in theme_colors:
+    if color_name not in color_variants:
         print_debug("Color variant %s not found" % color_name)
     return color_variants[color_name]
 
 func _make_all_theme_color_variants() -> void:
+    if themes_created:
+        return
     for color_name in theme_colors:
         if color_name not in color_variants:
             _make_theme_color_variant(color_name, theme_colors[color_name])
+    themes_created = true
 
 func _make_theme_color_variant(color_name: String, color_color: Color) -> void:
     theme_colors[color_name] = color_color
     var new_theme: Theme = base_theme.duplicate()
+    color_variants[color_name] = new_theme
     
     var base_theme_base_color_l: float = base_theme_base_color.ok_hsl_l
     var base_theme_base_color_s: float = base_theme_base_color.ok_hsl_s
@@ -48,7 +56,7 @@ func _make_theme_color_variant(color_name: String, color_color: Color) -> void:
             colored_sb.border_color = Color.from_ok_hsl(new_h, sat_ratio * new_s, shade_ratio * new_l)
         new_theme.set_stylebox(sb_name, sb_class, colored_sb)
     
-    var make_recolors: = func(color_names: Array[String], theme_class: String) -> void:
+    var make_recolors: = func(color_names: Array, theme_class: String) -> void:
         for col_name in color_names:
             var base_theme_version: Color = base_theme.get_color(col_name, theme_class)
             var shade_ratio: float = base_theme_version.ok_hsl_l / base_theme_base_color_l
