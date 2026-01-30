@@ -161,6 +161,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "Density|Angle": "AngleDensity",
     "Density|DistanceToBiomeEdge": "DistanceToBiomeEdgeDensity",
     "Density|Terrain": "TerrainDensity",
+    "Density|Exported": "ExportedDensity",
     
     # Curve nodes
     "Curve|Manual": "ManualCurve",
@@ -428,7 +429,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     # Positions Cell Noise Density
     "PositionsCellNoiseDensity": {
 		"id_prefix_override": "PositionsCellNoiseDensityNode",
-        "display_name": "Cell Noise Density",
+        "display_name": "Positions Cell Noise Density",
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
@@ -1032,6 +1033,19 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+        }
+    },
+    "ExportedDensity": {
+        "id_prefix_override": "Exported.Density",
+        "display_name": "Exported Density",
+        "output_value_type": "Density",
+        "settings": {
+            "ExportAs":	{ "gd_type": TYPE_STRING, "default_value": "" },
+            "SingleInstance": { "gd_type": TYPE_BOOL, "default_value": true },
+            "Skip":	{ "gd_type": TYPE_BOOL, "default_value": false },
+        },
+        "connections": {
+            "Inputs": { "value_type": "Density", "multi": true },
         }
     },
     

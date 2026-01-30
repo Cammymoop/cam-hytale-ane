@@ -63,13 +63,14 @@ func _num_connected_asset_nodes_full(conn_name: String) -> int:
         return 0
     return connected_node_counts[conn_name]
 
-func get_raw_connected_nodes(conn_name: String) -> Array[Dictionary]:
-    var conn_data: Array[Dictionary] = []
+func get_raw_connected_nodes(conn_name: String) -> Array:
     if typeof(connections[conn_name]) == TYPE_DICTIONARY:
-        conn_data.append(connections[conn_name])
+        return [connections[conn_name]]
+    elif typeof(connections[conn_name]) == TYPE_ARRAY:
+        return connections[conn_name]
     else:
-        conn_data.append_array(connections[conn_name])
-    return conn_data
+        print_debug("get_raw_connected_nodes: Connection %s is of an unhandled type: %s" % [conn_name, type_string(typeof(connections[conn_name]))])
+        return []
 
 
 func set_connection(conn_name: String, index: int, asset_node: HyAssetNode) -> void:

@@ -9,6 +9,11 @@ var last_open_from_directory: String = ""
 var cur_open_file_dialog: FileDialog = null
 var cur_save_file_dialog: FileDialog = null
 
+const LAST_DIR_CACHE_FILE: String = "user://.last_dir"
+
+func _ready() -> void:
+    load_last_directory()
+
 func _process(_delta: float) -> void:
     if Input.is_action_just_pressed("open_file_shortcut"):
         show_open_file_dialog()
@@ -43,6 +48,8 @@ func on_file_selected(path: String) -> void:
     last_open_from_directory = path.get_base_dir()
     on_open_dialog_closed()
     requested_open_file.emit(path)
+    
+    save_last_directory()
     
     remove_old_open_dialog()
 
@@ -87,4 +94,25 @@ func on_file_save_location_selected(path: String) -> void:
     on_save_dialog_closed()
     requested_save_file.emit(path)
     
+    save_last_directory()
+
     remove_old_save_dialog()
+
+
+func save_last_directory() -> void:
+    var file: = FileAccess.open(LAST_DIR_CACHE_FILE, FileAccess.WRITE)
+    if not file:
+        print_debug("Error opening last directory cache file for writing: %s" % LAST_DIR_CACHE_FILE)
+        return
+    file.store_string(last_open_from_directory)
+    file.close()
+
+func load_last_directory() -> void:
+    if not FileAccess.file_exists(LAST_DIR_CACHE_FILE):
+        return
+    var file: = FileAccess.open(LAST_DIR_CACHE_FILE, FileAccess.READ)
+    if not file:
+        return
+    last_open_from_directory = file.get_as_text().strip_edges()
+    print_debug("Loaded last directory from cache: %s" % last_open_from_directory)
+    file.close()

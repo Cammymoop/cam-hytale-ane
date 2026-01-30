@@ -25,6 +25,7 @@ var root_node: HyAssetNode = null
 @onready var dialog_handler: DialogHandler = get_parent().get_node("DialogHandler")
 
 var asset_node_meta: Dictionary[String, Dictionary] = {}
+var all_meta: Dictionary = {}
 
 enum NodeContextMenu {
     DELETE_NODE = 1,
@@ -461,13 +462,24 @@ func get_node_position_from_meta(node_id: String) -> Vector2:
     var meta_pos: Dictionary = node_meta.get("$Position", {"$x": relative_root_position.x, "$y": relative_root_position.y - 560})
     return Vector2(meta_pos["$x"], meta_pos["$y"])
     
-func parse_asset_node_shallow(asset_node_data: Dictionary, output_value_type: String = "", known_node_type: String = "") -> HyAssetNode:
+func parse_asset_node_shallow(old_style: bool, asset_node_data: Dictionary, output_value_type: String = "", known_node_type: String = "") -> HyAssetNode:
     if not asset_node_data:
         print_debug("Asset node data is empty")
         return null
-    if not asset_node_data.has("$NodeId"):
+
+    if old_style and not known_node_type:
+        var type_key_val: String = asset_node_data.get("Type", "NO_TYPE_KEY")
+        var inferred_node_type: String = schema.resolve_asset_node_type(type_key_val, output_value_type)
+        if not inferred_node_type or inferred_node_type == "Unknown":
+            print_debug("Old-style inferring node type failed, returning null")
+            push_error("Old-style inferring node type failed, returning null")
+            return null
+        else:
+            asset_node_data["$NodeId"] = get_unique_id(schema.get_id_prefix_for_node_type(inferred_node_type))
+    elif not asset_node_data.has("$NodeId"):
         print_debug("Asset node data does not have a $NodeId, it is probably not an asset node")
         return null
+    
     
     var asset_node = HyAssetNode.new()
     asset_node.an_node_id = asset_node_data["$NodeId"]
@@ -494,8 +506,13 @@ func parse_asset_node_shallow(asset_node_data: Dictionary, output_value_type: St
         if other_key.begins_with("$") or HyAssetNode.special_keys.has(other_key):
             continue
         
-        var connected_data = check_for_asset_nodes(asset_node_data[other_key])
-        if connected_data != null:
+        var connected_data = check_for_asset_nodes(old_style, asset_node_data[other_key])
+        if other_key in asset_node.connection_list or connected_data != null:
+            if connected_data == null:
+                if asset_node.an_type != "Unknown" and schema.node_schema[asset_node.an_type][other_key].get("multi", false):
+                    connected_data = []
+                else:
+                    connected_data = {}
             if verbose:
                 var short_data: = str(connected_data).substr(0, 12) + "..."
                 prints("Node '%s' (%s) Connection '%s' has connected nodes: %s" % [asset_node.an_name, asset_node.an_type, other_key, short_data])
@@ -508,6 +525,25 @@ func parse_asset_node_shallow(asset_node_data: Dictionary, output_value_type: St
             asset_node.settings[other_key] = asset_node_data[other_key]
     
     return asset_node
+
+func check_for_asset_nodes(old_style: bool, val: Variant) -> Variant:
+    var test_dict: Dictionary
+    if val is Dictionary:
+        test_dict = val
+    elif val is Array:
+        if val.size() == 0:
+            return val
+        test_dict = val[0]
+    elif val != null:
+        return null
+    
+    if old_style:
+        if test_dict.is_empty() or test_dict.has("$Position"):
+            return val
+    else:
+        if test_dict.is_empty() or test_dict.has("$NodeId"):
+            return val
+    return null
 
 func init_asset_node(asset_node: HyAssetNode) -> void:
     var type_schema: = {}
@@ -534,10 +570,10 @@ func init_asset_node(asset_node: HyAssetNode) -> void:
     for setting_name in settings_schema.keys():
         asset_node.settings[setting_name] = settings_schema[setting_name].get("default_value", null)
 
-func _inner_parse_asset_node_deep(asset_node_data: Dictionary, output_value_type: String = "", base_node_type: String = "") -> Dictionary:
-    var parsed_node: = parse_asset_node_shallow(asset_node_data, output_value_type, base_node_type)
+func _inner_parse_asset_node_deep(old_style: bool, asset_node_data: Dictionary, output_value_type: String = "", base_node_type: String = "") -> Dictionary:
+    var parsed_node: = parse_asset_node_shallow(old_style, asset_node_data, output_value_type, base_node_type)
     var all_nodes: Array[HyAssetNode] = [parsed_node]
-    for conn in parsed_node.connections.keys():
+    for conn in parsed_node.connection_list:
         if parsed_node.is_connection_empty(conn):
             continue
         
@@ -547,7 +583,7 @@ func _inner_parse_asset_node_deep(asset_node_data: Dictionary, output_value_type
             if parsed_node.an_type != "Unknown":
                 conn_value_type = schema.node_schema[parsed_node.an_type]["connections"][conn]["value_type"]
 
-            var sub_parse_result: = _inner_parse_asset_node_deep(conn_nodes_data[conn_node_idx], conn_value_type)
+            var sub_parse_result: = _inner_parse_asset_node_deep(old_style, conn_nodes_data[conn_node_idx], conn_value_type)
             all_nodes.append_array(sub_parse_result["all_nodes"])
             parsed_node.set_connection(conn, conn_node_idx, sub_parse_result["base"])
         parsed_node.set_connection_count(conn, conn_nodes_data.size())
@@ -556,23 +592,44 @@ func _inner_parse_asset_node_deep(asset_node_data: Dictionary, output_value_type
     
     return {"base": parsed_node, "all_nodes": all_nodes}
 
-func parse_asset_node_deep(asset_node_data: Dictionary, output_value_type: String = "", base_node_type: String = "") -> Dictionary:
-    var res: = _inner_parse_asset_node_deep(asset_node_data, output_value_type, base_node_type)
+func parse_asset_node_deep(old_style: bool, asset_node_data: Dictionary, output_value_type: String = "", base_node_type: String = "") -> Dictionary:
+    var res: = _inner_parse_asset_node_deep(old_style, asset_node_data, output_value_type, base_node_type)
     return res
 
 func parse_root_asset_node(base_node: Dictionary) -> void:
     hy_workspace_id = "NONE"
     var parsed_node_count: = 0
-    if not base_node.has("$NodeEditorMetadata") or not base_node["$NodeEditorMetadata"] is Dictionary:
-        print_debug("Root node does not have $NodeEditorMetadata")
+    var old_style_format: = false
+    if base_node.has("$WorkspaceID"):
+        old_style_format = true
+        hy_workspace_id = base_node["$WorkspaceID"]
+        
+    elif not base_node.get("$NodeEditorMetadata", {}):
+        print_debug("Not old-style but Root node does not have $NodeEditorMetadata")
+        push_error("Not old-style but Root node does not have $NodeEditorMetadata")
+        return
     else:
+        hy_workspace_id = base_node["$NodeEditorMetadata"].get("$WorkspaceID", "NONE")
+    
+    if not hy_workspace_id or hy_workspace_id == "NONE":
+        print_debug("No workspace ID found in root node or editor metadata")
+        push_error("No workspace ID found in root node or editor metadata")
+        return
+
+    var root_node_type: String = schema.resolve_asset_node_type(base_node.get("Type", "NO_TYPE_KEY"), "ROOT|%s" % hy_workspace_id, base_node.get("$NodeId", ""))
+
+    if old_style_format and not base_node.get("$NodeId", ""):
+        base_node["$NodeId"] = get_unique_id(schema.get_id_prefix_for_node_type(root_node_type))
+
+    if not old_style_format:
         var meta_data: = base_node["$NodeEditorMetadata"] as Dictionary
+        all_meta = meta_data.duplicate(true)
 
         for node_id in meta_data.get("$Nodes", {}).keys():
             asset_node_meta[node_id] = meta_data["$Nodes"][node_id]
 
         for floating_tree in meta_data.get("$FloatingNodes", []):
-            var floating_parse_result: = parse_asset_node_deep(floating_tree)
+            var floating_parse_result: = parse_asset_node_deep(false, floating_tree)
             floating_tree_roots.append(floating_parse_result["base"])
             parsed_node_count += floating_parse_result["all_nodes"].size()
             #print("Floating tree parsed, %d nodes" % floating_parse_result["all_nodes"].size(), " (total: %d)" % parsed_node_count)
@@ -582,35 +639,50 @@ func parse_root_asset_node(base_node: Dictionary) -> void:
         
         hy_workspace_id = meta_data.get("$WorkspaceID", "NONE")
 
-    if hy_workspace_id == "NONE" and base_node.has("$WorkspaceID"):
-        hy_workspace_id = base_node["$WorkspaceID"]
-
-    var root_node_type: = "Unknown"
     if hy_workspace_id == "NONE":
         print_debug("No workspace ID found in root node or editor metadata")
-    else:
-        root_node_type = schema.resolve_asset_node_type(base_node.get("Type", "NO_TYPE_KEY"), "ROOT|%s" % hy_workspace_id, base_node.get("$NodeId", ""))
-        print("Root node type: %s" % root_node_type)
+        push_error("No workspace ID found in root node or editor metadata")
+        return
 
-    var parse_result: = parse_asset_node_deep(base_node, "", root_node_type)
+    var parse_result: = parse_asset_node_deep(old_style_format, base_node, "", root_node_type)
     root_node = parse_result["base"]
     all_asset_nodes.append_array(parse_result["all_nodes"])
     parsed_node_count += parse_result["all_nodes"].size()
     #print("Root node parsed, %d nodes" % parse_result["all_nodes"].size(), " (total: %d)" % parsed_node_count)
     for an in parse_result["all_nodes"]:
         all_asset_node_ids.append(an.an_node_id)
-        
     
+    if old_style_format:
+        all_meta = {}
+        collect_node_positions_old_style_recursive(base_node)
+        all_meta["$Nodes"] = asset_node_meta.duplicate(true)
+        all_meta["$FloatingNodes"] = []
+        all_meta["$Groups"] = base_node.get("$Groups", [])
+        all_meta["$Comments"] = base_node.get("$Comments", [])
+        all_meta["$Links"] = base_node.get("$Links", {})
+        
     loaded = true
 
-func check_for_asset_nodes(val: Variant) -> Variant:
-    if val is Dictionary:
-        if val.is_empty() or val.has("$NodeId"):
-            return val
-    elif val is Array:
-        if val.size() == 0 or val[0] is Dictionary and val[0].has("$NodeId"):
-            return val
-    return null
+func collect_node_positions_old_style_recursive(cur_node_data: Dictionary) -> void:
+    if not cur_node_data.has("$NodeId"):
+        print_debug("Old style node does not have a $NodeID, exiting branch")
+        return
+    var cur_node_meta: = {}
+    if cur_node_data.has("$Position"):
+        cur_node_meta["$Position"] = cur_node_data["$Position"]
+    if cur_node_data.has("$Title"):
+        cur_node_meta["$Title"] = cur_node_data["$Title"]
+    asset_node_meta[cur_node_data["$NodeId"]] = cur_node_meta
+    
+    for key in cur_node_data.keys():
+        if key.begins_with("$") or typeof(cur_node_data[key]) not in [TYPE_DICTIONARY, TYPE_ARRAY]:
+            continue
+        if typeof(cur_node_data[key]) == TYPE_DICTIONARY:
+            if cur_node_data[key].get("$NodeId", ""):
+                collect_node_positions_old_style_recursive(cur_node_data[key])
+        elif cur_node_data[key].size() > 0 and typeof(cur_node_data[key][0]) == TYPE_DICTIONARY and cur_node_data[key][0].get("$NodeId", ""):
+            for i in cur_node_data[key].size():
+                collect_node_positions_old_style_recursive(cur_node_data[key][i])
 
 
 func make_graph_stuff() -> void:
@@ -1228,6 +1300,11 @@ func serialize_node_editor_metadata() -> Dictionary:
         floating_trees_serialized.append(floating_tree_root_an.serialize_me(schema, gn_lookup))
     serialized_metadata["$FloatingNodes"] = floating_trees_serialized
     serialized_metadata["$WorkspaceID"] = hy_workspace_id
+    
+    for other_key in all_meta.keys():
+        if serialized_metadata.has(other_key):
+            continue
+        serialized_metadata[other_key] = all_meta[other_key]
     return serialized_metadata
 
 func test_reserialize_to_file(data_from_json: Dictionary) -> void:
