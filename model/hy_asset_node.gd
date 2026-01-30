@@ -261,6 +261,12 @@ func serialize_me(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphN
             if node_schema["settings"][setting_key]["gd_type"] == TYPE_STRING:
                 if not settings[setting_key]:
                     continue
+            elif node_schema["settings"][setting_key]["gd_type"] == TYPE_INT:
+                if settings.has(setting_key):
+                    if typeof(settings[setting_key]) == TYPE_FLOAT:
+                        settings[setting_key] = roundi(settings[setting_key])
+                    elif typeof(settings[setting_key]) == TYPE_STRING:
+                        settings[setting_key] = roundi(float(settings[setting_key]))
             serialized_data[setting_key] = settings[setting_key]
         for conn_name in node_schema.get("connections", {}).keys():
             var num_connected: = num_connected_asset_nodes(conn_name)

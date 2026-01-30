@@ -498,6 +498,12 @@ func parse_asset_node_shallow(old_style: bool, asset_node_data: Dictionary, outp
     elif output_value_type != "ROOT":
         asset_node.an_type = schema.resolve_asset_node_type(asset_node_data.get("Type", "NO_TYPE_KEY"), output_value_type, asset_node.an_node_id)
     
+    var node_schema: Dictionary = {}
+    if asset_node.an_type and asset_node.an_type != "Unknown":
+        node_schema = schema.node_schema.get(asset_node.an_type, {})
+        if not node_schema:
+            print_debug("Warning: Node schema not found for node type: %s" % asset_node.an_type)
+    
     asset_node.raw_tree_data = asset_node_data.duplicate(true)
     init_asset_node(asset_node)
 
@@ -509,7 +515,7 @@ func parse_asset_node_shallow(old_style: bool, asset_node_data: Dictionary, outp
         var connected_data = check_for_asset_nodes(old_style, asset_node_data[other_key])
         if other_key in asset_node.connection_list or connected_data != null:
             if connected_data == null:
-                if asset_node.an_type != "Unknown" and schema.node_schema[asset_node.an_type][other_key].get("multi", false):
+                if asset_node.an_type != "Unknown" and node_schema["connections"][other_key].get("multi", false):
                     connected_data = []
                 else:
                     connected_data = {}
@@ -522,7 +528,17 @@ func parse_asset_node_shallow(old_style: bool, asset_node_data: Dictionary, outp
                 var short_data: = str(asset_node_data[other_key])
                 short_data = short_data.substr(0, 50) + ("..." if short_data.length() > 50 else "")
                 prints("Node '%s' (%s) Connection '%s' is just data: %s" % [asset_node.an_name, asset_node.an_type, other_key, short_data])
-            asset_node.settings[other_key] = asset_node_data[other_key]
+            var parsed_value: Variant = asset_node_data[other_key]
+            if node_schema and node_schema.get("settings", {}).has(other_key):
+                var expected_gd_type: int = node_schema["settings"][other_key]["gd_type"]
+                if expected_gd_type == TYPE_INT:
+                    parsed_value = roundi(float(parsed_value))
+                elif expected_gd_type == TYPE_FLOAT:
+                    parsed_value = float(parsed_value)
+                elif expected_gd_type == TYPE_STRING:
+                    if not typeof(parsed_value) == TYPE_STRING:
+                        print_debug("Warning: Setting %s is expected to be a string, but is not: %s" % [other_key, parsed_value])
+            asset_node.settings[other_key] = parsed_value
     
     return asset_node
 

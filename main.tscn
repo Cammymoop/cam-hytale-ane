@@ -149,7 +149,7 @@ script = ExtResource("1_ig7tw")
 test_json_file = "res://test_files/example_biomes/Basic.json"
 schema = SubResource("Resource_1bvp3")
 new_node_menu = NodePath("../PopupMenuRoot/CenterContainer/NewGNMenu")
-json_positions_scale = Vector2(0.4, 0.4)
+json_positions_scale = Vector2(0.6, 0.6)
 
 [node name="SpecialGNFactory" type="Node" parent="AssetNodeGraphEdit" unique_id=859398855]
 script = ExtResource("5_lquwl")

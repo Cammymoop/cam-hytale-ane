@@ -76,6 +76,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "PCNReturnType",
     "PCNDistanceFunction",
     "Point3D",
+    "Point3DInt",
     "PointGenerator",
     "Stripe",
     "WeightedMaterial",
@@ -251,6 +252,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "CurvePoint|": "CurvePoint",
     "Material|": "Material",
     "Point3D|": "Point3D",
+    "Point3DInt|": "Point3DInt",
     "BlockMask|": "BlockMask",
     "BlockSubset|": "BlockSubset",
     "Stripe|": "Stripe",
@@ -412,8 +414,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
         },
         "connections": {
-            "Curve": { "value_type": "Curve", "multi": false },
             "Inputs": { "value_type": "Density", "multi": true },
+            "Curve": { "value_type": "Curve", "multi": false },
         }
     },
     "BaseHeightDensity": {
@@ -1169,6 +1171,15 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Z": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
         }
     },
+    "Point3DInt": {
+        "display_name": "Point 3D (Integer)",
+        "output_value_type": "Point3DInt",
+        "settings": {
+            "X": { "gd_type": TYPE_INT, "default_value": 0 },
+            "Y": { "gd_type": TYPE_INT, "default_value": 0 },
+            "Z": { "gd_type": TYPE_INT, "default_value": 0 },
+        }
+    },
     
     # PointGenerator nodes
     "MeshPointGenerator": {
@@ -1398,7 +1409,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "BoxBlockType": { "gd_type": TYPE_STRING, "default_value": "BoxBlockType" },
         },
         "connections": {
-            "Range": { "value_type": "Point3D", "multi": false },
+            "Range": { "value_type": "Point3DInt", "multi": false },
             "Material": { "value_type": "Material", "multi": false },
             "Pattern": { "value_type": "Pattern", "multi": false },
             "Scanner": { "value_type": "Scanner", "multi": false },
@@ -1417,7 +1428,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Material": { "value_type": "MaterialProvider", "multi": false },
             "Density": { "value_type": "Density", "multi": false },
             "PlacementMask": { "value_type": "BlockMask", "multi": false },
-            "Range": { "value_type": "Point3D", "multi": false },
+            "Range": { "value_type": "Point3DInt", "multi": false },
         }
     },
     
