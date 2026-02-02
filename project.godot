@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Cam Hytale ANE (AssetNodeEditor)"
 config/description="[Early Alpha] A custom, cross-platform Asset Node editor for hytale asset nodes, primarily for worldgen v2"
-config/version="0.1.2"
+config/version="0.1.4"
 run/main_scene="res://main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="CamHytaleANE"

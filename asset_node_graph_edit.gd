@@ -84,6 +84,12 @@ var moved_nodes_positions: Dictionary[GraphNode, Vector2] = {}
 var file_menu_btn: MenuButton = null
 var file_menu_menu: PopupMenu = null
 
+func get_version_number_string() -> String:
+    var prerelease_string: = " Alpha"
+    if OS.has_feature("debug"):
+        prerelease_string = " Alpha (Debug)"
+    return "v%s" % ProjectSettings.get_setting("application/config/version") + prerelease_string
+
 func _ready() -> void:
     if not new_node_menu:
         push_warning("New node menu is not set, please set it in the inspector")
@@ -113,6 +119,18 @@ func _ready() -> void:
     var menu_hbox: = get_menu_hbox()
     var grid_toggle_btn: = menu_hbox.get_child(4) as Button
     grid_toggle_btn.toggled.connect(on_grid_toggled.bind(grid_toggle_btn))
+    
+    var last_menu_hbox_item: = menu_hbox.get_child(menu_hbox.get_child_count() - 1)
+    var version_label: = Label.new()
+    version_label.text = ""
+    version_label.add_theme_color_override("font_color", Color.WHITE.darkened(0.5))
+    version_label.add_theme_font_size_override("font_size", 12)
+    version_label.grow_horizontal = Control.GROW_DIRECTION_END
+    version_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    version_label.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+    version_label.text = "Cam Hytale ANE %s" % get_version_number_string()
+    last_menu_hbox_item.add_child(version_label)
+    version_label.offset_left = 12
     
     for val_type_name in schema.value_types:
         var val_type_idx: = type_names.size()
