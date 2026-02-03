@@ -373,11 +373,9 @@ func duplicate_and_add_asset_node(asset_node: HyAssetNode, new_gn: GraphNode = n
         asset_node.an_node_id = get_unique_an_id(id_prefix)
     
     var new_id_for_copy: = get_unique_an_id(id_prefix)
-    print("new id for copy: %s" % new_id_for_copy)
     var asset_node_copy: = asset_node.get_shallow_copy(new_id_for_copy)
     _register_asset_node(asset_node_copy)
     floating_tree_roots.append(asset_node_copy)
-    print("%s registered asset nodes" % all_asset_nodes.size())
     an_lookup[asset_node_copy.an_node_id] = asset_node_copy
     if new_gn:
         gn_lookup[asset_node_copy.an_node_id] = new_gn
@@ -385,7 +383,6 @@ func duplicate_and_add_asset_node(asset_node: HyAssetNode, new_gn: GraphNode = n
     return asset_node_copy
 
 func duplicate_and_add_filtered_an_tree(root_asset_node: HyAssetNode, asset_node_set: Array[HyAssetNode]) -> HyAssetNode:
-    print_debug("Duplicating and adding filtered AN tree for root asset node %s" % root_asset_node.an_node_id)
     var new_root_an: HyAssetNode = duplicate_and_add_asset_node(root_asset_node)
     var conn_names: Array[String] = root_asset_node.connection_list.duplicate()
     for conn_name in conn_names:
@@ -424,6 +421,11 @@ func _delete_request(delete_gn_names: Array[StringName]) -> void:
         var gn: GraphNode = get_node_or_null(NodePath(gn_name))
         if gn:
             gns_to_remove.append(gn)
+    var root_gn: GraphNode = get_root_gn()
+    if root_gn in gns_to_remove:
+        gns_to_remove.erase(root_gn)
+    if gns_to_remove.size() == 0:
+        return
     remove_gns_with_connections_and_undo(gns_to_remove)
 
 func _connect_right_request(from_gn_name: StringName, from_port: int, dropped_pos: Vector2) -> void:
@@ -520,8 +522,16 @@ func discard_copied_nodes() -> void:
     copied_external_ans.clear()
     in_graph_copy_id = ""
 
+func get_root_gn() -> GraphNode:
+    return gn_lookup[root_node.an_node_id]
+
 func _cut_request() -> void:
     var selected_gns: Array[GraphNode] = get_selected_gns()
+    var root_gn: GraphNode = get_root_gn()
+    if root_gn in selected_gns:
+        selected_gns.erase(root_gn)
+    if selected_gns.size() == 0:
+        return
     _copy_or_cut_gns(selected_gns)
     # this gets set to false if we ever undo. so that we never try to re-use the cut nodes while they actually exist in the graph
     clipboard_was_from_cut = true
@@ -1557,7 +1567,6 @@ func remove_graph_node_without_undo(gn: GraphNode) -> void:
     if an_id:
         var asset_node: HyAssetNode = an_lookup.get(an_id, null)
         if asset_node:
-            print("removing asset node: %s" % asset_node.an_node_id)
             remove_asset_node(asset_node)
     remove_child(gn)
 
