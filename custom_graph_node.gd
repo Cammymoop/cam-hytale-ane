@@ -3,6 +3,8 @@ extends GraphNode
 
 signal was_right_clicked(graph_node: CustomGraphNode)
 
+var node_type_schema: Dictionary
+
 func _gui_input(event: InputEvent) -> void:
     if not event is InputEventMouseButton:
         return
@@ -18,7 +20,10 @@ func _draw_port(_slot_index: int, port_pos: Vector2i, _left: bool, color: Color)
 
     draw_texture_rect(base_icon, Rect2(port_pos + icon_offset, base_icon.get_size()), false, color)
 
-func update_port_colors(graph_edit: AssetNodeGraphEdit, asset_node: HyAssetNode) -> void:
+func set_node_type_schema(schema: Dictionary) -> void:
+    node_type_schema = schema
+
+func update_port_colors() -> void:
     if is_slot_enabled_left(0):
         var my_output_type_color_name: Variant = ThemeColorVariants.color_variants.find_key(theme)
         if my_output_type_color_name == null:
@@ -29,14 +34,15 @@ func update_port_colors(graph_edit: AssetNodeGraphEdit, asset_node: HyAssetNode)
     
     var slot_control_nodes: Array[Control] = get_slot_control_nodes()
 
-    var connection_list: Array[String] = asset_node.connection_list
-    for conn_idx in connection_list.size():
-        var conn_value_type: String = graph_edit.schema.node_schema[asset_node.an_type]["connections"][connection_list[conn_idx]].get("value_type", "")
-        var conn_color: Color = TypeColors.get_actual_color_for_type(conn_value_type)
-        set_slot_color_right(conn_idx, conn_color)
-        if conn_idx < slot_control_nodes.size() and slot_control_nodes[conn_idx] is Label:
-            slot_control_nodes[conn_idx].add_theme_color_override("font_color", TypeColors.get_label_color_for_type(conn_value_type))
-            slot_control_nodes[conn_idx].add_theme_stylebox_override("normal", TypeColors.get_label_stylebox_for_type(conn_value_type))
+    if node_type_schema:
+        var conn_names: Array = node_type_schema["connections"].keys()
+        for conn_idx in conn_names.size():
+            var conn_value_type: String = node_type_schema["connections"][conn_names[conn_idx]].get("value_type", "")
+            var conn_color: Color = TypeColors.get_actual_color_for_type(conn_value_type)
+            set_slot_color_right(conn_idx, conn_color)
+            if conn_idx < slot_control_nodes.size() and slot_control_nodes[conn_idx] is Label:
+                slot_control_nodes[conn_idx].add_theme_color_override("font_color", TypeColors.get_label_color_for_type(conn_value_type))
+                slot_control_nodes[conn_idx].add_theme_stylebox_override("normal", TypeColors.get_label_stylebox_for_type(conn_value_type))
 
 func get_slot_control_nodes() -> Array[Control]:
     var slot_control_nodes: Array[Control] = []

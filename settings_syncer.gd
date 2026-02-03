@@ -2,7 +2,7 @@ extends Node
 class_name SettingsSyncer
 
 var asset_node: HyAssetNode
-var watched_settings: Dictionary[String, Control] = {}
+var watched_settings: Dictionary[String, NodePath] = {}
 var setting_gd_types: Dictionary[String, int] = {}
 
 func set_asset_node(the_asset_node: HyAssetNode) -> void:
@@ -10,7 +10,7 @@ func set_asset_node(the_asset_node: HyAssetNode) -> void:
     asset_node.settings_changed.connect(update_from_asset_node)
 
 func add_watched_setting(setting_name: String, input_control: Control, setting_gd_type: int = -1) -> void:
-    watched_settings[setting_name] = input_control
+    watched_settings[setting_name] = get_path_to(input_control)
     setting_gd_types[setting_name] = setting_gd_type if setting_gd_type >= 0 else TYPE_STRING
 
     if input_control is GNNumberEdit:
@@ -37,7 +37,7 @@ func on_value_changed(value: Variant, setting_name: String) -> void:
 
 func update_from_asset_node() -> void:
     for setting_name in watched_settings.keys():
-        var input_control: = watched_settings[setting_name]
+        var input_control: = get_node(watched_settings[setting_name]) as Control
         if input_control is GNNumberEdit:
             input_control.set_value_directly(float(asset_node.settings[setting_name]))
         elif input_control is LineEdit:

@@ -43,6 +43,11 @@ func setup_asset_node() -> void:
             return
         asset_node = graph_edit.an_lookup[an_id]
 
+func get_own_asset_nodes() -> Array[HyAssetNode]:
+    var ans: Array[HyAssetNode] = [asset_node]
+    ans.append_array(asset_node.get_all_connected_nodes(POINTS_CONNECTION_NAME))
+    return ans
+
 func setup_points_table() -> void:
     if not points_table:
         points_table = $PointsTable

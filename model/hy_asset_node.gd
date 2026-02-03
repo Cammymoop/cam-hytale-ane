@@ -174,6 +174,25 @@ func _reindex_connection(conn_name: String, max_index: int = -1, insert_nodes: D
         else:
             connected_asset_nodes.erase("%s:%d" % [conn_name, new_index])
 
+## Given a new NodeID returns a new copy with all the same data but no connected asset nodes
+func get_shallow_copy(new_id: String) -> HyAssetNode:
+    if not has_inner_asset_nodes:
+        push_error("Trying to get a shallow copy of an unpopulated asset node (%s)" % an_node_id)
+        return null
+
+    var new_asset_node: = HyAssetNode.new()
+    new_asset_node.an_node_id = new_id
+    new_asset_node.an_type = an_type
+    new_asset_node.an_name = an_name
+    new_asset_node.title = title
+    new_asset_node.comment = comment
+    new_asset_node.settings = settings.duplicate_deep()
+    new_asset_node.connection_list = connection_list.duplicate()
+    for conn_name in connection_list:
+        new_asset_node.connected_node_counts[conn_name] = 0
+    new_asset_node.has_inner_asset_nodes = true
+    return new_asset_node
+
     
 
 func get_connected_node(conn_name: String, index: int) -> HyAssetNode:
@@ -190,7 +209,7 @@ func get_all_connected_nodes(conn_name: String) -> Array[HyAssetNode]:
         print_debug("Trying to retrieve inner nodes of a shallow asset node (%s)" % an_node_id)
         return []
     if not connection_list.has(conn_name):
-        print_debug("Connection name %s not found in connection list" % conn_name)
+        print_debug("Connection name %s not found in connection list %s" % [conn_name, connection_list])
         return []
 
     return _get_connected_node_list(conn_name)
@@ -221,8 +240,19 @@ func sort_connections_by_gn_pos(gn_lookup: Dictionary[String, GraphNode]) -> voi
         for i in range(sorted_nodes.size()):
             connected_asset_nodes["%s:%d" % [conn_name, i]] = sorted_nodes[i]
 
+func enumerate_connected_tree() -> Array[HyAssetNode]:
+    var node_list: Array[HyAssetNode] = [self]
+    for connected_node in connected_asset_nodes.values():
+        node_list.append_array(connected_node.enumerate_connected_tree())
+    return node_list
 
-func serialize_me(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphNode]) -> Dictionary:
+func serialize_within_set(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphNode], included_asset_nodes: Array[HyAssetNode]) -> Dictionary:
+    if self not in included_asset_nodes:
+        return {}
+    
+    return serialize_me(schema, gn_lookup, included_asset_nodes)
+
+func serialize_me(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphNode], included_asset_nodes: Array[HyAssetNode] = []) -> Dictionary:
     if not has_inner_asset_nodes:
         print_debug("Serializing unpopulated asset node (%s)" % an_node_id)
         return raw_tree_data.duplicate(true)
@@ -249,9 +279,12 @@ func serialize_me(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphN
             if num_connected > 1:
                 serialized_data[conn_name] = []
                 for connected_an in get_all_connected_nodes(conn_name):
-                    serialized_data[conn_name].append(connected_an.serialize_me(schema, gn_lookup))
+                    if not included_asset_nodes or connected_an in included_asset_nodes:
+                        serialized_data[conn_name].append(connected_an.serialize_me(schema, gn_lookup, included_asset_nodes))
             else:
-                serialized_data[conn_name] = get_connected_node(conn_name, 0).serialize_me(schema, gn_lookup)
+                var connected_an: = get_connected_node(conn_name, 0)
+                if not included_asset_nodes or connected_an in included_asset_nodes:
+                    serialized_data[conn_name] = get_connected_node(conn_name, 0).serialize_me(schema, gn_lookup, included_asset_nodes)
     else:
         var node_schema: = schema.node_schema[an_type]
         var serialized_type_key: Variant = schema.node_types.find_key(an_type)
@@ -276,8 +309,11 @@ func serialize_me(schema: AssetNodesSchema, gn_lookup: Dictionary[String, GraphN
             if is_multi:
                 serialized_data[conn_name] = []
                 for connected_an in get_all_connected_nodes(conn_name):
-                    serialized_data[conn_name].append(connected_an.serialize_me(schema, gn_lookup))
+                    if not included_asset_nodes or connected_an in included_asset_nodes:
+                        serialized_data[conn_name].append(connected_an.serialize_me(schema, gn_lookup, included_asset_nodes))
             else:
-                serialized_data[conn_name] = get_connected_node(conn_name, 0).serialize_me(schema, gn_lookup)
+                var connected_an: = get_connected_node(conn_name, 0)
+                if not included_asset_nodes or connected_an in included_asset_nodes:
+                    serialized_data[conn_name] = get_connected_node(conn_name, 0).serialize_me(schema, gn_lookup, included_asset_nodes)
 
     return serialized_data
