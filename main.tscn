@@ -184,7 +184,6 @@ script = ExtResource("5_lquwl")
 metadata/_custom_type_script = "uid://d2ucs5vp8diew"
 
 [node name="TestGN" type="GraphNode" parent="AssetNodeGraphEdit" unique_id=749274935]
-visible = false
 layout_mode = 0
 offset_left = 85.0
 offset_top = 138.0
@@ -546,7 +545,6 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "Don't Save"
 
-[connection signal="ready" from="AssetNodeGraphEdit/TestGN" to="AssetNodeGraphEdit/TestGN" method="hide"]
 [connection signal="requested_open_file" from="DialogHandler" to="AssetNodeGraphEdit" method="_requested_open_file"]
 [connection signal="requested_save_file" from="DialogHandler" to="AssetNodeGraphEdit" method="on_requested_save_file"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog"]
