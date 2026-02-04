@@ -4,8 +4,10 @@
 ### Fixes:
 - Added some missing Postions, Curve, and VectorProvider Nodes
 
+### Improvements:
 - Make theme colors customizable
 - Prompt for saving unsaved changes before opening a new file
+- Allow choosing a new file type when creating a new file
 - Drag & drop support to open a json file
 
 ## 0.1.4
