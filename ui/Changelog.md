@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+### Improvements:
+- Add Display scaling detection, on windows and linux (x11) this is always 100%, and manually setting display scale
+  - Custom display scale is saved and persists across sessions
+
 ## 0.1.5
 ### Fixes:
 - Added some missing Postions, Curve, and VectorProvider Nodes
