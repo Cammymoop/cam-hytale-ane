@@ -26,14 +26,10 @@ func create_buttons() -> void:
         choose_type_btn.text = workspace_id
         choose_type_btn.pressed.connect(choose_type_btn_pressed.bind(workspace_id))
         button_container.add_child(choose_type_btn, true)
-    
-    var cancel_btn: Button = Button.new()
-    cancel_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-    cancel_btn.name = "CancelBtn"
-    cancel_btn.text = "Cancel"
-    cancel_btn.pressed.connect(closing.emit)
-    button_container.add_child(cancel_btn, true)
 
 func choose_type_btn_pressed(workspace_id: String) -> void:
     file_type_chosen.emit(workspace_id)
+    closing.emit()
+
+func _on_cancel_btn_pressed() -> void:
     closing.emit()

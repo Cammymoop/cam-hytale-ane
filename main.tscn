@@ -334,7 +334,6 @@ mouse_default_cursor_shape = 2
 text = "Show All"
 
 [node name="NewFileTypeChooser" type="PanelContainer" parent="PopupMenuRoot/NonFocusStop" unique_id=1695221338]
-visible = false
 custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2cqfq")
@@ -360,14 +359,46 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_yaehf")
 [node name="MarginContainer" type="MarginContainer" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer" unique_id=1185350737]
 layout_mode = 2
 
-[node name="ButtonContainer" type="VBoxContainer" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer" unique_id=406972742]
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer" unique_id=656631103]
 layout_mode = 2
 theme = ExtResource("8_5vw27")
 
-[node name="Button" type="Button" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/ButtonContainer" unique_id=923966637]
+[node name="ButtonContainer" type="VBoxContainer" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=406972742]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonContainer" unique_id=923966637]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "HytaleGenerator - Biome"
+
+[node name="Spacer" type="Control" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1673997254]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=32377983]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1343738529]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NewFileOpenButton" type="Button" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=617422994]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Open File"
+
+[node name="Spacer2" type="Control" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1164507436]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelBtn" type="Button" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=236463073]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Cancel"
+
+[node name="Spacer3" type="Control" parent="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2126540417]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="FocusStop" type="ColorRect" parent="PopupMenuRoot" unique_id=840984799]
 visible = false
@@ -548,6 +579,9 @@ text = "Don't Save"
 
 [connection signal="requested_open_file" from="DialogHandler" to="AssetNodeGraphEdit" method="_requested_open_file"]
 [connection signal="requested_save_file" from="DialogHandler" to="AssetNodeGraphEdit" method="on_requested_save_file"]
+[connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="DialogHandler" method="show_open_file_dialog"]
+[connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
+[connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_cancel"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/DontSaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_ignore_save_chosen"]
