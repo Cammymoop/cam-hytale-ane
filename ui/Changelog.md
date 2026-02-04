@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.1.5
+### Fixes:
+- Added some missing Postions, Curve, and VectorProvider Nodes
+
 - Make theme colors customizable
 - Prompt for saving unsaved changes before opening a new file
 - Drag & drop support to open a json file

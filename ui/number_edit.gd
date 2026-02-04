@@ -10,6 +10,7 @@ var value: float = 0.0
 var text_dirty: = false
 
 func _ready() -> void:
+    alignment = HORIZONTAL_ALIGNMENT_RIGHT
     focus_exited.connect(on_focus_out)
     text_submitted.connect(text_change_done.unbind(1))
     text_changed.connect(on_text_changed)

@@ -1293,6 +1293,8 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
         for i in maxi(num_inputs, num_outputs) + num_settings:
             if i >= first_setting_slot:
                 var setting_name: String = setting_names[i - first_setting_slot]
+                if node_schema and node_schema.get("settings", {}).has(setting_name) and node_schema.get("settings", {})[setting_name].get("hidden", false):
+                    continue
 
                 var slot_node: = HBoxContainer.new()
                 slot_node.name = "Slot%d" % i
@@ -1309,24 +1311,34 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
                     setting_value = asset_node.settings[setting_name]
                 else:
                     setting_value = schema.node_schema[asset_node.an_type]["settings"][setting_name].get("default_value", 0)
+
                 if setting_name in node_schema.get("settings", {}):
                     setting_type = node_schema.get("settings", {})[setting_name]["gd_type"]
                 else:
                     print_debug("Setting type for %s : %s not found in node schema (%s)" % [setting_name, setting_value, asset_node.an_type])
                     setting_type = typeof(setting_value) if setting_value else TYPE_STRING
+                
+                var ui_hint: String = node_schema.get("settings", {})[setting_name].get("ui_hint", "")
 
                 if setting_type == TYPE_BOOL:
                     s_edit = CheckBox.new()
-                    s_edit.name = "SettingEdit"
                     s_edit.button_pressed = setting_value
+                elif setting_type == TYPE_FLOAT or setting_type == TYPE_INT:
+                    s_edit = GNNumberEdit.new()
+                    s_edit.is_int = setting_type == TYPE_INT
+                    s_edit.set_value_directly(setting_value)
+                    s_edit.size_flags_horizontal = Control.SIZE_FILL
+                    s_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
                 else:
                     s_edit = LineEdit.new()
-                    s_edit.name = "SettingEdit"
                     s_edit.text = str(setting_value)
                     s_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
                     s_name.size_flags_horizontal = Control.SIZE_FILL
-                    if setting_type == TYPE_FLOAT or setting_type == TYPE_INT:
-                        s_edit.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+                    if ui_hint == "block_id":
+                        s_edit.custom_minimum_size.x = 140
+                    #if setting_type == TYPE_FLOAT or setting_type == TYPE_INT:
+                        #s_edit.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+                s_edit.name = "SettingEdit"
                 slot_node.add_child(s_edit, true)
                 graph_node.add_child(slot_node, true)
 

@@ -12,8 +12,8 @@ func rebind_signals() -> void:
     for setting_name in watched_settings.keys():
         var input_control: = get_node(watched_settings[setting_name]) as Control
         if input_control is GNNumberEdit:
-            if not input_control.value_changed.is_connected(on_value_changed):
-                input_control.value_changed.connect(on_value_changed.bind(setting_name))
+            if not input_control.val_changed.is_connected(on_value_changed):
+                input_control.val_changed.connect(on_value_changed.bind(setting_name))
         elif input_control is LineEdit:
             if not input_control.text_changed.is_connected(on_value_changed):
                 input_control.text_changed.connect(on_value_changed.bind(setting_name))
@@ -30,7 +30,7 @@ func add_watched_setting(setting_name: String, input_control: Control, setting_g
     setting_gd_types[setting_name] = setting_gd_type if setting_gd_type >= 0 else TYPE_STRING
 
     if input_control is GNNumberEdit:
-        input_control.value_changed.connect(on_value_changed.bind(setting_name))
+        input_control.val_changed.connect(on_value_changed.bind(setting_name))
     elif input_control is LineEdit:
         input_control.text_changed.connect(on_value_changed.bind(setting_name))
     elif input_control is BaseButton and input_control.toggle_mode:
