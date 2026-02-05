@@ -10,6 +10,7 @@
 - Fix a few more cases of floats serialized instead of ints which would cause the asset not to load
 - Fix Manual Curve saving and loading causing extra floating CurvePoint nodes at the origin
 - Fix duplicating or pasting special nodes not being placed at the duplicate/pasted position
+- Fix regression: Using space to open the new node menu would only work once until another popup was opened
 
 ## 0.1.6
 ### Improvements:

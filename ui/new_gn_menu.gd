@@ -3,7 +3,8 @@ extends PanelContainer
 class_name NewGNMenu
 
 signal node_type_picked(node_type: String)
-signal cancelled()
+signal cancelled
+signal closing
 
 @export var auto_confirm_single_type: bool = true
 
@@ -47,7 +48,6 @@ var popup_menu_root: PopupMenuRoot = null
 
 func _ready() -> void:
     find_popup_menu_root(get_parent())
-    hide()
     show_all_btn.toggled.connect(on_show_all_btn_toggled)
     set_max_popup_height()
     get_window().size_changed.connect(set_max_popup_height)
@@ -85,7 +85,7 @@ func _process(_delta: float) -> void:
     
     if Input.is_action_just_pressed("ui_cancel"):
         cancelled.emit()
-        hide()
+        closing.emit()
 
     if Input.is_action_just_pressed("_debug_next_filter") and OS.has_feature("debug"):
         test_filter_idx += 1
@@ -273,9 +273,9 @@ func choose_item(tree_item: TreeItem) -> void:
     if not tree_item.has_meta("node_type"):
         print_debug("Tree item chosen but no node type meta found: ", tree_item.get_text(0))
         cancelled.emit()
-        hide()
+        closing.emit()
         return
 
     node_type_picked.emit(tree_item.get_meta("node_type"))
-    hide()
+    closing.emit()
     
