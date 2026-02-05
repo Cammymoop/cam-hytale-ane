@@ -4,10 +4,8 @@ extends GraphNode
 signal was_right_clicked(graph_node: CustomGraphNode)
 
 var node_type_schema: Dictionary
-
 var settings_syncer: SettingsSyncer = null
-
-var theme_color_output_type: String = ""
+@export_storage var theme_color_output_type: String = ""
 
 func make_settings_syncer(asset_node: HyAssetNode) -> SettingsSyncer:
     settings_syncer = SettingsSyncer.new()

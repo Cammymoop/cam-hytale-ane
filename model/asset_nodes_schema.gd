@@ -1903,9 +1903,9 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "MaterialProvider",
         "settings": {
             "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
-            "TopY": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "TopY": { "gd_type": TYPE_INT, "default_value": 0, "ui_hint": "y_coordinate" },
             "TopBaseHeight": { "gd_type": TYPE_STRING, "default_value": "" },
-            "BottomY": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "BottomY": { "gd_type": TYPE_INT, "default_value": 0, "ui_hint": "y_coordinate" },
             "BottomBaseHeight": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {

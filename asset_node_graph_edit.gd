@@ -296,7 +296,7 @@ func on_settings_menu_index_pressed(index: int) -> void:
 func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     clear_graph()
     hy_workspace_id = workspace_id
-    var root_node_type: = SchemaManager.schema.resolve_root_asset_node_type(workspace_id, {})
+    var root_node_type: = SchemaManager.schema.resolve_root_asset_node_type(workspace_id, {}) as String
     var new_root_node: HyAssetNode = get_new_asset_node(root_node_type)
     set_root_node(new_root_node)
     var screen_center_pos: Vector2 = get_viewport_rect().size / 2
@@ -996,7 +996,7 @@ func parse_root_asset_node(base_node: Dictionary) -> void:
             
             for output_value_type in node_type_by_output_type.keys():
                 for node_type in node_type_by_output_type[output_value_type]:
-                    var id_prefix: = SchemaManager.schema.get_id_prefix_for_node_type(node_type)
+                    var id_prefix: = SchemaManager.schema.get_id_prefix_for_node_type(node_type) as String
                     if not id_prefix:
                         continue
                     if node_id.begins_with(id_prefix + "-"):
