@@ -334,6 +334,7 @@ mouse_default_cursor_shape = 2
 text = "Show All"
 
 [node name="NewFileTypeChooser" type="PanelContainer" parent="PopupMenuRoot/NonFocusStop" unique_id=1695221338]
+visible = false
 custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2cqfq")

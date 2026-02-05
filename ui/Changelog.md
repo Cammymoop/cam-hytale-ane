@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+### Improvements:
+- Add an "Open File" button to the new file popup that shows on opening the editor
+
+### Fixes:
+- Fix a few more cases of floats serialized instead of ints which would cause the asset not to load
+
 ## 0.1.6
 ### Improvements:
 - Add Display scaling detection, on windows and linux (x11) this is always 100%, and manually setting display scale

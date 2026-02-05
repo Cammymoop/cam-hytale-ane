@@ -1886,6 +1886,9 @@ func serialize_node_editor_metadata() -> Dictionary:
             var parent_gn: GraphNode = null
             while parent_gn == null and parent_an != null:
                 parent_an = parent_an.get_meta("metadata_parent", null)
+                if not parent_an:
+                    parent_gn = null
+                    break
                 parent_gn = gn_lookup.get(parent_an.an_node_id, null) as GraphNode
             if parent_gn:
                 var my_idx_local: int = an.get_meta("metadata_index_local", 0)
