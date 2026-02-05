@@ -2558,10 +2558,6 @@ content_margin_bottom = 0.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_blkrb"]
 
-[sub_resource type="DPITexture" id="DPITexture_abqjc"]
-_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\".75\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
-"
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6iyjs"]
 content_margin_left = 4.0
 content_margin_top = 4.0
@@ -2769,7 +2765,6 @@ LineEdit/constants/caret_width = 1
 LineEdit/constants/minimum_character_width = 4
 LineEdit/constants/outline_size = 0
 LineEdit/font_sizes/font_size = 12
-LineEdit/icons/clear = SubResource("DPITexture_abqjc")
 LineEdit/styles/focus = SubResource("StyleBoxFlat_1bvp3")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_6iyjs")
 LineEdit/styles/read_only = SubResource("StyleBoxFlat_4w656")

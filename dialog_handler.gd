@@ -13,12 +13,6 @@ const RECENT_DIRS_FILE: String = "user://.recent_dirs"
 func _ready() -> void:
     load_file_dialog_recents_cache()
 
-func _process(_delta: float) -> void:
-    if Input.is_action_just_pressed("open_file_shortcut"):
-        show_open_file_dialog()
-    if Input.is_action_just_pressed("save_file_shortcut"):
-        show_save_file_dialog()
-
 func remove_old_dialogs() -> void:
     for child in get_children():
         if child is FileDialog:
@@ -58,7 +52,12 @@ func on_open_dialog_closed(file_dialog: FileDialog) -> void:
     file_dialog.queue_free()
 
 
-func show_save_file_dialog() -> void:
+func show_save_file_dialog(use_cur_file_name: bool) -> void:
+    var file_name: = ""
+    if use_cur_file_name:
+        var graph_edit: AssetNodeGraphEdit = get_tree().current_scene.find_child("AssetNodeGraphEdit")
+        file_name = graph_edit.cur_file_name
+
     remove_old_dialogs()
     var file_dialog: FileDialog = FileDialog.new()
     file_dialog.access = FileDialog.ACCESS_FILESYSTEM
@@ -67,6 +66,9 @@ func show_save_file_dialog() -> void:
         file_dialog.current_dir = last_file_dialog_directory
     else:
         file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
+    
+    if file_name:
+        file_dialog.current_file = file_name
 
     file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
     file_dialog.add_filter("*.json", "JSON files")

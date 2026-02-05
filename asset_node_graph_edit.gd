@@ -12,6 +12,10 @@ var parsed_json_data: Dictionary = {}
 var parsed_has_no_positions: = false
 var loaded: = false
 
+var cur_file_name: = ""
+var cur_file_path: = ""
+var has_saved_to_cur_file: = false
+
 var global_gn_counter: int = 0
 
 const DEFAULT_HY_WORKSPACE_ID: String = "HytaleGenerator - Biome"
@@ -116,6 +120,11 @@ func get_version_number_string() -> String:
     return get_plain_version() + prerelease_string
 
 func _ready() -> void:
+    %ToastMessageContainer.show_toast_message("4")
+    %ToastMessageContainer.show_toast_message("3")
+    %ToastMessageContainer.show_toast_message("2")
+    %ToastMessageContainer.show_toast_message("1")
+    %ToastMessageContainer.show_toast_message("Go")
     get_window().files_dropped.connect(on_files_dropped)
     assert(popup_menu_root != null, "Popup menu root is not set, please set it in the inspector")
     if not new_node_menu:
@@ -201,7 +210,8 @@ func new_file_with_prompt(workspace_id: String) -> void:
         new_file_real(workspace_id)
     else:
         var prompt_text: = "Do you want to save the current file before creating a new file?"
-        popup_menu_root.show_save_confirm(prompt_text, new_file_real.bind(workspace_id))
+        var has_cur: = cur_file_name != ""
+        popup_menu_root.show_save_confirm(prompt_text, has_cur, new_file_real.bind(workspace_id))
 
 func new_file_real(workspace_id: String) -> void:
     setup_new_graph(workspace_id)
@@ -211,16 +221,30 @@ func open_file_with_prompt(json_file_path: String) -> void:
         load_file_real(json_file_path)
     else:
         var prompt_text: = "Do you want to save the current file before loading '%s'?" % json_file_path
-        popup_menu_root.show_save_confirm(prompt_text, load_file_real.bind(json_file_path))
+        var has_cur: = cur_file_name != ""
+        popup_menu_root.show_save_confirm(prompt_text, has_cur, load_file_real.bind(json_file_path))
 
 func load_file_real(json_file_path: String) -> void:
-    print("load file real: %s" % json_file_path)
+    cur_file_name = json_file_path.get_file()
+    cur_file_path = json_file_path.get_base_dir()
+    has_saved_to_cur_file = false
     dialog_handler.last_file_dialog_directory = json_file_path.get_base_dir()
     load_json_file(json_file_path)
 
 func _process(_delta: float) -> void:
     if popup_menu_root.is_menu_visible():
         return
+
+    if Input.is_action_just_pressed("open_file_shortcut"):
+        dialog_handler.show_open_file_dialog()
+    if Input.is_action_just_pressed("save_file_shortcut"):
+        if has_saved_to_cur_file:
+            save_to_json_file(cur_file_path + "/" + cur_file_name)
+            unedited = true
+        else:
+            dialog_handler.show_save_file_dialog(cur_file_name != "")
+    if Input.is_action_just_pressed("save_as_shortcut"):
+        dialog_handler.show_save_file_dialog(false)
 
     if Input.is_action_just_pressed(&"graph_select_all_nodes"):
         select_all()
@@ -231,6 +255,8 @@ func _process(_delta: float) -> void:
         if undo_manager.has_redo():
             print("Redoing")
             undo_manager.redo()
+        else:
+            %ToastMessageContainer.show_toast_message("Nothing to Redo")
     # NOTE we do need this to be elif, because pressing ctr+shift+z registers as a ctr+z action being pressed too
     elif Input.is_action_just_pressed("ui_undo"):
         if undo_manager.has_undo():
@@ -241,6 +267,8 @@ func _process(_delta: float) -> void:
             undo_manager.undo()
             #if not undo_manager.has_undo():
             #    unedited = true
+        else:
+            %ToastMessageContainer.show_toast_message("Nothing to Undo")
 
     if Input.is_action_just_pressed("show_new_node_menu"):
         if not new_node_menu.visible:
@@ -275,7 +303,13 @@ func on_file_menu_id_pressed(id: int) -> void:
         "Open":
             dialog_handler.show_open_file_dialog()
         "Save":
-            dialog_handler.show_save_file_dialog()
+            if has_saved_to_cur_file:
+                save_to_json_file(cur_file_path + "/" + cur_file_name)
+                unedited = true
+            else:
+                dialog_handler.show_save_file_dialog(cur_file_name != "")
+        "Save As ...":
+            dialog_handler.show_save_file_dialog(false)
         "New":
             popup_menu_root.show_new_file_type_chooser()
 
@@ -294,6 +328,9 @@ func on_settings_menu_index_pressed(index: int) -> void:
             popup_menu_root.show_theme_editor()
 
 func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
+    cur_file_name = ""
+    cur_file_path = dialog_handler.last_file_dialog_directory
+    has_saved_to_cur_file = false
     clear_graph()
     hy_workspace_id = workspace_id
     var root_node_type: = SchemaManager.schema.resolve_root_asset_node_type(workspace_id, {}) as String
@@ -302,6 +339,7 @@ func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     var screen_center_pos: Vector2 = get_viewport_rect().size / 2
     var new_gn: CustomGraphNode = make_and_add_graph_node(new_root_node, screen_center_pos, true, true)
     gn_lookup[new_root_node.an_node_id] = new_gn
+    unedited = true
     loaded = true
 
 func set_root_node(new_root_node: HyAssetNode) -> void:
@@ -1790,12 +1828,19 @@ func _undo_redo_remove_gn(the_graph_node: GraphNode) -> void:
 
 
 func on_requested_save_file(file_path: String) -> void:
-    print("on requested save file: %s" % file_path)
     await get_tree().process_frame
-    print("now saving to file")
+    cur_file_name = file_path.get_file()
+    cur_file_path = file_path.get_base_dir()
+    print("now saving to file %s" % file_path)
     save_to_json_file(file_path)
+    has_saved_to_cur_file = true
+    unedited = true
 
 func save_to_json_file(file_path: String) -> void:
+    _save_to_json_file(file_path)
+    %ToastMessageContainer.show_toast_message("Saved")
+
+func _save_to_json_file(file_path: String) -> void:
     var json_str: = get_asset_node_graph_json_str()
     var file: = FileAccess.open(file_path, FileAccess.WRITE)
     if not file:

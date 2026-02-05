@@ -1,0 +1,38 @@
+{
+  "$NodeId": "Biome-1c21e08a-c5c8-2248-e333-1929541f0ab0",
+  "Terrain": {
+    "$NodeId": "Terrain-82d8b1a5-abe0-615f-ee42-0966349ff87c",
+    "Type": "DAOTerrain"
+  },
+  "Props": [
+    {
+      "$NodeId": "Runtime-57dc07ea-2235-5ff8-1f23-576a7b8ca638",
+      "Skip": false,
+      "Runtime": 0
+    }
+  ],
+  "$NodeEditorMetadata": {
+    "$Nodes": {
+      "Biome-1c21e08a-c5c8-2248-e333-1929541f0ab0": {
+        "$Position": {
+          "$x": 1000.0,
+          "$y": 500.0
+        }
+      },
+      "Terrain-82d8b1a5-abe0-615f-ee42-0966349ff87c": {
+        "$Position": {
+          "$x": 1867.0,
+          "$y": 167.0
+        }
+      },
+      "Runtime-57dc07ea-2235-5ff8-1f23-576a7b8ca638": {
+        "$Position": {
+          "$x": 1600.0,
+          "$y": 633.0
+        }
+      }
+    },
+    "$FloatingNodes": [],
+    "$WorkspaceID": "HytaleGenerator - Biome"
+  }
+}

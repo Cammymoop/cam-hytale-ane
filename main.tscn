@@ -15,6 +15,8 @@
 [ext_resource type="Script" uid="uid://dm0dehdgpmrnk" path="res://ui/type_color_button.gd" id="12_ycdy4"]
 [ext_resource type="Script" uid="uid://b7lb2mxxqf1uj" path="res://ui/save_confirm.gd" id="15_vivmo"]
 [ext_resource type="Script" uid="uid://bbhpphioejxw1" path="res://ui/new_file_type_chooser.gd" id="16_2cqfq"]
+[ext_resource type="Texture2D" uid="uid://c5yfuettbwecl" path="res://ui/assets/x_icon.tres" id="16_yaehf"]
+[ext_resource type="Script" uid="uid://crugojabvgfmf" path="res://ui/toast_message_container.gd" id="17_yaehf"]
 
 [sub_resource type="Theme" id="Theme_272bh"]
 
@@ -150,6 +152,74 @@ bg_color = Color(0.7835238, 0.78352326, 0.7835235, 1)
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_074og"]
+bg_color = Color(0.31061712, 0.31061712, 0.31061706, 0.84705883)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Animation" id="Animation_yaehf"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PanelContainer:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("PanelContainer:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_074og"]
+resource_name = "show"
+length = 0.76666665
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("PanelContainer:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.76666665),
+"transitions": PackedFloat32Array(1, 0.4204483, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("PanelContainer:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.76666665),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cegan"]
+_data = {
+&"RESET": SubResource("Animation_yaehf"),
+&"show": SubResource("Animation_074og")
+}
+
 [node name="BaseControl" type="Control" unique_id=1109592141]
 layout_mode = 3
 anchors_preset = 15
@@ -273,6 +343,7 @@ save_confirm = NodePath("FocusStop/CenterContainer/SaveConfirm")
 new_file_type_chooser = NodePath("NonFocusStop/NewFileTypeChooser")
 
 [node name="NonFocusStop" type="CenterContainer" parent="PopupMenuRoot" unique_id=1041756882]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -402,7 +473,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="FocusStop" type="ColorRect" parent="PopupMenuRoot" unique_id=840984799]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -416,6 +486,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -516,7 +590,7 @@ script = ExtResource("12_ycdy4")
 
 [node name="SaveConfirm" type="PanelContainer" parent="PopupMenuRoot/FocusStop/CenterContainer" unique_id=1473184355 node_paths=PackedStringArray("dialog_handler")]
 visible = false
-custom_minimum_size = Vector2(340, 0)
+custom_minimum_size = Vector2(560, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_2cqfq")
 script = ExtResource("15_vivmo")
@@ -534,6 +608,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Save the current file first?"
 horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/MarginContainer" unique_id=1313031213]
+layout_mode = 2
+alignment = 2
+
+[node name="Button" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/MarginContainer/HBoxContainer" unique_id=2085674539]
+layout_mode = 2
+icon = ExtResource("16_yaehf")
+flat = true
 
 [node name="PanelContainer" type="PanelContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer" unique_id=636189084]
 layout_mode = 2
@@ -554,35 +637,98 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 autowrap_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=704935523]
+[node name="MarginContainer" type="MarginContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1298767335]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer" unique_id=704935523]
 layout_mode = 2
 theme = ExtResource("8_5vw27")
 
-[node name="SaveBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=364039383]
+[node name="SaveBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=364039383]
 layout_mode = 2
 text = "Save"
 
-[node name="Spacer" type="Control" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=295962986]
+[node name="SaveSpacer" type="Control" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=295962986]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CancelBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1296302940]
+[node name="SaveAsBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=124300803]
+layout_mode = 2
+text = "Save As ..."
+
+[node name="Spacer2" type="Control" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=963538928]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1296302940]
 layout_mode = 2
 text = "Cancel"
 
-[node name="Spacer2" type="Control" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=963538928]
+[node name="Spacer3" type="Control" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1023216243]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DontSaveBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=307294204]
+[node name="DontSaveBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=307294204]
 layout_mode = 2
-text = "Don't Save"
+text = "Don't Save Changes"
+
+[node name="ToastMessageContainer" type="Control" parent="." unique_id=1771569462]
+unique_name_in_owner = true
+z_index = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("17_yaehf")
+
+[node name="PanelContainer" type="PanelContainer" parent="ToastMessageContainer" unique_id=657494300]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_074og")
+
+[node name="MarginContainer" type="MarginContainer" parent="ToastMessageContainer/PanelContainer" unique_id=1764117911]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 8
+
+[node name="ToastMessageLabel" type="Label" parent="ToastMessageContainer/PanelContainer/MarginContainer" unique_id=1658145036]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Saved"
+
+[node name="ToastAnimator" type="AnimationPlayer" parent="ToastMessageContainer" unique_id=1892830028]
+libraries/ = SubResource("AnimationLibrary_cegan")
 
 [connection signal="requested_open_file" from="DialogHandler" to="AssetNodeGraphEdit" method="_requested_open_file"]
 [connection signal="requested_save_file" from="DialogHandler" to="AssetNodeGraphEdit" method="on_requested_save_file"]
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="DialogHandler" method="show_open_file_dialog"]
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
-[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog"]
-[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_cancel"]
-[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/DontSaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_ignore_save_chosen"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/MarginContainer/HBoxContainer/Button" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_cancel"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/SaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog" binds= [true]]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/SaveAsBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog" binds= [false]]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_cancel"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/DontSaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_ignore_save_chosen"]

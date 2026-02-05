@@ -5,6 +5,10 @@ signal closing
 @export var dialog_handler: DialogHandler
 @onready var prompt: Label = find_child("Prompt")
 
+@onready var save_btn: Button = find_child("SaveBtn")
+@onready var save_spacer: Control = find_child("SaveSpacer")
+@onready var save_as_btn: Button = find_child("SaveAsBtn")
+
 var after_save_callback: Callable = Callable()
 
 func _ready() -> void:
@@ -15,6 +19,11 @@ func on_visibility_changed() -> void:
     if not visible:
         after_save_callback = Callable()
         prompt.text = ""
+
+func set_can_save_to_cur_filename(can_save: bool) -> void:
+    save_btn.visible = can_save
+    save_spacer.visible = can_save
+    save_as_btn.text = "Save As ..." if can_save else "Save"
 
 func set_prompt_text(prompt_text: String) -> void:
     prompt.text = prompt_text
@@ -35,8 +44,8 @@ func on_ignore_save_chosen() -> void:
     after_save_callback = Callable()
     closing.emit()
 
-func show_save_dialog() -> void:
-    dialog_handler.show_save_file_dialog()
+func show_save_dialog(save_as_current: bool) -> void:
+    dialog_handler.show_save_file_dialog(save_as_current)
     if not dialog_handler.requested_save_file.is_connected(current_was_saved):
         dialog_handler.requested_save_file.connect(current_was_saved.unbind(1), CONNECT_ONE_SHOT)
 

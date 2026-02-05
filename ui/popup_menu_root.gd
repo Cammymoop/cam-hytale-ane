@@ -18,12 +18,14 @@ func show_theme_editor() -> void:
     focus_stop.show()
     theme_editor_menu.show()
 
-func show_save_confirm(prompt_text: String, after_save_callback: Callable) -> void:
+func show_save_confirm(prompt_text: String, can_save_to_cur: bool, after_save_callback: Callable) -> void:
     hide_all_menus()
     focus_stop.show()
-    save_confirm.show()
+
+    save_confirm.set_can_save_to_cur_filename(can_save_to_cur)
     save_confirm.set_prompt_text(prompt_text)
     save_confirm.set_after_save_callback(after_save_callback)
+    save_confirm.show()
 
 func show_new_file_type_chooser() -> void:
     hide_all_menus()
