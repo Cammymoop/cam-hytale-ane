@@ -4,7 +4,7 @@
 > PLEASE READ: This is just an early alpha, provided as-is, take care to properly version control or backup any files you may be editing.
 
 ## Current Status:
-Early Alpha
+Alpha, usable but not very stable
 
 ### What works:
 * WorldGen Asset Node workspaces (Biome, Density, BlockMask, Assignments)
@@ -15,12 +15,12 @@ Early Alpha
 * Modifying existing nodes connections
 * Cutting connections by drawing a line (ctr+right click)
 * Remembering favorites and recently used directories accross app restarts
-* Windows and Linux support (Mac build exists but is currently completely untested and not properly signed)
+* Windows and Linux support (unsigned Mac build is available, mileage may vary)
 
 ### What doesn't work:
 * Doesn't yet work with non-worldgen Workspaces, only those that start with "HytaleGenerator - "
-  * Can load other HytaleGenerator workspace files besides Biome files, but new files are always created as a Biome workspace for now, this will be addressed in the next version
 * Node Comments, Separate Comments, and Groups are not yet implemented
+* Customizable Theme Colors do not persist across sessions yet
 * Custom Node Titles are supported but there's no way to rename nodes in the editor itself yet
 * Certain node types parameters use a simple string input box, which may not work for everything
 
