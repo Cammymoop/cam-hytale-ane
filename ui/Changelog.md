@@ -3,6 +3,8 @@
 ## 0.1.7
 ### Improvements:
 - Add an "Open File" button to the new file popup that shows on opening the editor
+- Separate "Save" and "Save As" - you no longer need to go through the file dialog every time you save
+- Show a quick toast message when a file is saved
 
 ### Fixes:
 - Fix a few more cases of floats serialized instead of ints which would cause the asset not to load

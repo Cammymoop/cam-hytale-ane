@@ -37,6 +37,7 @@ enum ContextMenuItems {
     COPY_NODES = 1,
     CUT_NODES,
     PASTE_NODES,
+    DUPLICATE_NODES,
 
     DELETE_NODES,
     DISSOLVE_NODES,
@@ -626,6 +627,9 @@ func deselect_all() -> void:
             c.selected = false
 
 func _duplicate_request() -> void:
+    duplicate_selected_gns()
+
+func duplicate_selected_gns() -> void:
     # TODO: dont clobber the clipboard
     _copy_request()
     _paste_request()
@@ -2138,6 +2142,8 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
             var dissolve_idx: int = context_menu.get_item_index(ContextMenuItems.DISSOLVE_NODES)
             context_menu.set_item_disabled(dissolve_idx, true)
         context_menu.id_pressed.connect(on_node_context_menu_id_pressed.bind(graph_node))
+    
+    context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
 
     add_child(context_menu, true)
 
@@ -2151,6 +2157,9 @@ func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_
         ContextMenuItems.DISSOLVE_NODES:
             if can_dissolve_gn(on_gn):
                 pass#dissolve_node(on_gn)
+        ContextMenuItems.DUPLICATE_NODES:
+            duplicate_selected_gns()
+
 
 func get_duplicate_gn_name(old_gn_name: String) -> String:
     var base_name: = old_gn_name.split("--")[0]
