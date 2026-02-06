@@ -1,6 +1,8 @@
 [gd_resource type="Theme" format=3 uid="uid://cv3cabit36ilb"]
 
+[ext_resource type="Texture2D" uid="uid://3o3i270yvcvh" path="res://ui/assets/checkbox_unchecked_icon.tres" id="1_3xb56"]
 [ext_resource type="FontFile" uid="uid://43145ahrbd7d" path="res://ui/assets/dejavu-sans.book.ttf" id="1_g1fjd"]
+[ext_resource type="Texture2D" uid="uid://rqgkd8nqk62c" path="res://ui/assets/radio_checked.tres" id="1_joxlk"]
 [ext_resource type="Texture2D" uid="uid://dhprb6qaxt4u0" path="res://ui/assets/graph_node_port_default.tres" id="2_6tukj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h2yge"]
@@ -405,7 +407,7 @@ ButtonOptRight/styles/hover = SubResource("StyleBoxFlat_3xb56")
 ButtonOptRight/styles/normal = SubResource("StyleBoxFlat_lsmgg")
 ButtonOptRight/styles/pressed = SubResource("StyleBoxFlat_11ing")
 CheckBox/colors/checkbox_checked_color = Color(0.491206, 0.7963681, 0.60121584, 1)
-CheckBox/colors/checkbox_unchecked_color = Color(0.23947352, 0.45469046, 0.32146466, 1)
+CheckBox/colors/checkbox_unchecked_color = Color(0.22276875, 0.42951164, 0.30120504, 1)
 CheckBox/colors/font_color = Color(0.875, 0.875, 0.875, 1)
 CheckBox/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
 CheckBox/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
@@ -416,6 +418,8 @@ CheckBox/colors/font_pressed_color = Color(1, 1, 1, 1)
 CheckBox/constants/check_v_offset = 0
 CheckBox/constants/h_separation = 4
 CheckBox/font_sizes/font_size = 12
+CheckBox/icons/radio_checked = ExtResource("1_joxlk")
+CheckBox/icons/unchecked = ExtResource("1_3xb56")
 CheckBox/styles/disabled = SubResource("StyleBoxEmpty_2cqfq")
 CheckBox/styles/focus = SubResource("StyleBoxEmpty_tsbh2")
 CheckBox/styles/hover = SubResource("StyleBoxEmpty_2cqfq")

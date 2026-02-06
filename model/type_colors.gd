@@ -57,6 +57,9 @@ var custom_color_names: Dictionary[String, String] = {}
 var base_label_stylebox: StyleBoxFlat = preload("res://ui/base_label_stylebox.tres")
 var color_label_styleboxes: Dictionary[String, StyleBoxFlat] = {}
 
+func _ready() -> void:
+    load_custom_theme()
+
 func get_color_label_stylebox(color_name: String) -> StyleBoxFlat:
     if color_name not in color_label_styleboxes:
         generate_color_label_stylebox(color_name)
@@ -122,7 +125,10 @@ func save_custom_theme(message_callback: Callable) -> void:
     file.store_string(JSON.stringify(custom_theme_dict))
     message_callback.call("Custom Colors Saved")
 
-func load_custom_theme(message_callback: Callable) -> void:
+func load_custom_theme(message_callback: Callable = Callable()) -> void:
+    if not FileAccess.file_exists(CUSTOM_THEME_FILE_PATH):
+        return
+
     var file: = FileAccess.open(CUSTOM_THEME_FILE_PATH, FileAccess.READ)
     if not file:
         push_error("Error opening custom theme file for reading: %s" % CUSTOM_THEME_FILE_PATH)
@@ -137,7 +143,8 @@ func load_custom_theme(message_callback: Callable) -> void:
         print_debug("Error parsing custom theme file")
     
     if not file or not parsed_dict:
-        message_callback.call("Error loading custom theme colors")
+        if message_callback.is_valid():
+            message_callback.call("Error loading custom theme colors")
         return
     
     var loaded_custom_theme_colors: Dictionary[String, Color] = {}
@@ -149,7 +156,8 @@ func load_custom_theme(message_callback: Callable) -> void:
     custom_color_names.clear()
     custom_color_names.merge(parsed_dict["custom_type_colors"])
     ThemeColorVariants.recreate_variants()
-    message_callback.call("Custom Colors Loaded")
+    if message_callback.is_valid():
+        message_callback.call("Custom Colors Loaded")
 
 func reset_theme_to_default(message_callback: Callable) -> void:
     ThemeColorVariants.custom_theme_colors = {}

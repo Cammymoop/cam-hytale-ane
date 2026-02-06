@@ -6,4 +6,5 @@
 custom_minimum_size = Vector2(10, 10)
 offset_right = 8.0
 offset_bottom = 8.0
+theme_override_constants/separation = 6
 script = ExtResource("1_w44bt")
