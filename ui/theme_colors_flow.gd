@@ -1,5 +1,7 @@
 extends HFlowContainer
 
+signal color_changed
+
 const TypeColorsFlow = preload("res://ui/type_colors_flow.gd")
 
 var theme_color_picker_button_scn: PackedScene = preload("res://ui/theme_color_picker_button.tscn")
@@ -50,6 +52,7 @@ func make_color_picker_buttons() -> void:
 func theme_color_changed(new_color: Color, color_name: String) -> void:
     ThemeColorVariants.add_custom_theme_color(color_name, new_color)
     type_colors_flow.color_name_color_changed(color_name)
+    color_changed.emit()
 
 func clear_children() -> void:
     for child in get_children():

@@ -1,6 +1,7 @@
 extends HFlowContainer
 
 signal colors_changed
+signal type_color_changed
 
 const TypeColorButton = preload("res://ui/type_color_button.gd")
 
@@ -24,6 +25,7 @@ func make_type_color_buttons() -> void:
     for type_name in SchemaManager.schema.value_types:
         var type_color_button: = TypeColorButton.new()
         type_color_button.set_type_name(type_name)
+        type_color_button.type_color_changed.connect(type_color_changed.emit)
         add_child(type_color_button, true)
 
 func clear_children() -> void:

@@ -473,7 +473,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="FocusStop" type="ColorRect" parent="PopupMenuRoot" unique_id=840984799]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -513,6 +512,15 @@ layout_mode = 2
 layout_mode = 2
 text = "Customize Theme"
 horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/MarginContainer" unique_id=1464377468]
+layout_mode = 2
+alignment = 2
+
+[node name="Button" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1985474165]
+layout_mode = 2
+icon = ExtResource("16_yaehf")
+flat = true
 
 [node name="PanelContainer" type="PanelContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer" unique_id=235268267]
 layout_mode = 2
@@ -588,6 +596,29 @@ layout_mode = 2
 text = "Density"
 flat = false
 script = ExtResource("12_ycdy4")
+
+[node name="HSeparator2" type="HSeparator" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1503040676]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=537093238]
+layout_mode = 2
+alignment = 1
+
+[node name="SaveThemeBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=572432677]
+layout_mode = 2
+text = "Save Custom Theme"
+
+[node name="ReloadThemeBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1652067665]
+layout_mode = 2
+text = "Reload Custom Theme"
+
+[node name="ResetThemeBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1289408156]
+layout_mode = 2
+text = "Reset to Defaults"
+
+[node name="CloseBtn" type="Button" parent="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=449467879]
+layout_mode = 2
+text = "Close"
 
 [node name="SaveConfirm" type="PanelContainer" parent="PopupMenuRoot/FocusStop/CenterContainer" unique_id=1473184355 node_paths=PackedStringArray("dialog_handler")]
 visible = false
@@ -728,6 +759,11 @@ libraries/ = SubResource("AnimationLibrary_cegan")
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="DialogHandler" method="show_open_file_dialog"]
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/NewFileOpenButton" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
 [connection signal="pressed" from="PopupMenuRoot/NonFocusStop/NewFileTypeChooser/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CancelBtn" to="PopupMenuRoot/NonFocusStop/NewFileTypeChooser" method="_on_cancel_btn_pressed"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/MarginContainer/HBoxContainer/Button" to="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor" method="on_close_button_pressed"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveThemeBtn" to="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor" method="on_save_custom_theme"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ReloadThemeBtn" to="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor" method="on_load_custom_theme"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ResetThemeBtn" to="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor" method="on_reset_theme_to_default"]
+[connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CloseBtn" to="PopupMenuRoot/FocusStop/CenterContainer/ThemeEditor" method="on_close_button_pressed"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/MarginContainer/HBoxContainer/Button" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="on_cancel"]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/SaveBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog" binds= [true]]
 [connection signal="pressed" from="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/SaveAsBtn" to="PopupMenuRoot/FocusStop/CenterContainer/SaveConfirm" method="show_save_dialog" binds= [false]]

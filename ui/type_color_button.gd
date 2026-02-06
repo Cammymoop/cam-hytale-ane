@@ -1,5 +1,7 @@
 extends MenuButton
 
+signal type_color_changed
+
 const TypeColorsFlow = preload("res://ui/type_colors_flow.gd")
 
 const ICON_SIZE: = 14
@@ -62,4 +64,5 @@ func on_color_idx_selected(idx: int) -> void:
         return
     TypeColors.custom_color_names[type_name] = color_name
     update_visuals()
+    type_color_changed.emit()
     

@@ -12,6 +12,7 @@ func _ready() -> void:
     save_confirm.closing.connect(hide_all_menus)
     new_file_type_chooser.closing.connect(hide_all_menus)
     new_gn_menu.closing.connect(hide_all_menus)
+    theme_editor_menu.closing.connect(hide_all_menus)
     hide_all_menus()
 
 func show_theme_editor() -> void:

@@ -1,6 +1,8 @@
 @tool
 extends Node
 
+const CUSTOM_THEME_FILE_PATH: = "user://color_themes/custom.json"
+
 var fallback_color: String = "grey"
 
 @export var type_colors: Dictionary[String, String] = {
@@ -98,3 +100,59 @@ func get_label_color_for_type(type_name: String) -> Color:
 
 func get_label_stylebox_for_type(type_name: String) -> StyleBoxFlat:
     return get_color_label_stylebox(get_color_for_type(type_name))
+
+func save_custom_theme(message_callback: Callable) -> void:
+    print("saving custom theme")
+    if not DirAccess.dir_exists_absolute(CUSTOM_THEME_FILE_PATH.get_base_dir()):
+        DirAccess.make_dir_absolute(CUSTOM_THEME_FILE_PATH.get_base_dir())
+    var custom_theme_dict: = {
+        "custom_theme_colors": {}.merged(ThemeColorVariants.custom_theme_colors),
+        "custom_type_colors": custom_color_names,
+    }
+    for color_name in custom_theme_dict["custom_theme_colors"]:
+        var color_str: String = custom_theme_dict["custom_theme_colors"][color_name].to_html()
+        custom_theme_dict["custom_theme_colors"][color_name] = color_str
+
+    var file: = FileAccess.open(CUSTOM_THEME_FILE_PATH, FileAccess.WRITE)
+    if not file:
+        push_error("Error opening custom theme file for writing: %s" % CUSTOM_THEME_FILE_PATH)
+        print_debug("Error opening custom theme file for writing: %s" % CUSTOM_THEME_FILE_PATH)
+        %ToastMessageContainer.show_toast_message("Error saving custom theme colors")
+        return
+    file.store_string(JSON.stringify(custom_theme_dict))
+    message_callback.call("Custom Colors Saved")
+
+func load_custom_theme(message_callback: Callable) -> void:
+    var file: = FileAccess.open(CUSTOM_THEME_FILE_PATH, FileAccess.READ)
+    if not file:
+        push_error("Error opening custom theme file for reading: %s" % CUSTOM_THEME_FILE_PATH)
+        print_debug("Error opening custom theme file for reading: %s" % CUSTOM_THEME_FILE_PATH)
+
+    var parsed_dict: Variant = null
+    if file:
+        parsed_dict = JSON.parse_string(file.get_as_text())
+
+    if not parsed_dict:
+        push_error("Error parsing custom theme file")
+        print_debug("Error parsing custom theme file")
+    
+    if not file or not parsed_dict:
+        message_callback.call("Error loading custom theme colors")
+        return
+    
+    var loaded_custom_theme_colors: Dictionary[String, Color] = {}
+    for color_name in parsed_dict["custom_theme_colors"]:
+        var color_str: String = parsed_dict["custom_theme_colors"][color_name]
+        loaded_custom_theme_colors[color_name] = Color.from_string(color_str, Color.MAGENTA)
+    ThemeColorVariants.custom_theme_colors = loaded_custom_theme_colors
+
+    custom_color_names.clear()
+    custom_color_names.merge(parsed_dict["custom_type_colors"])
+    ThemeColorVariants.recreate_variants()
+    message_callback.call("Custom Colors Loaded")
+
+func reset_theme_to_default(message_callback: Callable) -> void:
+    ThemeColorVariants.custom_theme_colors = {}
+    custom_color_names = {}
+    ThemeColorVariants.recreate_variants()
+    message_callback.call("Theme Reset to Defaults")
