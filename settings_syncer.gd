@@ -14,6 +14,12 @@ func rebind_signals() -> void:
         if input_control is GNNumberEdit:
             if not input_control.val_changed.is_connected(on_value_changed):
                 input_control.val_changed.connect(on_value_changed.bind(setting_name))
+        elif input_control is GNExclusiveEnumEdit:
+            if not input_control.option_changed.is_connected(on_value_changed):
+                input_control.option_changed.connect(on_value_changed.bind(setting_name))
+        elif input_control is GNToggleSet:
+            if not input_control.members_changed.is_connected(on_value_changed):
+                input_control.members_changed.connect(on_value_changed.bind(setting_name))
         elif input_control is LineEdit:
             if not input_control.text_changed.is_connected(on_value_changed):
                 input_control.text_changed.connect(on_value_changed.bind(setting_name))
@@ -31,6 +37,10 @@ func add_watched_setting(setting_name: String, input_control: Control, setting_g
 
     if input_control is GNNumberEdit:
         input_control.val_changed.connect(on_value_changed.bind(setting_name))
+    elif input_control is GNExclusiveEnumEdit:
+        input_control.option_changed.connect(on_value_changed.bind(setting_name))
+    elif input_control is GNToggleSet:
+        input_control.members_changed.connect(on_value_changed.bind(setting_name))
     elif input_control is LineEdit:
         input_control.text_changed.connect(on_value_changed.bind(setting_name))
     elif input_control is BaseButton and input_control.toggle_mode:
@@ -48,6 +58,10 @@ func on_value_changed(value: Variant, setting_name: String) -> void:
         asset_node.settings[setting_name] = int(value)
     elif setting_gd_types[setting_name] == TYPE_BOOL:
         asset_node.settings[setting_name] = bool(value)
+    elif setting_gd_types[setting_name] == TYPE_ARRAY:
+        if not asset_node.settings.has(setting_name):
+            asset_node.settings[setting_name] = []
+        asset_node.settings[setting_name].assign(value)
     else:
         print_debug("Warning: Setting %s has gd type %s, which is not expected" % [setting_name, type_string(setting_gd_types[setting_name])])
 
@@ -56,9 +70,13 @@ func update_from_asset_node() -> void:
         var input_control: = get_node(watched_settings[setting_name]) as Control
         if input_control is GNNumberEdit:
             input_control.set_value_directly(float(asset_node.settings[setting_name]))
+        elif input_control is GNExclusiveEnumEdit:
+            input_control.set_current_option_directly(asset_node.settings[setting_name])
+        elif input_control is GNToggleSet:
+            input_control.set_members_directly(asset_node.settings[setting_name])
         elif input_control is LineEdit:
             input_control.text = str(asset_node.settings[setting_name])
         elif input_control is BaseButton and input_control.toggle_mode:
-            input_control.button_pressed = bool(asset_node.settings[setting_name])
+            input_control.set_pressed_no_signal(bool(asset_node.settings[setting_name]))
 
 

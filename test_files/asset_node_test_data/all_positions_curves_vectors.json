@@ -241,6 +241,15 @@
 								"$NodeId":	"FieldFunctionPositions-d77881de-5759-46e9-89ec-d4464b851288",
 								"Type":	"FieldFunction",
 								"Skip":	false,
+								"Delimiters":	[{
+										"$NodeId":	"Delimiter-4a85cfe8-4271-4696-85c3-199cfaedfac3",
+										"Min":	-1,
+										"Max":	0.2
+									}, {
+										"$NodeId":	"Delimiter-d6468375-49b6-4cfe-a7f0-64fff1af6156",
+										"Min":	0.2,
+										"Max":	1
+									}],
 								"Positions":	{
 									"$NodeId":	"Anchor.Positions-5efc3f75-c52b-46ed-aaab-c16d0c4de1a9",
 									"Type":	"Anchor",
@@ -442,6 +451,12 @@
 					"$y":	498
 				}
 			},
+			"DistanceSCurve-de09aa38-adbb-4a11-bef4-f09249bba17b":	{
+				"$Position":	{
+					"$x":	6917,
+					"$y":	140
+				}
+			},
 			"Clamp.Curve-508bb341-a3a1-4577-a1a4-594a00e8b2e9":	{
 				"$Position":	{
 					"$x":	7008,
@@ -634,6 +649,12 @@
 					"$y":	1770
 				}
 			},
+			"ConstantDensityNode-30143dae-7b5b-43db-b693-3f906af74532":	{
+				"$Position":	{
+					"$x":	7961,
+					"$y":	1727
+				}
+			},
 			"Angle.Density-e160f900-372f-425e-8138-fd19d4e8ef7c":	{
 				"$Position":	{
 					"$x":	4953,
@@ -676,16 +697,16 @@
 					"$y":	1279
 				}
 			},
-			"DistanceSCurve-de09aa38-adbb-4a11-bef4-f09249bba17b":	{
+			"Delimiter-4a85cfe8-4271-4696-85c3-199cfaedfac3":	{
 				"$Position":	{
-					"$x":	6917,
-					"$y":	140
+					"$x":	7353,
+					"$y":	1459
 				}
 			},
-			"ConstantDensityNode-30143dae-7b5b-43db-b693-3f906af74532":	{
+			"Delimiter-d6468375-49b6-4cfe-a7f0-64fff1af6156":	{
 				"$Position":	{
-					"$x":	7961,
-					"$y":	1727
+					"$x":	7156,
+					"$y":	1609
 				}
 			}
 		},

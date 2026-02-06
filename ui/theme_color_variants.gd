@@ -105,6 +105,8 @@ func _make_theme_color_variant(color_name: String, color_color: Color) -> void:
         make_recolors.call(["font_color", "font_hover_color", "font_hover_pressed_color", "font_pressed_color"], btn_class)
     
     make_recolors.call(["checkbox_checked_color", "checkbox_unchecked_color"], "CheckBox")
+    make_recolors.call(["font_color"], "LabelCheckboxChecked")
+    make_recolors.call(["font_color"], "LabelCheckboxUnchecked")
     
     make_colored_duplicate_sb_flat.call("normal", "LineEdit", true)
     make_colored_duplicate_sb_flat.call("read_only", "LineEdit", true)

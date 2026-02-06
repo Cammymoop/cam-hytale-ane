@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dhggpy8ho2wwa"]
+
+[ext_resource type="Script" uid="uid://cg5s5qrjuvl3r" path="res://ui/labeled_check_box.gd" id="1_jd4mg"]
+
+[node name="LabeledCheckBox" type="HBoxContainer" unique_id=1574992569]
+offset_right = 63.0
+offset_bottom = 24.0
+theme_override_constants/separation = 1
+script = ExtResource("1_jd4mg")
+
+[node name="Label" type="Label" parent="." unique_id=1553054235]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="." unique_id=1763342776]
+layout_mode = 2

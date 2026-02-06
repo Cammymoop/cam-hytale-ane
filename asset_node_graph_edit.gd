@@ -897,8 +897,12 @@ func parse_asset_node_shallow(old_style: bool, asset_node_data: Dictionary, outp
 
     # fill out stuff in data even if it isn't in the schema
     for other_key in asset_node_data.keys():
-        if other_key.begins_with("$") or HyAssetNode.special_keys.has(other_key):
+        if other_key.begins_with("$"):
             continue
+        if other_key in HyAssetNode.special_keys:
+            # Type is a special key but PCNDistanceFunction uses it differently, hence the special case
+            if not node_schema or (not node_schema.get("settings", {}).has(other_key)):
+                continue
         
         var connected_data = check_for_asset_nodes(old_style, asset_node_data[other_key])
         if other_key in asset_node.connection_list or connected_data != null:
@@ -1389,13 +1393,10 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
                 if node_schema and node_schema.get("settings", {}).has(setting_name) and node_schema.get("settings", {})[setting_name].get("hidden", false):
                     continue
 
-                var slot_node: = HBoxContainer.new()
-                slot_node.name = "Slot%d" % i
                 var s_name: = Label.new()
                 s_name.name = "SettingName"
                 s_name.text = "%s:" % setting_name
                 s_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-                slot_node.add_child(s_name, true)
 
                 var s_edit: Control
                 var setting_value: Variant
@@ -1412,8 +1413,44 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
                     setting_type = typeof(setting_value) if setting_value else TYPE_STRING
                 
                 var ui_hint: String = node_schema.get("settings", {})[setting_name].get("ui_hint", "")
+                if ui_hint:
+                    prints("ui hint for %s: %s" % [setting_name, ui_hint])
 
-                if setting_type == TYPE_BOOL:
+                var slot_node: Control = HBoxContainer.new()
+
+                if ui_hint == "string_enum":
+                    prints("making exclusive enum edit for %s" % setting_name)
+                    s_edit = preload("res://ui/data_editors/exclusive_enum.tscn").instantiate() as GNExclusiveEnumEdit
+                    var value_set: String = node_schema["settings"][setting_name].get("value_set", "")
+                    if not value_set:
+                        print_debug("Value set for %s:%s not found in schema" % [asset_node.an_type, setting_name])
+                        continue
+                    if node_schema["settings"][setting_name]["gd_type"] == TYPE_STRING:
+                        var valid_values: Array[String] = SchemaManager.schema.get_value_set_values(value_set)
+                        s_edit.set_options(valid_values, setting_value)
+                    else:
+                        var valid_values: Array = SchemaManager.schema.get_value_set_values(value_set)
+                        s_edit.set_numeric_options(valid_values, setting_value)
+                elif ui_hint == "enum_as_set":
+                    slot_node = VBoxContainer.new()
+                    s_edit = preload("res://ui/data_editors/toggle_set.tscn").instantiate() as GNToggleSet
+                    var value_set: String = node_schema["settings"][setting_name].get("value_set", "")
+                    if not value_set:
+                        print_debug("Value set for %s:%s not found in schema" % [asset_node.an_type, setting_name])
+                        continue
+                    if not setting_type == TYPE_ARRAY:
+                        print_debug("UI hinted toggle set for %s:%s but the setting is not an array" % [asset_node.an_type, setting_name])
+                        continue
+                    var valid_values: Array = SchemaManager.schema.get_value_set_values(value_set)
+                    var sub_gd_type: int = node_schema["settings"][setting_name]["array_gd_type"]
+                    if sub_gd_type == TYPE_INT:
+                        var converted_values: Array = []
+                        for value in setting_value:
+                            converted_values.append(int(value))
+                        s_edit.setup(valid_values, converted_values)
+                    else:
+                        s_edit.setup(valid_values, setting_value)
+                elif setting_type == TYPE_BOOL:
                     s_edit = CheckBox.new()
                     s_edit.button_pressed = setting_value
                 elif setting_type == TYPE_FLOAT or setting_type == TYPE_INT:
@@ -1431,7 +1468,10 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
                         s_edit.custom_minimum_size.x = 140
                     #if setting_type == TYPE_FLOAT or setting_type == TYPE_INT:
                         #s_edit.alignment = HORIZONTAL_ALIGNMENT_RIGHT
-                s_edit.name = "SettingEdit"
+
+                s_edit.name = "SettingEdit_%s" % setting_name
+                slot_node.name = "Slot%d" % i
+                slot_node.add_child(s_name, true)
                 slot_node.add_child(s_edit, true)
                 graph_node.add_child(slot_node, true)
 

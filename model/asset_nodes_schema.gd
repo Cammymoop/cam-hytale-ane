@@ -66,6 +66,9 @@ func resolve_asset_node_type(type_key: String, output_value_type: String, node_i
             return "Unknown"
         else:
             return _unknown_output_type_inference(node_id)
+    elif output_value_type in nonspecial_type_value_types:
+        type_key = ""
+
     if output_value_type.begins_with("ROOT"):
         push_warning("Using deprecated path to infer root node type")
         var parts: = output_value_type.split("|")
@@ -103,6 +106,29 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
 
     return node_schema[node_type].get("id_prefix_override", node_type)
 
+func has_value_set(value_set: String) -> bool:
+    return value_set in value_sets
+
+func typeof_value_set(value_set: String) -> int:
+    if value_set not in value_sets:
+        print_debug("Value set %s not found" % value_set)
+        return TYPE_STRING
+    return value_sets[value_set]["gd_type"]
+
+func get_value_set_values(value_set: String) -> Array:
+    if value_set not in value_sets:
+        print_debug("Value set %s not found" % value_set)
+        return []
+    if not "valid_values" in value_sets[value_set]:
+        return []
+
+    if not value_sets[value_set]["valid_values"].is_typed():
+        var typed_values: = Array([], value_sets[value_set]["gd_type"], "", null)
+        typed_values.assign(value_sets[value_set]["valid_values"])
+        value_sets[value_set]["valid_values"] = typed_values
+
+    return value_sets[value_set]["valid_values"].duplicate()
+
 @export var value_types: Array[String] = [
     "Density",
     "Curve",
@@ -128,7 +154,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "Stripe",
     "WeightedMaterial",
     "DelimiterFieldFunctionMP",
-    "DelimiterDensityPCNReturnType",
+    "DelimiterFieldFunctionPP",
+    "DelimiterPCN",
     "Runtime",
     "Directionality",
     "Condition",
@@ -147,7 +174,13 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "RuleBlockMask",
     "DelimiterEnvironment",
     "DelimiterTint",
-    "Range",
+    "DecimalRange",
+    "OrthogonalRotation",
+    "DecimalBounds3d",
+]
+
+@export var nonspecial_type_value_types: Array[String] = [
+    "PCNDistanceFunction",
 ]
 
 @export var node_types: Dictionary[String, String] = {
@@ -210,6 +243,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "Density|DistanceToBiomeEdge": "DistanceToBiomeEdgeDensity",
     "Density|Terrain": "TerrainDensity",
     "Density|Exported": "ExportedDensity",
+    "Density|YSampled": "YSampledDensity",
     
     # Curve nodes
     "Curve|Manual": "ManualCurve",
@@ -256,6 +290,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "Positions|Sphere": "SpherePositions",
     "Positions|BaseHeight": "BaseHeightPositions",
     "Positions|SimpleHorizontal": "SimpleHorizontalPositions",
+    "Positions|Bound": "BoundPositions",
     
     # Pattern nodes
     "Pattern|Floor": "FloorPattern",
@@ -326,7 +361,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "Stripe|": "Stripe",
     "WeightedMaterial|": "WeightedMaterial",
     "DelimiterFieldFunctionMP|": "DelimiterFieldFunctionMP",
-    "DelimiterDensityPCNReturnType|": "DelimiterDensityPCNReturnType",
+    "DelimiterFieldFunctionPP|": "DelimiterFieldFunctionPP",
+    "DelimiterPCN|": "DelimiterPCN",
     "CaseSwitch|": "CaseSwitch",
     "KeyMultiMix|": "KeyMultiMix",
     "WeightedAssignment|": "WeightedAssignment",
@@ -337,21 +373,21 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "WeightedClusterProp|": "WeightedClusterProp",
     "DelimiterEnvironment|": "DelimiterEnvironment",
     "DelimiterTint|": "DelimiterTint",
-    "Range|": "Range",
+    "DecimalRange|": "DecimalRange",
     "BlockColumn|": "BlockColumn",
     "EntryWeightedProp|": "EntryWeightedProp",
     "RuleBlockMask|": "RuleBlockMask",
+    "OrthogonalRotation|": "OrthogonalRotation",
+    "DecimalBounds3d|": "DecimalBounds3d",
+    "PCNDistanceFunction|": "PCNDistanceFunction",
     
     # PointGenerator nodes
     "PointGenerator|Mesh": "MeshPointGenerator",
     
-    # PCNDistanceFunction nodes
-    "PCNDistanceFunction|Euclidean": "EuclideanPCNDistanceFunction",
-    "PCNDistanceFunction|Manhattan": "ManhattanPCNDistanceFunction",
-    
     # Directionality nodes
     "Directionality|Static": "StaticDirectionality",
     "Directionality|Random": "RandomDirectionality",
+    "Directionality|Pattern": "PatternDirectionality",
     "Directionality|Imported": "ImportedDirectionality",
     
     # VectorProvider nodes
@@ -397,6 +433,59 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     "HytaleGenerator - Density": "ExportedDensity",
     "HytaleGenerator - BlockMask": "BlockMask",
     "HytaleGenerator - Assignments": "FieldFunctionAssignments",
+}
+
+@export var value_sets: Dictionary[String, Dictionary] = {
+    "orth_rotation": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["None", "Ninety", "OneEighty", "TwoSeventy"],
+        "exclusive": true,
+    },
+    "distance_types": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["Euclidean", "Manhattan"],
+        "exclusive": true,
+    },
+    "cardinal_degrees": {
+        "gd_type": TYPE_INT,
+        "valid_values": [0, 90, 180, 270],
+        "exclusive": true,
+    },
+    "column_scanner_strat": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["DART_THROW", "PICK_VALID"],
+        "exclusive": true,
+    },
+    "sad_context": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["DEPTH_INTO_FLOOR", "DEPTH_INTO_CEILING"],
+        "exclusive": true,
+    },
+    "sad_condition_context": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["SPACE_ABOVE_FLOOR", "SPACE_BELOW_CEILING"],
+        "exclusive": true,
+    },
+    "area_scan_shape": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["CIRCLE", "SQUARE"],
+        "exclusive": true,
+    },
+    "molding_direction": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["NONE", "UP", "DOWN"],
+        "exclusive": true,
+    },
+    "cardinal_dirs": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["N", "S", "E", "W"],
+        "exclusive": true,
+    },
+    "orth_dirs": {
+        "gd_type": TYPE_STRING,
+        "valid_values": ["N", "S", "E", "W", "U", "D"],
+        "exclusive": true,
+    }
 }
 
 @export var node_schema: Dictionary[String, Dictionary] = {
@@ -1134,6 +1223,19 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Inputs": { "value_type": "Density", "multi": true },
         }
     },
+    "YSampledDensity": {
+        "id_prefix_override": "YSampled.Density",
+        "display_name": "YSampled Density",
+        "output_value_type": "Density",
+        "settings": {
+            "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "SampleDistance": { "gd_type": TYPE_FLOAT, "default_value": 4.0 },
+            "SampleOffset": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+        },
+        "connections": {
+            "Inputs": { "value_type": "Density", "multi": true },
+        }
+    },
     
     # CurvePoint (single-node value type)
     "CurvePoint": {
@@ -1171,8 +1273,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "ExponentA": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "ExponentB": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 10.0 },
-            "Transition": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
-            "TransitionSmooth": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "Transition": { "gd_type": TYPE_FLOAT, "default_value": 1.0, "ui_hint": "float_range:0_1" },
+            "TransitionSmooth": { "gd_type": TYPE_FLOAT, "default_value": 1.0, "ui_hint": "float_range:0_1" },
         }
     },
     "ConstantCurve": {
@@ -1340,6 +1442,29 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "settings": {
             "Solid": { "gd_type": TYPE_STRING, "default_value": "", "ui_hint": "block_id" },
             "Fluid": { "gd_type": TYPE_STRING, "default_value": "", "ui_hint": "block_id" },
+            "SolidBottomUp": { "gd_type": TYPE_BOOL, "default_value": false },
+        },
+        "connections": {
+            "SolidRotation": { "value_type": "OrthogonalRotation", "multi": false },
+        }
+    },
+    
+    "OrthogonalRotation": {
+        "display_name": "Orthogonal Rotation",
+        "output_value_type": "OrthogonalRotation",
+        "settings": {
+            "Yaw": { "gd_type": TYPE_STRING, "default_value": "None", "value_set": "orth_rotation", "ui_hint": "string_enum" },
+            "Pitch": { "gd_type": TYPE_STRING, "default_value": "None", "value_set": "orth_rotation", "ui_hint": "string_enum" },
+            "Roll": { "gd_type": TYPE_STRING, "default_value": "None", "value_set": "orth_rotation", "ui_hint": "string_enum" },
+        },
+    },
+    
+    "DecimalBounds3d": {
+        "display_name": "Decimal Bounds 3D",
+        "output_value_type": "DecimalBounds3d",
+        "connections": {
+            "PointA": { "value_type": "Point3D", "multi": false },
+            "PointB": { "value_type": "Point3D", "multi": false },
         }
     },
     
@@ -1491,6 +1616,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "connections": {
             "Positions": { "value_type": "Positions", "multi": false },
             "FieldFunction": { "value_type": "Density", "multi": false },
+            "Delimiters": { "value_type": "DelimiterFieldFunctionPP", "multi": true },
         }
     },
     "OccurrencePositions": {
@@ -1576,7 +1702,19 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         },
         "connections": {
             "Positions": { "value_type": "Point3D", "multi": false },
-            "RangeY": { "value_type": "Range", "multi": false },
+            "RangeY": { "value_type": "DecimalRange", "multi": false },
+        }
+    },
+    "BoundPositions": {
+        "id_prefix_override": "Bound.Positions",
+        "display_name": "Bound Positions",
+        "output_value_type": "Positions",
+        "settings": {
+            "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
+        "connections": {
+            "Bounds": { "value_type": "DecimalBounds3d", "multi": false },
         }
     },
     
@@ -1674,7 +1812,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         }
     },
     
-    # DelimiterFieldFunctionMP (single-node value type)
+    # Delimiter for Field Function Material Provider
     "DelimiterFieldFunctionMP": {
         "display_name": "Delimiter",
         "output_value_type": "DelimiterFieldFunctionMP",
@@ -1686,12 +1824,22 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Material": { "value_type": "MaterialProvider", "multi": false },
         }
     },
+    # Delimiter for Field Function Positions Provider
+    "DelimiterFieldFunctionPP": {
+        "id_prefix_override": "Delimiter",
+        "display_name": "Delimiter",
+        "output_value_type": "DelimiterFieldFunctionPP",
+        "settings": {
+            "Min": { "gd_type": TYPE_FLOAT, "default_value": -1.0 },
+            "Max": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+        },
+    },
     
     # Delimiter for Positions Cell Noise Density Return Type (single-node value type)
-    "DelimiterDensityPCNReturnType": {
+    "DelimiterPCN": {
 		"id_prefix_override": "Delimiter.DensityPCNReturnType",
         "display_name": "Delimiter",
-        "output_value_type": "DelimiterDensityPCNReturnType",
+        "output_value_type": "DelimiterPCN",
         "settings": {
             "From": { "gd_type": TYPE_FLOAT, "default_value": -1.0 },
             "To": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
@@ -1772,15 +1920,14 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
     },
     
     # Positions Cell Noise Distance Function nodes
-    "EuclideanPCNDistanceFunction": {
+    "PCNDistanceFunction": {
+        "nonspecial_type": true,
 		"id_prefix_override": "PCNDistanceFunction",
-        "display_name": "Euclidean",
+        "display_name": "Distance Function",
         "output_value_type": "PCNDistanceFunction",
-    },
-    "ManhattanPCNDistanceFunction": {
-		"id_prefix_override": "PCNDistanceFunction",
-        "display_name": "Manhattan",
-        "output_value_type": "PCNDistanceFunction",
+        "settings": {
+            "Type": { "gd_type": TYPE_STRING, "default_value": "Euclidean", "value_set": "distance_types", "ui_hint": "string_enum" },
+        }
     },
     
     # Environment/Tint Provider nodes
@@ -1806,7 +1953,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "display_name": "Constant Tint Provider",
         "output_value_type": "TintProvider",
         "settings": {
-            "Color": { "gd_type": TYPE_STRING, "default_value": "#FFFFFF" },
+            "Color": { "gd_type": TYPE_STRING, "default_value": "#00FF00" },
         }
     },
     "DensityDelimitedTintProvider": {
@@ -1828,7 +1975,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         },
         "connections": {
             "ChoiceDensity": { "value_type": "Density", "multi": false },
-            "Delimiters": { "value_type": "DelimiterDensityPCNReturnType", "multi": true },
+            "Delimiters": { "value_type": "DelimiterPCN", "multi": true },
         }
     },
     "CellValuePCNReturnType": {
@@ -1916,7 +2063,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "display_name": "Space And Depth Material Provider",
         "output_value_type": "MaterialProvider",
         "settings": {
-            "LayerContext": { "gd_type": TYPE_STRING, "default_value": "DEPTH_INTO_FLOOR" },
+            "LayerContext": { "gd_type": TYPE_STRING, "default_value": "DEPTH_INTO_FLOOR", "value_set": "sad_context", "ui_hint": "string_enum" },
             "MaxExpectedDepth": { "gd_type": TYPE_INT, "default_value": 3 },
         },
         "connections": {
@@ -1994,7 +2141,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "Directions": { "gd_type": TYPE_ARRAY, "default_value": [] },
+            "Directions": { "gd_type": TYPE_ARRAY, "array_gd_type": TYPE_STRING, "default_value": [], "value_set": "cardinal_dirs", "ui_hint": "enum_as_set" },
             "RequireAllDirections": { "gd_type": TYPE_BOOL, "default_value": false },
         },
         "connections": {
@@ -2008,11 +2155,11 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "SurfaceRadius": { "gd_type": TYPE_INT, "default_value": 1 },
-            "MediumRadius": { "gd_type": TYPE_INT, "default_value": 1 },
+            "SurfaceRadius": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "MediumRadius": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "SurfaceGap": { "gd_type": TYPE_INT, "default_value": 0 },
             "MediumGap": { "gd_type": TYPE_INT, "default_value": 0 },
-            "Facings": { "gd_type": TYPE_ARRAY, "default_value": [] },
+            "Facings": { "gd_type": TYPE_ARRAY, "array_gd_type": TYPE_STRING, "default_value": [], "value_set": "orth_dirs", "ui_hint": "enum_as_set" },
             "RequireAllFacings": { "gd_type": TYPE_BOOL, "default_value": false },
         },
         "connections": {
@@ -2056,7 +2203,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "MaxY": { "gd_type": TYPE_INT, "default_value": 320 },
             "MinY": { "gd_type": TYPE_INT, "default_value": 0 },
-            "Strategy": { "gd_type": TYPE_STRING, "default_value": "DART_THROW" },
+            "Strategy": { "gd_type": TYPE_STRING, "default_value": "DART_THROW", "value_set": "column_scanner_strat", "ui_hint": "string_enum" },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
             "RelativeToPosition": { "gd_type": TYPE_BOOL, "default_value": false },
             "BaseHeightName": { "gd_type": TYPE_STRING, "default_value": "Base" },
@@ -2070,7 +2217,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "ScanRange": { "gd_type": TYPE_INT, "default_value": 3 },
-            "ScanShape": { "gd_type": TYPE_STRING, "default_value": "CIRCLE" },
+            "ScanShape": { "gd_type": TYPE_STRING, "default_value": "CIRCLE", "value_set": "area_scan_shape", "ui_hint": "string_enum" },
             "ResultCap": { "gd_type": TYPE_INT, "default_value": 1 },
         },
         "connections": {
@@ -2110,7 +2257,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "LegacyPath": { "gd_type": TYPE_BOOL, "default_value": false },
             "LoadEntities": { "gd_type": TYPE_BOOL, "default_value": false },
-            "MoldingDirection": { "gd_type": TYPE_STRING, "default_value": "NONE" },
+            "MoldingDirection": { "gd_type": TYPE_STRING, "default_value": "NONE", "value_set": "molding_direction", "ui_hint": "string_enum" },
             "MoldingChildren": { "gd_type": TYPE_BOOL, "default_value": false },
         },
         "connections": {
@@ -2132,9 +2279,10 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
         },
         "connections": {
-            "DistanceCurve": { "value_type": "Curve", "multi": false },
+            "DistanceCurve": { "value_type": "Curve", "multi": false, "force_node_type": "ManualCurve" },
             "WeightedProps": { "value_type": "WeightedClusterProp", "multi": true },
             "Scanner": { "value_type": "Scanner", "multi": false },
+            "ColumnProp": { "value_type": "Prop", "multi": false, "force_node_type": "ColumnProp" },
         }
     },
     "UnionProp": {
@@ -2255,7 +2403,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "Directionality",
         "settings": {
             "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
-            "Rotation": { "gd_type": TYPE_INT, "default_value": 0 },
+            "Rotation": { "gd_type": TYPE_INT, "default_value": 0, "value_set": "cardinal_degrees", "ui_hint": "string_enum" },
         },
         "connections": {
             "Pattern": { "value_type": "Pattern", "multi": false },
@@ -2270,6 +2418,21 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         },
         "connections": {
             "Pattern": { "value_type": "Pattern", "multi": false },
+        }
+    },
+    "PatternDirectionality": {
+		"id_prefix_override": "Pattern.Directionality",
+        "display_name": "Pattern Directionality",
+        "output_value_type": "Directionality",
+        "settings": {
+            "InitialDirection": { "gd_type": TYPE_STRING, "default_value": "N", "value_set": "cardinal_dirs", "ui_hint": "string_enum" },
+            "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+        },
+        "connections": {
+            "NorthPattern": { "value_type": "Pattern", "multi": false },
+            "SouthPattern": { "value_type": "Pattern", "multi": false },
+            "EastPattern": { "value_type": "Pattern", "multi": false },
+            "WestPattern": { "value_type": "Pattern", "multi": false },
         }
     },
     "ImportedDirectionality": {
@@ -2372,8 +2535,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "display_name": "Equals Condition",
         "output_value_type": "Condition",
         "settings": {
-            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "" },
-            "Value": { "gd_type": TYPE_INT, "default_value": 0 },
+            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "SPACE_ABOVE_FLOOR", "value_set": "sad_condition_context", "ui_hint": "string_enum" },
+            "Value": { "gd_type": TYPE_INT, "default_value": 1 },
         }
     },
     "GreaterThanCondition": {
@@ -2381,8 +2544,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "display_name": "Greater Than Condition",
         "output_value_type": "Condition",
         "settings": {
-            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "" },
-            "Threshold": { "gd_type": TYPE_INT, "default_value": 0 },
+            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "SPACE_ABOVE_FLOOR", "value_set": "sad_condition_context", "ui_hint": "string_enum" },
+            "Threshold": { "gd_type": TYPE_INT, "default_value": 1 },
         }
     },
     "SmallerThanCondition": {
@@ -2390,8 +2553,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "display_name": "Smaller Than Condition",
         "output_value_type": "Condition",
         "settings": {
-            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "" },
-            "Threshold": { "gd_type": TYPE_INT, "default_value": 0 },
+            "ContextToCheck": { "gd_type": TYPE_STRING, "default_value": "SPACE_ABOVE_FLOOR", "value_set": "sad_condition_context", "ui_hint": "string_enum" },
+            "Threshold": { "gd_type": TYPE_INT, "default_value": 1 },
         }
     },
     
@@ -2405,6 +2568,8 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         },
         "connections": {
             "Material": { "value_type": "MaterialProvider", "multi": false },
+            # the item below is broken in the official editor, see if I can find out what it is from the server jar
+            #"Thicknesses": { "value_type": "WeightedLayerThickness", "multi": true },
         }
     },
     "ConstantThicknessLayer": {
@@ -2507,7 +2672,7 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "DelimiterEnvironment",
         "connections": {
             "Environment": { "value_type": "EnvironmentProvider", "multi": false },
-            "Range": { "value_type": "Range", "multi": false },
+            "Range": { "value_type": "DecimalRange", "multi": false },
         }
     },
     "DelimiterTint": {
@@ -2516,13 +2681,13 @@ func get_id_prefix_for_node_type(node_type: String) -> String:
         "output_value_type": "DelimiterTint",
         "connections": {
             "Tint": { "value_type": "TintProvider", "multi": false },
-            "Range": { "value_type": "Range", "multi": false },
+            "Range": { "value_type": "DecimalRange", "multi": false },
         }
     },
-    "Range": {
+    "DecimalRange": {
 		"id_prefix_override": "Decimal.Range",
         "display_name": "Decimal Range",
-        "output_value_type": "Range",
+        "output_value_type": "DecimalRange",
         "settings": {
             "MinInclusive": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
             "MaxExclusive": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },

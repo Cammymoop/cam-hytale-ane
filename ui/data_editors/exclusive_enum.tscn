@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://cfkn5qaxp73yy"]
+
+[ext_resource type="Script" uid="uid://b4cmx2d6cq6bp" path="res://ui/data_editors/exclusive_enum.gd" id="1_88k82"]
+
+[node name="ExclusiveEnum" type="OptionButton" unique_id=458067692]
+offset_right = 32.0
+offset_bottom = 20.0
+theme_override_constants/modulate_arrow = 1
+script = ExtResource("1_88k82")

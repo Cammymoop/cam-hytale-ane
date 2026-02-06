@@ -7,6 +7,7 @@ const TEST_FILES = [
 	"test_files/asset_node_test_data/all_positions_curves_vectors.json",
 	"test_files/asset_node_test_data/all_materials_and_props.json",
 	"test_files/asset_node_test_data/biome_and_misc.json",
+	"test_files/asset_node_test_data/new_stuff_added.json",
 ]
 
 var schema: AssetNodesSchema

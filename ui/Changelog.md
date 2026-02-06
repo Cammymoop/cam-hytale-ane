@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+### New Upstream Changes:
+- Materials now have directionality
+- Added YSampled Density (Defines sample spacing in Y and interpolates density values between samples)
+- Added Bound Positions Provider (limits positions within a bounding box I think)
+
+### Improvements:
+- Options with a limited set of values now use a dropdown selector (like Distance Function for Positions Cell Noise)
+- Options that consist of a set of limited values now use a set of checkboxes (like Directions for Wall Pattern)
+
+### Fixes:
+- Added missing Pattern Directionality
+- Added missing Delimiter for Field Function Positions Provider
+- Fix Positions Cell Noise distance function types being treated as 2 separate node types
+
 ## 0.1.8
 ### Improvements:
 - Add an "Open File" button to the new file popup that shows on opening the editor

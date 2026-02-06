@@ -1,0 +1,121 @@
+{
+	"$NodeId":	"Biome-5cedeca4-15bb-44c9-a7e0-a10729d5bef2",
+	"Terrain":	{
+		"$NodeId":	"Terrain-7169491b-48f4-4c5a-80e6-f88082bb1897",
+		"Type":	"DAOTerrain",
+		"Density":	{
+			"$NodeId":	"YSampled.Density-ed4a2e7a-7989-4866-955a-79be13ffa998",
+			"Type":	"YSampled",
+			"Skip":	false,
+			"SampleDistance":	4,
+			"SampleOffset":	0,
+			"Inputs":	[{
+					"$NodeId":	"ConstantDensityNode-7c72639f-05d9-4782-8ec6-4e613f36d264",
+					"Type":	"Constant",
+					"Skip":	false,
+					"Value":	0
+				}, {
+					"$NodeId":	"ConstantDensityNode-98ec1f7d-3c40-4dea-8a5b-c8f4c95e7a05",
+					"Type":	"Constant",
+					"Skip":	false,
+					"Value":	0
+				}]
+		}
+	},
+	"Props":	[{
+			"$NodeId":	"Runtime-df08ed84-2090-4a93-abea-fcfba7007489",
+			"Skip":	false,
+			"Runtime":	0,
+			"Positions":	{
+				"$NodeId":	"Bound.Positions-fc4d089e-095c-4dc0-af9f-ed1f19d3872b",
+				"Type":	"Bound",
+				"Skip":	false,
+				"Bounds":	{
+					"$NodeId":	"DecimalBounds3d-e42ce127-d9e8-4310-81c5-a149b8a70dbb",
+					"PointA":	{
+						"$NodeId":	"Point3D-c3b55e5c-40be-414c-975c-c66ce7907251",
+						"X":	0,
+						"Y":	0,
+						"Z":	0
+					},
+					"PointB":	{
+						"$NodeId":	"Point3D-fc219b65-e16f-4f4c-b040-f61945c425fc",
+						"X":	0,
+						"Y":	0,
+						"Z":	0
+					}
+				}
+			}
+		}],
+	"$NodeEditorMetadata":	{
+		"$Nodes":	{
+			"Biome-5cedeca4-15bb-44c9-a7e0-a10729d5bef2":	{
+				"$Position":	{
+					"$x":	-352,
+					"$y":	590
+				},
+				"$Title":	"[ROOT] Biome"
+			},
+			"YSampled.Density-ed4a2e7a-7989-4866-955a-79be13ffa998":	{
+				"$Position":	{
+					"$x":	1224,
+					"$y":	270
+				}
+			},
+			"ConstantDensityNode-7c72639f-05d9-4782-8ec6-4e613f36d264":	{
+				"$Position":	{
+					"$x":	2019,
+					"$y":	112
+				}
+			},
+			"ConstantDensityNode-98ec1f7d-3c40-4dea-8a5b-c8f4c95e7a05":	{
+				"$Position":	{
+					"$x":	1987,
+					"$y":	645
+				}
+			},
+			"Bound.Positions-fc4d089e-095c-4dc0-af9f-ed1f19d3872b":	{
+				"$Position":	{
+					"$x":	1222,
+					"$y":	996
+				}
+			},
+			"DecimalBounds3d-e42ce127-d9e8-4310-81c5-a149b8a70dbb":	{
+				"$Position":	{
+					"$x":	1983,
+					"$y":	1256
+				}
+			},
+			"Point3D-c3b55e5c-40be-414c-975c-c66ce7907251":	{
+				"$Position":	{
+					"$x":	2240,
+					"$y":	969
+				}
+			},
+			"Point3D-fc219b65-e16f-4f4c-b040-f61945c425fc":	{
+				"$Position":	{
+					"$x":	2317,
+					"$y":	1465
+				}
+			},
+			"Terrain-7169491b-48f4-4c5a-80e6-f88082bb1897":	{
+				"$Position":	{
+					"$x":	837,
+					"$y":	232
+				}
+			},
+			"Runtime-df08ed84-2090-4a93-abea-fcfba7007489":	{
+				"$Position":	{
+					"$x":	505,
+					"$y":	1040
+				}
+			}
+		},
+		"$FloatingNodes":	[],
+		"$Links":	{
+		},
+		"$Groups":	[],
+		"$Comments":	[],
+		"$WorkspaceID":	"HytaleGenerator - Biome"
+	}
+}
