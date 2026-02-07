@@ -2,6 +2,7 @@ extends GraphEdit
 class_name AssetNodeGraphEdit
 
 signal finished_saving
+signal zoom_changed(new_zoom: float)
 
 @export var save_formatted_json: = true
 @export_file_path("*.json") var test_json_file: String = ""
@@ -1691,6 +1692,7 @@ func on_zoom_changed() -> void:
     else:
         grid_toggle_btn.disabled = false
         show_grid = grid_logical_enabled
+    zoom_changed.emit(zoom)
 
 func on_grid_toggled(grid_is_enabled: bool, grid_toggle_btn: Button) -> void:
     if grid_toggle_btn.disabled:

@@ -7,6 +7,8 @@ var settings_file_path: String = "user://CHANE_settings.json"
 
 var detected_display_scale: float = 1.0
 
+const GRAPH_NODE_MARGIN_BOTTOM_EXTRA: int = 6
+
 func _ready() -> void:
     if can_detect_display_scale():
         detected_display_scale = DisplayServer.screen_get_scale(DisplayServer.SCREEN_OF_MAIN_WINDOW)

@@ -1,0 +1,5 @@
+[gd_resource type="DPITexture" format=3 uid="uid://d2kpwkg7g83at"]
+
+[resource]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><circle cx=\"4\" cy=\"4\" r=\"4\" fill=\"#fff\"/><circle cx=\"4\" cy=\"4\" r=\"3\" fill=\"#bbb\"/><circle cx=\"4\" cy=\"4\" r=\"1\" fill=\"#333\"/></svg>"
+base_scale = 2.0

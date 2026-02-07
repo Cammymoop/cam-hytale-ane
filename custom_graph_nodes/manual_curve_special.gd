@@ -9,24 +9,43 @@ var asset_node: HyAssetNode
 var my_points: Array[Vector2] = []
 
 var points_table: GridContainer
-var graph_container: Control
+var graph_container: MarginContainer
 @onready var mode_buttons: HToggleButtons = $ModeButtons
 @onready var new_point_button: Button = $NewPointButton
 
+@export var curve_plot: CurvePlot
+
 const POINTS_CONNECTION_NAME: String = "Points"
 
+@export var cur_mode: String = "table"
+var last_size: Dictionary = {
+    "table": Vector2.ZERO,
+    "graph": Vector2.ZERO,
+}
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_SCENE_INSTANTIATED:
+        points_table = $PointsTable
+        graph_container = $GraphContainer
+
 func _ready() -> void:
+    graph_container.add_theme_constant_override("margin_bottom", ANESettings.GRAPH_NODE_MARGIN_BOTTOM_EXTRA)
     setup_ports()
-    setup_graph_container()
+    if not graph_edit.zoom_changed.is_connected(on_zoom_changed):
+        graph_edit.zoom_changed.connect(on_zoom_changed)
     mode_buttons.allow_all_off = false
     mode_buttons.option_changed.connect(on_mode_changed)
     new_point_button.pressed.connect(add_new_point)
+
+    show_nodes_for_mode(cur_mode)
+    #last_size[cur_mode] = size
+    if not resized.is_connected(on_resized):
+        resized.connect(on_resized)
 
 func setup_ports() -> void:
     # note, don't need to add a child control to enable the first port because there's already multiple children from the scene
     set_slot_enabled_left(0, true)
     set_slot_type_left(0, graph_edit.type_id_lookup["Curve"])
-
 
 func get_current_connection_list() -> Array[String]:
     return []
@@ -39,29 +58,32 @@ func get_own_asset_nodes() -> Array[HyAssetNode]:
     ans.append_array(asset_node.get_all_connected_nodes(POINTS_CONNECTION_NAME))
     return ans
 
-func setup_points_table() -> void:
-    if not points_table:
-        points_table = $PointsTable
 
-func setup_graph_container() -> void:
-    if not graph_container:
-        graph_container = $GraphContainer
+func on_resized() -> void:
+    last_size[cur_mode] = size
+
+func on_zoom_changed(new_zoom: float) -> void:
+    curve_plot.cur_zoom = new_zoom
+    if graph_container.visible:
+        curve_plot.queue_redraw()
 
 func load_points_from_an_connection() -> void:
+    var cur_minimum_height: float = get_combined_minimum_size().y
+    var should_shrink: = false
+    if cur_mode == "table":
+        should_shrink = cur_minimum_height >= minf(size.y, last_size[cur_mode].y)
     my_points.clear()
     for point_asset_node in asset_node.get_all_connected_nodes(POINTS_CONNECTION_NAME):
         my_points.append(Vector2(point_asset_node.settings["In"], point_asset_node.settings["Out"]))
-    refresh_table_rows()
+    refresh_table_rows(should_shrink)
 
 func remove_point_at(row_idx: int) -> void:
-    prints("removing point at %s" % row_idx)
     var point_asset_node: HyAssetNode = asset_node.get_connected_node(POINTS_CONNECTION_NAME, row_idx)
     asset_node.remove_node_from_connection_at(POINTS_CONNECTION_NAME, row_idx)
     graph_edit.remove_asset_node(point_asset_node)
     load_points_from_an_connection()
 
-func refresh_table_rows() -> void:
-    setup_points_table()
+func refresh_table_rows(should_shrink: bool) -> void:
     for c in points_table.get_children():
         points_table.remove_child(c)
         c.queue_free()
@@ -79,7 +101,11 @@ func refresh_table_rows() -> void:
         points_table.add_child(x_button)
         x_button.pressed.connect(table_x_button_pressed.bind(row_idx))
     
-    refresh_min_size()
+    if should_shrink:
+        size.y = 0
+        if size.y < last_size[cur_mode].y:
+            last_size[cur_mode] = size
+
 
 func table_value_changed(new_value: float, row_idx: int, is_in: bool) -> void:
     my_points[row_idx][0 if is_in else 1] = new_value
@@ -111,16 +137,26 @@ func get_table_x_button() -> Button:
     return new_button
 
 func on_mode_changed(new_mode_name: String) -> void:
-    if new_mode_name.to_lower() == "table":
+    new_mode_name = new_mode_name.to_lower()
+    if new_mode_name == cur_mode:
+        return
+    
+    last_size[cur_mode] = size
+    cur_mode = new_mode_name
+
+    show_nodes_for_mode(new_mode_name)
+    size = last_size[new_mode_name]
+
+func show_nodes_for_mode(the_mode: String) -> void:
+    if the_mode == "table":
         points_table.show()
         new_point_button.show()
         graph_container.hide()
-        refresh_min_size()
     else:
         points_table.hide()
         new_point_button.hide()
         graph_container.show()
-        refresh_min_size()
+        curve_plot.update_curve(my_points)
 
 func add_new_point() -> void:
     var new_curve_point_an: HyAssetNode = graph_edit.get_new_asset_node("CurvePoint")
@@ -129,6 +165,3 @@ func add_new_point() -> void:
     new_curve_point_an.settings["Out"] = last_point_vec.y
     asset_node.append_node_to_connection("Points", new_curve_point_an)
     load_points_from_an_connection()
-
-func refresh_min_size() -> void:
-    size = Vector2(0, 0)

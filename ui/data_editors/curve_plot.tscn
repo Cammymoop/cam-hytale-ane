@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c6fmf3d3ag8if"]
+
+[ext_resource type="Script" uid="uid://dhtlqcxj0uamc" path="res://custom_graph_nodes/curve_plot.gd" id="1_1hytg"]
+
+[node name="CurvePlot" type="Control" unique_id=1134121482]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_1hytg")

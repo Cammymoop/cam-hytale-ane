@@ -3,8 +3,17 @@
 [ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://custom_graph_nodes/manual_curve_special.gd" id="1_dv77j"]
 [ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/grey_theme.tres" id="1_o8u1p"]
 [ext_resource type="Script" uid="uid://gxuxbfatctg6" path="res://ui/h_toggle_buttons.gd" id="3_o8u1p"]
+[ext_resource type="PackedScene" uid="uid://c6fmf3d3ag8if" path="res://ui/data_editors/curve_plot.tscn" id="4_veyee"]
+[ext_resource type="Texture2D" uid="uid://d2kpwkg7g83at" path="res://ui/assets/draggable_point_border.tres" id="5_p1gf7"]
 
-[node name="ManualCurveSpecial" type="GraphNode" unique_id=13672599]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_veyee"]
+bg_color = Color(0.08078333, 0.08078336, 0.08078327, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ManualCurveSpecial" type="GraphNode" unique_id=13672599 node_paths=PackedStringArray("curve_plot")]
 offset_left = 70.0
 offset_top = 1.0
 offset_right = 296.0
@@ -50,9 +59,12 @@ slot/3/right_color = Color(1, 1, 1, 1)
 slot/3/right_icon = null
 slot/3/draw_stylebox = true
 script = ExtResource("1_dv77j")
+curve_plot = NodePath("GraphContainer/PanelContainer/CurvePlot")
 
 [node name="ModeButtons" type="HBoxContainer" parent="." unique_id=1652193247]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_constants/separation = 0
 alignment = 1
 script = ExtResource("3_o8u1p")
@@ -101,14 +113,24 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 12
 text = "New"
 
-[node name="GraphContainer" type="PanelContainer" parent="." unique_id=1542995569]
-visible = false
-custom_minimum_size = Vector2(0, 80)
+[node name="GraphContainer" type="MarginContainer" parent="." unique_id=395424957]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 6
 
-[node name="CenterContainer" type="CenterContainer" parent="GraphContainer" unique_id=1878163536]
+[node name="PanelContainer" type="PanelContainer" parent="GraphContainer" unique_id=1542995569]
+clip_children = 2
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_veyee")
 
-[node name="Label" type="Label" parent="GraphContainer/CenterContainer" unique_id=1423019705]
+[node name="CurvePlot" parent="GraphContainer/PanelContainer" unique_id=1134121482 instance=ExtResource("4_veyee")]
 layout_mode = 2
-text = "COMING SOON"
+curve_point_icon = ExtResource("5_p1gf7")
+line_color = Color(0.91220015, 0.4478596, 0.17746857, 1)
+y_axis_color = Color(0.60118276, 0.755453, 0.3583592, 1)
+x_axis_color = Color(0.7327995, 0.31885552, 0.42130005, 1)
+point_color = Color(0.94219613, 0.31506547, 0, 1)
+
+[editable path="GraphContainer/PanelContainer/CurvePlot"]
