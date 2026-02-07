@@ -3,6 +3,7 @@
 ## 0.2.1
 ### Improvements:
 - Can now save custom theme colors
+- Number fields can now have an expression like "123/5" typed into them which will set the resulting value
 
 ## 0.2.0
 For use with Hytale 2026.02.05 and later
