@@ -1,8 +1,13 @@
 # Changelog
 
 ## 0.2.2
+### Improvements:
+- Spin-box type buttons for number range inputs
+- Keyboard Shortcut for new file
+
 ### Fixes:
 - Fix Manual Curve not being able to connect back to a Curve connection port
+- Fix regression with number range inputs like Octaves in Simplex noise nodes
 
 ## 0.2.1
 ### Improvements:
