@@ -2,6 +2,8 @@
 
 ## 0.3.0
 ### Visual curve editor!
+- Can see a visualization of the manual curve and edit it by dragging the points around, even dragging them out past the edge of the current graph
+- Add new points by ctr-clicking on the curve graph, remove points by right-clicking them
 
 ### Fixes:
 - Fix Space menu not working until after left clicking the editor after closing a popup menu
