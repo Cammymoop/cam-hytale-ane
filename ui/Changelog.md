@@ -4,6 +4,8 @@
 ### New Features:
 - The add new node menu can now be filtered by typing the part of a name of the node
 - Can now insert a graph node into connections by dropping it on top of a compatible connection
+  - Will not try to patch a node into a connection if it already has it's output connected somewhere
+  - May change this to require holding a key when you drop it (configurable) in the future but for now it's mandatory
 
 ### Improvements:
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
