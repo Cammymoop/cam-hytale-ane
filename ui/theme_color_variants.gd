@@ -23,7 +23,6 @@ func _ready() -> void:
     _make_all_theme_color_variants()
 
 func recreate_variants() -> void:
-    print("recreating theme variants")
     themes_created = false
     _make_all_theme_color_variants()
 

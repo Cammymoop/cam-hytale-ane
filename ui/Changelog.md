@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+### New Feature:
+- The add new node menu can now be filtered by typing the part of a name of the node
+
+### Improvements:
+- "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
+
 ## 0.3.0
 ### Visual curve editor!
 - Can see a visualization of the manual curve and edit it by dragging the points around, even dragging them out past the edge of the current graph

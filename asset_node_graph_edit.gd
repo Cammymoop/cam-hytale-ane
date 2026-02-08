@@ -211,7 +211,6 @@ func on_popup_menu_opened() -> void:
     release_focus()
 
 func on_popup_menu_all_closed() -> void:
-    prints("popup menu all closed, grabbing focus", has_focus())
     grab_focus()
 
 func on_new_file_type_chosen(workspace_id: String) -> void:
@@ -425,7 +424,6 @@ func _add_connection(from_gn_name: StringName, from_port: int, to_gn_name: Strin
     var to_an: HyAssetNode = an_lookup.get(to_gn.get_meta("hy_asset_node_id", ""))
     
     
-    print("Adding connection from %s to %s" % [from_gn_name, to_gn_name])
     var existing_output_conn_infos: = raw_out_connections(to_gn)
     for existing_output in existing_output_conn_infos:
         remove_connection(existing_output, false)
@@ -1751,7 +1749,16 @@ func on_begin_node_move() -> void:
         moved_nodes_positions[gn] = gn.position_offset
 
 func on_end_node_move() -> void:
-    create_move_nodes_undo_step(get_selected_gns())
+    var selected_nodes: Array[GraphNode] = get_selected_gns()
+    if selected_nodes.size() == 1 and selected_nodes[0] is CustomGraphNode:
+        var gn_rect: = selected_nodes[0].get_global_rect()
+        var connections_overlapped: = get_connections_intersecting_with_rect(gn_rect)
+        if try_inserting_graph_node_into_connections(selected_nodes[0], connections_overlapped):
+            return
+    create_move_nodes_undo_step(selected_nodes)
+
+func try_inserting_graph_node_into_connections(gn: CustomGraphNode, connections_overlapped: Array[Dictionary]) -> bool:
+    return false
 
 func _set_gns_offsets(new_positions: Dictionary[GraphNode, Vector2]) -> void:
     for gn in new_positions.keys():
@@ -1819,8 +1826,11 @@ func create_undo_connection_change_step() -> void:
     if removed_gns.size() > 0:
         var the_ans: Dictionary[GraphNode, HyAssetNode] = {}
         for the_gn in removed_gns:
+            print("collecting asset nodes for gn being removed: %s" % the_gn.name)
+            print("gn asset node id: %s" % the_gn.get_meta("hy_asset_node_id", ""))
             if the_gn.get_meta("hy_asset_node_id", ""):
                 var the_an: HyAssetNode = an_lookup.get(the_gn.get_meta("hy_asset_node_id", ""))
+                print("asset node: %s" % the_an)
                 the_ans[the_gn] = the_an
         undo_manager.add_undo_method(undo_remove_gns.bind(removed_gns, the_ans))
 
@@ -2153,17 +2163,19 @@ func on_new_node_type_picked(node_type: String) -> void:
         snap_gn(new_gn)
         create_add_new_gn_undo_step(new_gn)
 
-
-func can_dissolve_gn(graph_node: GraphNode) -> bool:
-    if not graph_node.get_meta("hy_asset_node_id", ""):
-        return false
     
-    var all_gn_connections: Array[Dictionary] = raw_connections(graph_node)
-    var has_output_connection: bool = false
-    var output_gn: GraphNode = null
-    var output_port_idx: int = -1
+func get_dissolve_info(graph_node: GraphNode) -> Dictionary:
     var in_ports_connected: Array[int] = []
     var in_port_connection_count: Dictionary[int, int] = {}
+    var dissolve_info: Dictionary = {
+        "has_output_connection": false,
+        "output_to_gn_name": "",
+        "output_to_port_idx": -1,
+        "in_ports_connected": in_ports_connected,
+        "in_port_connection_count": in_port_connection_count,
+    }
+
+    var all_gn_connections: Array[Dictionary] = raw_connections(graph_node)
     for conn_info in all_gn_connections:
         if conn_info["from_node"] == graph_node.name:
             if not in_ports_connected.has(conn_info["from_port"]):
@@ -2172,43 +2184,94 @@ func can_dissolve_gn(graph_node: GraphNode) -> bool:
             else:
                 in_port_connection_count[conn_info["from_port"]] += 1
         elif conn_info["to_node"] == graph_node.name:
-            has_output_connection = true
-            output_gn = get_node(NodePath(conn_info["to_node"]))
-            output_port_idx = conn_info["to_port"]
+            dissolve_info["has_output_connection"] = true
+            dissolve_info["output_to_gn_name"] = conn_info["from_node"]
+            dissolve_info["output_to_port_idx"] = conn_info["from_port"]
+    return dissolve_info
+
+func can_dissolve_gn(graph_node: CustomGraphNode) -> bool:
+    if not graph_node.get_meta("hy_asset_node_id", ""):
+        return false
     
-    if not has_output_connection or in_ports_connected.size() == 0:
+    var dissolve_info: = get_dissolve_info(graph_node)
+    if not dissolve_info["has_output_connection"] or dissolve_info["in_ports_connected"].size() == 0:
+        return false
+    
+    var output_value_type: String = graph_node.node_type_schema.get("output_value_type", "")
+    if not output_value_type:
         return true
-    elif in_ports_connected.size() > 1:
-        return false
+    
+    var connected_connections_types: Array[String] = []
+    for conn_idx in dissolve_info["in_ports_connected"]:
+        var conn_type: String = graph_node.node_type_schema["connections"].values()[conn_idx].get("value_type", "")
+        connected_connections_types.append(conn_type)
+    
+    return output_value_type in connected_connections_types
 
-    var only_in_port_idx: = in_ports_connected[0]
-    var needs_multi_port: bool = in_port_connection_count[only_in_port_idx] > 1
+func dissolve_gn_with_undo(graph_node: CustomGraphNode) -> void:
+    var dissolve_info: = get_dissolve_info(graph_node)
+    if not graph_node.get_meta("hy_asset_node_id", "") or not dissolve_info["has_output_connection"]:
+        print_debug("Dissolve: node %s is not an asset node or has no output connection" % graph_node.name)
+        _delete_request([graph_node.name])
+        return
+    
+    var cur_schema: = graph_node.node_type_schema
+    var val_type: String = cur_schema.get("output_value_type", "")
+    var output_to_gn: = get_node(NodePath(dissolve_info["output_to_gn_name"])) as CustomGraphNode
+    if not output_to_gn:
+        push_error("Dissolve: output to node %s not found or is not CustomGraphNode" % dissolve_info["output_to_gn_name"])
+        _delete_request([graph_node.name])
+        return
+    
+    prints("dissovling", graph_node.name, "with dissolve info", dissolve_info)
+    
+    assert(output_to_gn.node_type_schema, "Dissolve: output to node %s has no schema set" % output_to_gn.name)
+    
+    var out_to_connection_schema: Dictionary = output_to_gn.node_type_schema.get("connections", {})
+    var out_conn_idx: int = dissolve_info["output_to_port_idx"]
+    var is_multi: bool = out_to_connection_schema.values()[out_conn_idx].get("multi", false)
+    
+    var cur_asset_node: HyAssetNode = an_lookup.get(graph_node.get_meta("hy_asset_node_id", ""), null)
+    assert(cur_asset_node, "Dissolve: current asset node not found")
+    # Sort asset node connections so the first one found if the out target isn't a multi connect is deterministic
+    cur_asset_node.sort_connections_by_gn_pos(gn_lookup)
+    
+    multi_connection_change = true
+    for in_port_idx in dissolve_info["in_ports_connected"]:
+        prints("dissolving node input port %d (%s)" % [in_port_idx, cur_asset_node.connection_list[in_port_idx]])
+        var conn_schema: Dictionary = cur_schema.get("connections", {}).values()[in_port_idx]
+        var in_val_type: String = conn_schema["value_type"]
+        if val_type and in_val_type != val_type:
+            prints("connection (%s) isn't the right value type, skipping" % in_val_type)
+            continue
+        
+        var conn_name: = cur_asset_node.connection_list[in_port_idx]
+        var connected_graph_nodes: Array[GraphNode] = get_graph_connected_graph_nodes(graph_node, conn_name)
+        prints("connected graph nodes on this port: %s" % [connected_graph_nodes])
+        var connected_one: bool = false
+        for in_gn in connected_graph_nodes:
+            connected_one = true
+            prints("removing connection from %s to %s" % [graph_node.name, in_gn.name])
+            _remove_connection(graph_node.name, in_port_idx, in_gn.name, 0)
+            prints("adding connection from %s to %s" % [graph_node.name, in_gn.name])
+            _add_connection(output_to_gn.name, out_conn_idx, in_gn.name, 0)
+            if not is_multi:
+                break
+        if not is_multi and connected_one:
+            prints("stopping after connecting one")
+            break
+    
+    var leftover_connections: = raw_connections(graph_node)
+    prints("leftover connections: %s" % [leftover_connections])
+    remove_multiple_connections(leftover_connections)
+    
+    multi_connection_change = false
 
-    var asset_node: HyAssetNode = an_lookup.get(graph_node.get_meta("hy_asset_node_id"), null)
-    if not asset_node or not asset_node.an_type or not SchemaManager.schema.node_schema.has(asset_node.an_type):
-        print_debug("Can dissolve GN: Asset node not found or AN type not found")
-        return false
-    
-    var type_schema: Dictionary = SchemaManager.schema.node_schema[asset_node.an_type]
-    var output_value_type: String = type_schema.get("output_value_type", "")
+    cur_connection_removed_gns.append(graph_node)
+    create_undo_connection_change_step()
+    remove_graph_node_without_undo(graph_node)
 
-    var connection_name: String = asset_node.connection_list[only_in_port_idx]
-    var input_value_type: String = type_schema.get("connections", {})[connection_name].get("value_type", "")
-    
-    if output_value_type != input_value_type:
-        return false
-    
-    if needs_multi_port:
-        var out_an: HyAssetNode = an_lookup.get(output_gn.get_meta("hy_asset_node_id", ""))
-        if not out_an or not out_an.an_type or not SchemaManager.schema.node_schema.has(out_an.an_type):
-            return false
-        var out_type_schema: Dictionary = SchemaManager.schema.node_schema[out_an.an_type]
-        var out_connection_name: String = out_an.connection_list[output_port_idx]
-        var out_is_multi: bool = out_type_schema.get("connections", {})[out_connection_name].get("multi", false)
-        if not out_is_multi:
-            return false
-    
-    return true
+
 
 func _on_graph_node_right_clicked(graph_node: CustomGraphNode) -> void:
     if connection_cut_active:
@@ -2268,8 +2331,7 @@ func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_
         ContextMenuItems.DELETE_NODES:
             _delete_request_refs(get_selected_gns())
         ContextMenuItems.DISSOLVE_NODES:
-            if can_dissolve_gn(on_gn):
-                pass#dissolve_node(on_gn)
+            dissolve_gn_with_undo(on_gn as CustomGraphNode)
         ContextMenuItems.DUPLICATE_NODES:
             duplicate_selected_gns()
 
