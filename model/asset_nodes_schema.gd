@@ -2022,7 +2022,7 @@ func get_value_set_values(value_set: String) -> Array:
     # Terrain nodes
     "DAOTerrain": {
 		"id_prefix_override": "Terrain",
-        "display_name": "DAO Terrain",
+        "display_name": "Terrain",
         "output_value_type": "Terrain",
         "connections": {
             "Density": { "value_type": "Density", "multi": false },

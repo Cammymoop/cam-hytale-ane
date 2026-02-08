@@ -1750,15 +1750,57 @@ func on_begin_node_move() -> void:
 
 func on_end_node_move() -> void:
     var selected_nodes: Array[GraphNode] = get_selected_gns()
+    # For now I'm keeping the undo step of moving and inserting into the connection separate
+    create_move_nodes_undo_step(selected_nodes)
     if selected_nodes.size() == 1 and selected_nodes[0] is CustomGraphNode:
-        var gn_rect: = selected_nodes[0].get_global_rect()
+        var gn_rect: = selected_nodes[0].get_global_rect().grow(-8)
         var connections_overlapped: = get_connections_intersecting_with_rect(gn_rect)
         if try_inserting_graph_node_into_connections(selected_nodes[0], connections_overlapped):
             return
-    create_move_nodes_undo_step(selected_nodes)
 
 func try_inserting_graph_node_into_connections(gn: CustomGraphNode, connections_overlapped: Array[Dictionary]) -> bool:
+    if gn.node_type_schema.get("no_output", false):
+        return false
+    
+    # Dont try to patch in if you already have an output connection
+    if raw_out_connections(gn).size() > 0:
+        return false
+
+    var gn_output_type: String = gn.node_type_schema.get("output_value_type", "")
+    var first_valid_input_port: int = -1
+
+    var schema_connections: Dictionary = gn.node_type_schema.get("connections", {})
+
+    for conn_idx in schema_connections.size():
+        if schema_connections.values()[conn_idx]["value_type"] == gn_output_type:
+            first_valid_input_port = conn_idx
+            break
+    if first_valid_input_port == -1:
+        return false
+    
+    for conn_info in connections_overlapped:
+        # ignore my own connections
+        if conn_info["to_node"] == gn.name or conn_info["from_node"] == gn.name:
+            continue
+        var conn_value_type: String = get_conn_info_value_type(conn_info)
+        if conn_value_type != gn_output_type:
+            continue
+        
+        # Now actually do the connection change
+        multi_connection_change = true
+        remove_connection(conn_info)
+        add_connection({"to_node": gn.name, "to_port": 0}.merged(conn_info))
+        add_connection({"from_node": gn.name, "from_port": first_valid_input_port}.merged(conn_info))
+        multi_connection_change = false
+        create_undo_connection_change_step()
+        return true
     return false
+    
+func get_conn_info_value_type(conn_info: Dictionary) -> String:
+    var to_gn: = get_node(NodePath(conn_info["to_node"])) as CustomGraphNode
+    if not to_gn:
+        push_error("get_conn_info_value_type: to node %s not found or is not CustomGraphNode" % conn_info["to_node"])
+    return to_gn.node_type_schema["output_value_type"]
 
 func _set_gns_offsets(new_positions: Dictionary[GraphNode, Vector2]) -> void:
     for gn in new_positions.keys():

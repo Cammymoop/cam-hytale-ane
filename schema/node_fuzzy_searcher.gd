@@ -4,6 +4,8 @@ const MAX_FUZZY_LENGTH: int = 80
 
 var node_type_names: Array[StringName] = []
 
+var category_num: int = 0
+
 const MAX_NAME_LENGTH: int = 99
 var node_type_display_name_lengths: Dictionary[StringName, int] = {}
 var node_type_category_index: Dictionary[StringName, int] = {}
@@ -22,6 +24,7 @@ func _ready() -> void:
 
 func build_index() -> void:
     var schema: AssetNodesSchema = SchemaManager.schema
+    category_num = schema.value_types.size()
     node_type_names.clear()
     display_names.clear()
     display_name_index.clear()
@@ -33,6 +36,8 @@ func build_index() -> void:
         if not schema.node_schema[type_name].get("no_output", false):
             var output_type: String = schema.node_schema[type_name]["output_value_type"]
             node_type_category_index[type_name] = schema.value_types.find(output_type)
+        else:
+            node_type_category_index[type_name] = 0
         if schema.node_schema[type_name].has("display_name"):
             var display_name: String = schema.node_schema[type_name]["display_name"].to_lower()
             var idx: int = display_names.find(display_name)
@@ -81,11 +86,14 @@ func search(query: String) -> void:
         match_score *= 10
         # 2: Prefer non-fuzzy matches
         match_score += int(not is_fuzzy)
+        match_score *= 100
+        # 3: Prefer nodes in higher categories in terms of the default listing order
+        match_score += category_num - node_type_category_index[type_name]
         match_score *= 10
-        # 3: Display name matches rank highest, followed by internal alt keyword, then internal type name
+        # 4: Display name matches rank highest, followed by internal alt keyword, then internal type name
         match_score += level
         match_score *= 100
-        # 4: Break ties by shorter display names
+        # 5: Break ties by shorter display names
         match_score += MAX_NAME_LENGTH - node_type_display_name_lengths[type_name]
         result_scores[type_name] = maxi(result_scores.get(type_name, 0.0), match_score)
 
