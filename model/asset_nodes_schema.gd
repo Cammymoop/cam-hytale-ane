@@ -243,6 +243,8 @@ func get_value_set_values(value_set: String) -> Array:
     "Density|Terrain": "TerrainDensity",
     "Density|Exported": "ExportedDensity",
     "Density|YSampled": "YSampledDensity",
+    # Deprecated Density nodes
+    "Density|AmplitudeConstant": "AmplitudeConstantDensity",
     
     # Curve nodes
     "Curve|Manual": "ManualCurve",
@@ -1235,6 +1237,18 @@ func get_value_set_values(value_set: String) -> Array:
             "Inputs": { "value_type": "Density", "multi": true },
         }
     },
+    "AmplitudeConstantDensity": {
+        "id_prefix_override": "AmplitudeConstantDensityNode",
+        "display_name": "Amplitude Constant Density (Deprecated)",
+        "output_value_type": "Density",
+        "settings": {
+            "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "Value": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "float_range:-1_1", "ui_soft_range": true },
+        },
+        "connections": {
+            "Inputs": { "value_type": "Density", "multi": true },
+        }
+    },
     
     # CurvePoint (single-node value type)
     "CurvePoint": {
@@ -1661,7 +1675,7 @@ func get_value_set_values(value_set: String) -> Array:
             "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
-            "Positions": { "value_type": "Point3D", "multi": true },
+            "Positions": { "value_type": "Point3DInt", "multi": true },
         }
     },
     "SpherePositions": {

@@ -323,6 +323,7 @@ func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     has_saved_to_cur_file = false
     clear_graph()
     hy_workspace_id = workspace_id
+    new_file_metadata_setup()
     var root_node_type: = SchemaManager.schema.resolve_root_asset_node_type(workspace_id, {}) as String
     var new_root_node: HyAssetNode = get_new_asset_node(root_node_type)
     set_root_node(new_root_node)
@@ -331,6 +332,17 @@ func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     gn_lookup[new_root_node.an_node_id] = new_gn
     unedited = true
     loaded = true
+
+func new_file_metadata_setup() -> void:
+    asset_node_meta.clear()
+    all_meta = {
+        "$Nodes": {},
+        "$FloatingNodes": [],
+        "$Groups": [],
+        "$Comments": [],
+        "$Links": {},
+        "$WorkspaceID": hy_workspace_id,
+    }
 
 func set_root_node(new_root_node: HyAssetNode) -> void:
     root_node = new_root_node
@@ -791,6 +803,7 @@ func paste_from_external() -> void:
     cur_added_connections = get_internal_connections_for_gns(added_gns)
     cur_connection_added_gns.assign(added_gns)
     create_undo_connection_change_step()
+    discard_copied_nodes()
 
 
 func _add_pasted_nodes(gns: Array[GraphNode], asset_node_set: Array[HyAssetNode], make_duplicates: bool) -> Array[GraphNode]:
@@ -857,6 +870,7 @@ func clear_graph() -> void:
     gn_lookup.clear()
     an_lookup.clear()
     asset_node_meta.clear()
+    all_meta.clear()
     for child in get_children():
         if child is GraphNode:
             remove_child(child)

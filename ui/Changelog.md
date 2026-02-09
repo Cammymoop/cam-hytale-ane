@@ -10,6 +10,9 @@
 ### Improvements:
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
 
+### Fixes:
+- Fix nodes pasted from the system clipboard not being able to save their position
+
 ## 0.3.0
 ### Visual curve editor!
 - Can see a visualization of the manual curve and edit it by dragging the points around, even dragging them out past the edge of the current graph

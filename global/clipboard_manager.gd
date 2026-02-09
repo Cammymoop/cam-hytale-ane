@@ -43,6 +43,7 @@ func load_copied_nodes_from_clipboard(graph_edit: AssetNodeGraphEdit) -> bool:
 
     var node_metadata: Dictionary = parsed_data["included_metadata"]["node_metadata"]
     for an in all_deserialized_ans:
+        graph_edit._register_asset_node(an)
         graph_edit.asset_node_meta[an.an_node_id] = node_metadata.get(an.an_node_id, {})
 
     graph_edit.in_graph_copy_id = parsed_data["copy_id"]
