@@ -672,6 +672,11 @@ func deselect_all() -> void:
         if c is GraphNode:
             c.selected = false
 
+func select_gns(gns: Array[CustomGraphNode]) -> void:
+    deselect_all()
+    for gn in gns:
+        gn.selected = true
+
 func _duplicate_request() -> void:
     duplicate_selected_gns()
 
@@ -711,6 +716,10 @@ func _cut_request() -> void:
 
 func _copy_request() -> void:
     var selected_gns: Array[GraphNode] = get_selected_gns()
+    var selected_gn_names: Array[String] = []
+    for gn in selected_gns:
+        selected_gn_names.append(gn.name)
+    prints("selected gns: %s" % [selected_gn_names])
     _copy_or_cut_gns(selected_gns)
     clipboard_was_from_cut = false
 
@@ -794,16 +803,19 @@ func _paste_request() -> void:
 func paste_from_external() -> void:
     var old_json_scale: = json_positions_scale
     json_positions_scale = Vector2.ONE
-    var screen_center_pos: Vector2 = scroll_offset + (get_viewport_rect().size / (2 * zoom))
+    var screen_center_pos: Vector2 = global_pos_to_position_offset(get_viewport_rect().size / 2)
     var an_roots: Array[HyAssetNode] = get_an_roots_within_set(copied_external_ans)
     floating_tree_roots.append_array(an_roots)
     var added_gns: = make_and_position_graph_nodes_for_trees(an_roots, false, screen_center_pos)
     json_positions_scale = old_json_scale
+
+    select_gns(added_gns)
     
     cur_added_connections = get_internal_connections_for_gns(added_gns)
     cur_connection_added_gns.assign(added_gns)
     create_undo_connection_change_step()
     discard_copied_nodes()
+    
 
 
 func _add_pasted_nodes(gns: Array[GraphNode], asset_node_set: Array[HyAssetNode], make_duplicates: bool) -> Array[GraphNode]:
@@ -830,16 +842,13 @@ func _add_pasted_nodes(gns: Array[GraphNode], asset_node_set: Array[HyAssetNode]
 func duplicate_graph_node(gn: CustomGraphNode, allowed_an_list: Array[HyAssetNode] = []) -> CustomGraphNode:
     var duplicate_gn: CustomGraphNode
     if gn.get_meta("is_special_gn", false):
-        print("duplicating special graph node")
         if not allowed_an_list:
             allowed_an_list = get_gn_own_asset_nodes(gn)
         duplicate_gn = special_gn_factory.make_duplicate_special_gn(gn, allowed_an_list)
     else:
         if not gn.get_meta("hy_asset_node_id", ""):
-            print("duplicating unsynced graph node")
             duplicate_gn = gn.duplicate()
         else:
-            print("duplicating synced graph node")
             var old_an: HyAssetNode = safe_get_an_from_gn(gn, allowed_an_list)
             duplicate_gn = _duplicate_synced_graph_node(gn, old_an)
     init_duplicate_graph_node(duplicate_gn, gn)
@@ -863,6 +872,7 @@ func safe_get_an_from_gn(gn: CustomGraphNode, extra_an_list: Array[HyAssetNode] 
     return null
 
 func clear_graph() -> void:
+    prints("clearing graph")
     all_asset_nodes.clear()
     all_asset_node_ids.clear()
     floating_tree_roots.clear()
@@ -1224,12 +1234,15 @@ func make_and_position_graph_nodes_for_trees(an_roots: Array[HyAssetNode], posit
 func make_and_add_graph_node(asset_node: HyAssetNode, at_global_pos: Vector2, centered: bool = false, snap_now: bool = false) -> CustomGraphNode:
     var new_gn: CustomGraphNode = new_graph_node(asset_node, true)
     add_child(new_gn, true)
-    new_gn.position_offset = (scroll_offset + at_global_pos) / zoom
+    new_gn.position_offset = global_pos_to_position_offset(at_global_pos)
     if centered:
         new_gn.position_offset -= new_gn.size / 2
     if snap_now:
         snap_gn(new_gn)
     return new_gn
+
+func global_pos_to_position_offset(the_global_pos: Vector2) -> Vector2:
+    return (scroll_offset + the_global_pos) / zoom
     
 func connect_children(graph_node: CustomGraphNode) -> void:
     var connection_names: Array[String] = get_graph_connections_for(graph_node)

@@ -14,4 +14,3 @@ line_color = Color(0.91220015, 0.4478596, 0.17746857, 1)
 y_axis_color = Color(0.60118276, 0.755453, 0.3583592, 1)
 x_axis_color = Color(0.7327995, 0.31885552, 0.42130005, 1)
 point_color = Color(0.94219613, 0.31506547, 0, 1)
-anim_region_easing = 0.47568282

@@ -394,9 +394,9 @@ func get_value_set_values(value_set: String) -> Array:
     # VectorProvider nodes
     "VectorProvider|Constant": "ConstantVectorProvider",
     "VectorProvider|DensityGradient": "DensityGradientVectorProvider",
-    "VectorProvider|Imported": "ImportedVectorProvider",
     "VectorProvider|Exported": "ExportedVectorProvider",
     "VectorProvider|Cache": "CacheVectorProvider",
+    "VectorProvider|Imported": "ImportedVectorProvider",
     
     # Condition nodes (for SpaceAndDepth)
     "Condition|AlwaysTrueCondition": "AlwaysTrueCondition",
@@ -535,6 +535,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -578,6 +579,7 @@ func get_value_set_values(value_set: String) -> Array:
             "ScaleXZ": { "gd_type": TYPE_FLOAT, "default_value": 50.0 },
             "ScaleY": { "gd_type": TYPE_FLOAT, "default_value": 12.0 },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A", "ui_hint": "random_seed" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "CurveMapperDensity": {
@@ -586,6 +588,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -600,6 +603,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "BaseHeightName": { "gd_type": TYPE_STRING, "default_value": "Base", "ui_hint": "base_height" },
             "Distance": { "gd_type": TYPE_BOOL, "default_value": true },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     # Positions Cell Noise Density
@@ -610,6 +614,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "MaxDistance": { "gd_type": TYPE_FLOAT, "default_value": 10.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Positions": { "value_type": "Positions", "multi": false },
@@ -624,6 +629,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "WarpFactor": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "WarpVector": { "value_type": "Point3D", "multi": false },
@@ -637,6 +643,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Reversed": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -649,6 +656,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "IsAnchored": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Axis": { "value_type": "Point3D", "multi": false },
@@ -661,6 +669,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "XValueDensity": {
@@ -669,6 +678,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "YOverrideDensity": {
@@ -678,6 +688,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Value": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -690,6 +701,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Value": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -702,6 +714,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Value": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -713,6 +726,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -749,8 +763,8 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "Capacity": { "gd_type": TYPE_INT, "default_value": 3 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -763,6 +777,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Mirror": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Axis": { "value_type": "Point3D", "multi": false },
@@ -778,6 +793,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "WallA": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
             "WallB": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -790,6 +806,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "SpinAngle": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "degrees" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "NewYAxis": { "value_type": "Point3D", "multi": false },
@@ -802,6 +819,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -819,6 +837,7 @@ func get_value_set_values(value_set: String) -> Array:
             "CellType": { "gd_type": TYPE_STRING, "default_value": "Distance2Div" },
             "Octaves": { "gd_type": TYPE_INT, "default_value": 1, "ui_hint": "int_range:1_10" },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A", "ui_hint": "random_seed" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "CellNoise3DDensity": {
@@ -827,7 +846,6 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "ScaleX": { "gd_type": TYPE_FLOAT, "default_value": 20.0 },
             "ScaleY": { "gd_type": TYPE_FLOAT, "default_value": 20.0 },
             "ScaleZ": { "gd_type": TYPE_FLOAT, "default_value": 20.0 },
@@ -835,6 +853,7 @@ func get_value_set_values(value_set: String) -> Array:
             "CellType": { "gd_type": TYPE_STRING, "default_value": "Distance2Div" },
             "Octaves": { "gd_type": TYPE_INT, "default_value": 1, "ui_hint": "int_range:1_10" },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A", "ui_hint": "random_seed" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "SmoothMaxDensity": {
@@ -844,6 +863,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 0.2 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -856,6 +876,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 0.2 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -868,6 +889,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Limit": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -880,6 +902,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Limit": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -894,6 +917,7 @@ func get_value_set_values(value_set: String) -> Array:
             "WallA": { "gd_type": TYPE_FLOAT, "default_value": -1.0 },
             "WallB": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 0.2 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -907,6 +931,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 0.2 },
             "Limit": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -920,6 +945,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 0.2 },
             "Limit": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -931,6 +957,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -942,6 +969,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -954,6 +982,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Exponent": { "gd_type": TYPE_FLOAT, "default_value": 2.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -968,6 +997,7 @@ func get_value_set_values(value_set: String) -> Array:
             "ScaleX": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "ScaleY": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "ScaleZ": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -982,6 +1012,7 @@ func get_value_set_values(value_set: String) -> Array:
             "SlideX": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
             "SlideY": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
             "SlideZ": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -997,6 +1028,7 @@ func get_value_set_values(value_set: String) -> Array:
             "WarpFactor": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "2D": { "gd_type": TYPE_BOOL, "default_value": false },
             "YFor2D": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1014,6 +1046,7 @@ func get_value_set_values(value_set: String) -> Array:
             "WarpOctaves": { "gd_type": TYPE_INT, "default_value": 1, "ui_hint": "int_range:1_10" },
             "WarpFactor": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A", "ui_hint": "random_seed" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1030,6 +1063,7 @@ func get_value_set_values(value_set: String) -> Array:
             "PositionsMaxY": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "y_coordinate" },
             "PositionsMinY": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "y_coordinate" },
             "HorizontalPinch": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Positions": { "value_type": "Positions", "multi": false },
@@ -1046,6 +1080,7 @@ func get_value_set_values(value_set: String) -> Array:
             "MaxDistance": { "gd_type": TYPE_FLOAT, "default_value": 10.0 },
             "ZeroPositionsY": { "gd_type": TYPE_BOOL, "default_value": false },
             "NormalizeDistance": { "gd_type": TYPE_BOOL, "default_value": true },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Positions": { "value_type": "Positions", "multi": false },
@@ -1061,6 +1096,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Spin": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "degrees" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Curve": { "value_type": "Curve", "multi": false },
@@ -1075,6 +1111,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Spin": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "degrees" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Curve": { "value_type": "Curve", "multi": false },
@@ -1100,6 +1137,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Spin": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "degrees" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "RadialCurve": { "value_type": "Curve", "multi": false },
@@ -1113,6 +1151,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Curve": { "value_type": "Curve", "multi": false },
@@ -1125,6 +1164,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "IsAnchored": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "PlaneNormal": { "value_type": "Point3D", "multi": false },
@@ -1138,6 +1178,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "SwitchState": { "gd_type": TYPE_STRING, "default_value": "", "ui_hint": "switch_state" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1149,6 +1190,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "SwitchCases": { "value_type": "CaseSwitch", "multi": true },
@@ -1160,6 +1202,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1169,6 +1212,9 @@ func get_value_set_values(value_set: String) -> Array:
 		"id_prefix_override": "MultiMix.Density",
         "display_name": "Multi Mix Density",
         "output_value_type": "Density",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
             "Keys": { "value_type": "KeyMultiMix", "multi": true },
@@ -1180,6 +1226,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "AngleDensity": {
@@ -1189,6 +1236,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "IsAxis": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Vector": { "value_type": "Point3D", "multi": false },
@@ -1201,6 +1249,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "TerrainDensity": {
@@ -1209,6 +1258,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Density",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "ExportedDensity": {
@@ -1216,9 +1266,9 @@ func get_value_set_values(value_set: String) -> Array:
         "display_name": "Exported Density",
         "output_value_type": "Density",
         "settings": {
-            "ExportAs":	{ "gd_type": TYPE_STRING, "default_value": "" },
             "SingleInstance": { "gd_type": TYPE_BOOL, "default_value": true },
             "Skip":	{ "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs":	{ "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1232,6 +1282,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "SampleDistance": { "gd_type": TYPE_FLOAT, "default_value": 4.0 },
             "SampleOffset": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
+            "ExportAs":	{ "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1244,6 +1295,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Value": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "float_range:-1_1", "ui_soft_range": true },
+            "ExportAs":	{ "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Inputs": { "value_type": "Density", "multi": true },
@@ -1485,6 +1537,9 @@ func get_value_set_values(value_set: String) -> Array:
     "ConstantMaterialProvider": {
         "display_name": "Constant Material Provider",
         "output_value_type": "MaterialProvider",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Material": { "value_type": "Material", "multi": false },
         }
@@ -1492,6 +1547,9 @@ func get_value_set_values(value_set: String) -> Array:
     "SolidityMaterialProvider": {
         "display_name": "Solidity Material Provider",
         "output_value_type": "MaterialProvider",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Solid": { "value_type": "MaterialProvider", "multi": false },
             "Empty": { "value_type": "MaterialProvider", "multi": false },
@@ -1500,6 +1558,9 @@ func get_value_set_values(value_set: String) -> Array:
     "QueueMaterialProvider": {
         "display_name": "Queue Material Provider",
         "output_value_type": "MaterialProvider",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Queue": { "value_type": "MaterialProvider", "multi": true },
         }
@@ -1507,6 +1568,9 @@ func get_value_set_values(value_set: String) -> Array:
     "StripedMaterialProvider": {
         "display_name": "Striped Material Provider",
         "output_value_type": "MaterialProvider",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Material": { "value_type": "MaterialProvider", "multi": false },
             "Stripes": { "value_type": "Stripe", "multi": true },
@@ -1518,6 +1582,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A", "ui_hint": "random_seed" },
             "SkipChance": { "gd_type": TYPE_FLOAT, "default_value": 0.0, "ui_hint": "float_range:0_1" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "WeightedMaterials": { "value_type": "WeightedMaterial", "multi": true },
@@ -1526,6 +1591,9 @@ func get_value_set_values(value_set: String) -> Array:
     "FieldFunctionMaterialProvider": {
         "display_name": "Field Function Material Provider",
         "output_value_type": "MaterialProvider",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "FieldFunction": { "value_type": "Density", "multi": false },
             "Delimiters": { "value_type": "DelimiterFieldFunctionMP", "multi": true },
@@ -1875,6 +1943,7 @@ func get_value_set_values(value_set: String) -> Array:
             "BaseHeightName": { "gd_type": TYPE_STRING, "default_value": "Base" },
             "TopDownOrder": { "gd_type": TYPE_BOOL, "default_value": true },
             "ResultCap": { "gd_type": TYPE_INT, "default_value": 1 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "OriginScanner": {
@@ -1883,6 +1952,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Scanner",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     
@@ -2062,11 +2132,11 @@ func get_value_set_values(value_set: String) -> Array:
         "display_name": "Simple Horizontal Material Provider",
         "output_value_type": "MaterialProvider",
         "settings": {
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "TopY": { "gd_type": TYPE_INT, "default_value": 0, "ui_hint": "y_coordinate" },
             "TopBaseHeight": { "gd_type": TYPE_STRING, "default_value": "" },
             "BottomY": { "gd_type": TYPE_INT, "default_value": 0, "ui_hint": "y_coordinate" },
             "BottomBaseHeight": { "gd_type": TYPE_STRING, "default_value": "" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Material": { "value_type": "MaterialProvider", "multi": false },
@@ -2078,6 +2148,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "LayerContext": { "gd_type": TYPE_STRING, "default_value": "DEPTH_INTO_FLOOR", "value_set": "sad_context", "ui_hint": "string_enum" },
             "MaxExpectedDepth": { "gd_type": TYPE_INT, "default_value": 3 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Condition": { "value_type": "Condition", "multi": false },
@@ -2099,6 +2170,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Origin": { "value_type": "Pattern", "multi": false },
@@ -2111,6 +2183,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Patterns": { "value_type": "Pattern", "multi": true },
@@ -2122,6 +2195,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Patterns": { "value_type": "Pattern", "multi": true },
@@ -2133,6 +2207,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Pattern": { "value_type": "Pattern", "multi": false },
@@ -2156,6 +2231,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Directions": { "gd_type": TYPE_ARRAY, "array_gd_type": TYPE_STRING, "default_value": [], "value_set": "cardinal_dirs", "ui_hint": "enum_as_set" },
             "RequireAllDirections": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Origin": { "value_type": "Pattern", "multi": false },
@@ -2174,6 +2250,7 @@ func get_value_set_values(value_set: String) -> Array:
             "MediumGap": { "gd_type": TYPE_INT, "default_value": 0 },
             "Facings": { "gd_type": TYPE_ARRAY, "array_gd_type": TYPE_STRING, "default_value": [], "value_set": "orth_dirs", "ui_hint": "enum_as_set" },
             "RequireAllFacings": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Surface": { "value_type": "Pattern", "multi": false },
@@ -2186,6 +2263,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Max": { "value_type": "Point3D", "multi": false },
@@ -2199,6 +2277,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Pattern",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "FieldFunction": { "value_type": "Density", "multi": false },
@@ -2213,7 +2292,6 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Scanner",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "MaxY": { "gd_type": TYPE_INT, "default_value": 320 },
             "MinY": { "gd_type": TYPE_INT, "default_value": 0 },
             "Strategy": { "gd_type": TYPE_STRING, "default_value": "DART_THROW", "value_set": "column_scanner_strat", "ui_hint": "string_enum" },
@@ -2221,6 +2299,7 @@ func get_value_set_values(value_set: String) -> Array:
             "RelativeToPosition": { "gd_type": TYPE_BOOL, "default_value": false },
             "BaseHeightName": { "gd_type": TYPE_STRING, "default_value": "Base" },
             "ResultCap": { "gd_type": TYPE_INT, "default_value": 1 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
     "AreaScanner": {
@@ -2232,6 +2311,7 @@ func get_value_set_values(value_set: String) -> Array:
             "ScanRange": { "gd_type": TYPE_INT, "default_value": 3 },
             "ScanShape": { "gd_type": TYPE_STRING, "default_value": "CIRCLE", "value_set": "area_scan_shape", "ui_hint": "string_enum" },
             "ResultCap": { "gd_type": TYPE_INT, "default_value": 1 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "ChildScanner": { "value_type": "Scanner", "multi": false },
@@ -2243,7 +2323,6 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Scanner",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "Name": { "gd_type": TYPE_STRING, "default_value": "" },
         }
     },
@@ -2255,6 +2334,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Prop",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "ColumnBlocks": { "value_type": "BlockColumn", "multi": true },
@@ -2272,6 +2352,7 @@ func get_value_set_values(value_set: String) -> Array:
             "LoadEntities": { "gd_type": TYPE_BOOL, "default_value": false },
             "MoldingDirection": { "gd_type": TYPE_STRING, "default_value": "NONE", "value_set": "molding_direction", "ui_hint": "string_enum" },
             "MoldingChildren": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "WeightedPrefabPaths": { "value_type": "WeightedPath", "multi": true },
@@ -2290,6 +2371,7 @@ func get_value_set_values(value_set: String) -> Array:
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Range": { "gd_type": TYPE_FLOAT, "default_value": 10.0 },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "DistanceCurve": { "value_type": "Curve", "multi": false, "force_node_type": "ManualCurve" },
@@ -2304,6 +2386,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Prop",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Props": { "value_type": "Prop", "multi": true },
@@ -2315,6 +2398,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Prop",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Offset": { "value_type": "Point3D", "multi": false },
@@ -2328,6 +2412,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Entries": { "value_type": "EntryWeightedProp", "multi": true },
@@ -2339,6 +2424,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Prop",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Queue": { "value_type": "Prop", "multi": true },
@@ -2350,6 +2436,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Prop",
         "settings": {
             "Skip": { "gd_type": TYPE_BOOL, "default_value": false },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "BoundingMin": { "value_type": "Point3D", "multi": false },
@@ -2375,6 +2462,9 @@ func get_value_set_values(value_set: String) -> Array:
 		"id_prefix_override": "Sandwich.Assignments",
         "display_name": "Sandwich Assignments",
         "output_value_type": "Assignments",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "Delimiters": { "value_type": "SMDelimiterAssignments", "multi": true },
         }
@@ -2386,6 +2476,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "SkipChance": { "gd_type": TYPE_FLOAT, "default_value": 0.0 },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "WeightedAssignments": { "value_type": "WeightedAssignment", "multi": true },
@@ -2403,6 +2494,9 @@ func get_value_set_values(value_set: String) -> Array:
 		"id_prefix_override": "FieldFunction.Assignments",
         "display_name": "Field Function Assignments",
         "output_value_type": "Assignments",
+        "settings": {
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
+        },
         "connections": {
             "FieldFunction": { "value_type": "Density", "multi": false },
             "Delimiters": { "value_type": "FFDelimiterAssignments", "multi": true },
@@ -2415,8 +2509,8 @@ func get_value_set_values(value_set: String) -> Array:
         "display_name": "Static Directionality",
         "output_value_type": "Directionality",
         "settings": {
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "Rotation": { "gd_type": TYPE_INT, "default_value": 0, "value_set": "cardinal_degrees", "ui_hint": "string_enum" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Pattern": { "value_type": "Pattern", "multi": false },
@@ -2428,6 +2522,7 @@ func get_value_set_values(value_set: String) -> Array:
         "output_value_type": "Directionality",
         "settings": {
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Pattern": { "value_type": "Pattern", "multi": false },
@@ -2440,6 +2535,7 @@ func get_value_set_values(value_set: String) -> Array:
         "settings": {
             "InitialDirection": { "gd_type": TYPE_STRING, "default_value": "N", "value_set": "cardinal_dirs", "ui_hint": "string_enum" },
             "Seed": { "gd_type": TYPE_STRING, "default_value": "A" },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "NorthPattern": { "value_type": "Pattern", "multi": false },
@@ -2474,8 +2570,8 @@ func get_value_set_values(value_set: String) -> Array:
         "display_name": "Density Gradient Vector Provider",
         "output_value_type": "VectorProvider",
         "settings": {
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "SampleDistance": { "gd_type": TYPE_FLOAT, "default_value": 1.0 },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "Density": { "value_type": "Density", "multi": false },
@@ -2486,8 +2582,8 @@ func get_value_set_values(value_set: String) -> Array:
         "display_name": "Exported Vector Provider",
         "output_value_type": "VectorProvider",
         "settings": {
-            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
             "SingleInstance": { "gd_type": TYPE_BOOL, "default_value": true },
+            "ExportAs": { "gd_type": TYPE_STRING, "default_value": "" },
         },
         "connections": {
             "VectorProvider": { "value_type": "VectorProvider", "multi": false },

@@ -105,7 +105,7 @@ func serialize_copied_nodes(graph_edit: AssetNodeGraphEdit) -> String:
     }
     var copied_an_set: Array[HyAssetNode] = get_copied_asset_node_set(graph_edit)
     var copied_an_roots: Array[HyAssetNode] = graph_edit.get_an_roots_within_set(copied_an_set)
-    print("serializing %s asset nodes" % copied_an_roots.size())
+    print("serializing %s asset nodes" % copied_an_set.size())
     for copied_an_root in copied_an_roots:
         var serialized_tree: = copied_an_root.serialize_within_set(SchemaManager.schema, graph_edit.gn_lookup, copied_an_set)
         serialized_data["asset_node_data"].append(serialized_tree)
