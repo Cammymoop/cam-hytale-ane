@@ -6,12 +6,13 @@
 - Can now insert a graph node into connections by dropping it on top of a compatible connection
   - Will not try to patch a node into a connection if it already has it's output connected somewhere
   - May change this to require holding a key when you drop it (configurable) in the future but for now it's mandatory
+- Can now select a subtree by double-clicking on the base node's titlebar, or from the node context menu
+- Can now edit the title of a node by selecting "Edit Title" from the context menu
 
 ### Improvements:
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
 - Manual Curve editor now supports undo/redo
 - Can now resize the maximum height of the add new node menu
-- Can now select a subtree by double-clicking on the base node's titlebar, or from the node context menu
 
 ### Fixes:
 - Fix nodes pasted from the system clipboard not being able to save their position
