@@ -3,8 +3,8 @@ class_name GNExclusiveEnumEdit
 
 signal option_changed(option: String)
 
-var options: Array[String] = []
-var selected_text: String = ""
+@export var options: Array[String] = []
+@export var selected_text: String = ""
 
 func _ready() -> void:
     item_selected.connect(on_option_selected)

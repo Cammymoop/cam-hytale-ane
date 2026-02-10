@@ -5,7 +5,7 @@ var labeled_check_box_scn: PackedScene = preload("res://ui/labeled_check_box.tsc
 
 signal members_changed(members: Array)
 
-var potential_members: Array = []
+@export var potential_members: Array = []
 
 func _ready() -> void:
     update_display()

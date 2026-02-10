@@ -154,6 +154,8 @@ func _ready() -> void:
     connection_to_empty.connect(_connect_right_request)
     connection_from_empty.connect(_connect_left_request)
     
+    graph_elements_linked_to_frame_request.connect(_link_to_group_request)
+    
     var menu_hbox: = get_menu_hbox()
     var grid_toggle_btn: = menu_hbox.get_child(4) as Button
     grid_toggle_btn.toggled.connect(on_grid_toggled.bind(grid_toggle_btn))
@@ -277,6 +279,11 @@ func _shortcut_input(event: InputEvent) -> void:
             prints("deselecting all nodes")
             accept_event()
             deselect_all()
+
+func _unhandled_key_input(event: InputEvent) -> void:
+    if Input.is_action_just_pressed_by_event("test_key", event):
+        accept_event()
+        new_test_group()
 
 func _process(_delta: float) -> void:
     if cur_zoom_level != zoom:
@@ -1223,6 +1230,14 @@ func make_graph_stuff() -> void:
     all_root_nodes.append_array(floating_tree_roots)
     make_and_position_graph_nodes_for_trees(all_root_nodes, true)
     
+    var group_datas: Array[Dictionary] = []
+    group_datas.assign(all_meta.get("$Groups", []))
+    make_json_groups(group_datas)
+
+func make_json_groups(group_datas: Array[Dictionary]) -> void:
+    for group_data in group_datas:
+        deserialize_and_add_group_and_attach_graph_nodes(group_data)
+    
 func make_and_position_graph_nodes_for_trees(an_roots: Array[HyAssetNode], positions_as_loaded: bool, add_offset: Vector2 = Vector2.ZERO) -> Array[CustomGraphNode]:
     var manually_position: bool = positions_as_loaded and not use_json_positions
     var base_tree_pos: = Vector2(0, 100)
@@ -1786,8 +1801,11 @@ func _on_requested_open_file(path: String) -> void:
 
 func on_begin_node_move() -> void:
     moved_nodes_positions.clear()
+    var detach_from_groups: bool = Util.is_shift_pressed()
     var selected_nodes: Array[GraphNode] = get_selected_gns()
     for gn in selected_nodes:
+        if detach_from_groups:
+            detach_graph_element_from_frame(gn.name)
         moved_nodes_positions[gn] = gn.position_offset
 
 func on_end_node_move() -> void:
@@ -2545,3 +2563,91 @@ func can_delete_gn(graph_node: CustomGraphNode) -> bool:
     if graph_node == get_root_gn():
         return false
     return true
+
+func deserialize_and_add_group_and_attach_graph_nodes(group_data: Dictionary) -> GraphFrame:
+    var new_group: = deserialize_and_add_group(group_data, true, true)
+    var ges_to_attach: Array[GraphElement] = []
+    var new_group_rect: = new_group.get_rect()
+    new_group_rect.position = new_group.position_offset
+    for child in get_children():
+        if child == new_group:
+            continue
+        if not child is GraphElement:
+            continue
+        if child is GraphFrame:
+            var child_rect: Rect2 = child.get_rect().grow(-8)
+            child_rect.position = child.position_offset
+            if new_group_rect.encloses(child_rect):
+                ges_to_attach.append(child)
+        elif child is CustomGraphNode:
+            var child_hbox_rect: Rect2 = child.get_titlebar_hbox().get_rect()
+            child_hbox_rect.position = child.position_offset
+            var child_titlebar_center: Vector2 = child_hbox_rect.get_center()
+            if new_group_rect.has_point(child_titlebar_center):
+                ges_to_attach.append(child)
+    attach_ges_to_group(ges_to_attach, new_group)
+    return new_group
+            
+
+func deserialize_and_add_group(group_data: Dictionary, json_pos_scale: bool, abs_position: bool) -> GraphFrame:
+    var group_size: Vector2 = Vector2(group_data.get("$width", 0), group_data.get("$height", 0))
+    if group_size.x == 0:
+        group_size.x = 100
+    if group_size.y == 0:
+        group_size.y = 100
+    if json_pos_scale:
+        group_size *= json_positions_scale
+
+    var new_group: = make_new_group(group_data.get("$name", ""), group_size)
+    add_child(new_group, true)
+    var pos_meta: Dictionary = group_data.get("$Position", {})
+    var pos: Vector2 = Vector2(pos_meta.get("$x", 0), pos_meta.get("$y", 0))
+    if json_pos_scale:
+        pos *= json_positions_scale
+
+    if abs_position:
+        new_group.position_offset = pos - relative_root_position
+    else:
+        var screen_center_pos: = get_viewport().get_visible_rect().size / 2
+        new_group.position_offset = pos - global_pos_to_position_offset(screen_center_pos)
+    
+    if group_data.has("$AccentColor"):
+        var accent_color_name: String = group_data["$AccentColor"]
+        if not ThemeColorVariants.has_theme_color(accent_color_name):
+            if ThemeColorVariants.has_theme_color(ANESettings.default_group_color):
+                accent_color_name = ANESettings.default_group_color
+            else:
+                accent_color_name = ""
+
+        if accent_color_name:
+            new_group.theme = ThemeColorVariants.get_theme_color_variant(accent_color_name)
+    
+    return new_group
+
+func make_new_group(group_title: String = "Group", group_size: Vector2 = Vector2(100, 100)) -> GraphFrame:
+    var new_group: = GraphFrame.new()
+    new_group.autoshrink_enabled = ANESettings.default_is_group_shrinkwrap
+    new_group.size = group_size
+    new_group.title = group_title
+    
+    return new_group
+
+func new_test_group() -> void:
+    var new_group: = make_new_group()
+    var screen_center_pos: = get_viewport().get_visible_rect().size / 2
+    add_child(new_group, true)
+    new_group.position_offset = global_pos_to_position_offset(screen_center_pos)
+    new_group.position_offset -= new_group.size / 2
+
+func attach_ges_to_group(ges: Array[GraphElement], group: GraphFrame) -> void:
+    var ge_names: Array = []
+    for ge in ges:
+        ge_names.append(ge.name)
+    _attach_ges_to_group(ge_names, group.name)
+
+func _link_to_group_request(graph_element_names: Array, group_name: StringName) -> void:
+    _attach_ges_to_group(graph_element_names, group_name)
+
+func _attach_ges_to_group(ge_names: Array, group_name: StringName) -> void:
+    for ge_name in ge_names:
+        attach_graph_element_to_frame(ge_name, group_name)

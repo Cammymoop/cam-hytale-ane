@@ -198,7 +198,7 @@ corner_detail = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h8e4i"]
 content_margin_left = 18.0
-content_margin_top = 12.0
+content_margin_top = 0.0
 content_margin_right = 18.0
 content_margin_bottom = 12.0
 bg_color = Color(0, 0, 0, 0.6)
@@ -212,7 +212,6 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
-expand_margin_top = 38.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4lmeg"]
 content_margin_left = 18.0
@@ -230,19 +229,13 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
-expand_margin_top = 38.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0cp0l"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d2t1y"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5itkh"]
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.16862746, 0.39607844, 0.34509805, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gngh3"]
 
@@ -431,18 +424,16 @@ GraphEditMinimap/colors/resizer_color = Color(1, 1, 1, 0.85)
 GraphFrame/colors/resizer_color = Color(0.875, 0.875, 0.875, 1)
 GraphFrame/styles/panel = SubResource("StyleBoxFlat_h8e4i")
 GraphFrame/styles/panel_selected = SubResource("StyleBoxFlat_4lmeg")
-GraphFrame/styles/titlebar = SubResource("StyleBoxEmpty_0cp0l")
-GraphFrame/styles/titlebar_selected = SubResource("StyleBoxEmpty_d2t1y")
+GraphFrame/styles/titlebar = SubResource("StyleBoxFlat_5itkh")
+GraphFrame/styles/titlebar_selected = SubResource("StyleBoxFlat_5itkh")
 GraphFrameTitleLabel/colors/font_color = Color(1, 1, 1, 1)
 GraphFrameTitleLabel/colors/font_outline_color = Color(1, 1, 1, 1)
-GraphFrameTitleLabel/colors/font_shadow_color = Color(0, 0, 0, 0)
 GraphFrameTitleLabel/constants/line_spacing = 3
 GraphFrameTitleLabel/constants/outline_size = 0
 GraphFrameTitleLabel/constants/shadow_offset_x = 1
 GraphFrameTitleLabel/constants/shadow_offset_y = 1
 GraphFrameTitleLabel/constants/shadow_outline_size = 1
-GraphFrameTitleLabel/font_sizes/font_size = 22
-GraphFrameTitleLabel/fonts/font = ExtResource("1_g1fjd")
+GraphFrameTitleLabel/font_sizes/font_size = 20
 GraphFrameTitleLabel/styles/normal = SubResource("StyleBoxEmpty_gngh3")
 GraphNode/colors/resizer_color = Color(0.875, 0.875, 0.875, 1)
 GraphNode/constants/port_h_offset = 0

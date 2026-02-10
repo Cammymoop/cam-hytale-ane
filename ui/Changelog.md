@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+### New Features:
+- Group support! (WIP)
+
+### Fixes:
+- Fix duplicated or pasted nodes showing default values or broken inputs for some fields
+
 ## 0.3.1
 ### New Features:
 - The add new node menu can now be filtered by typing the part of a name of the node

@@ -35,6 +35,7 @@ func rebind_signals() -> void:
 func set_asset_node(the_asset_node: HyAssetNode) -> void:
     asset_node = the_asset_node
     asset_node.settings_changed.connect(update_from_asset_node)
+    update_from_asset_node()
 
 func add_watched_setting(setting_name: String, input_control: Control, setting_gd_type: int = -1) -> void:
     watched_settings[setting_name] = get_path_to(input_control)
@@ -78,7 +79,7 @@ func update_from_asset_node() -> void:
         if input_control is GNNumberEdit:
             input_control.set_value_directly(float(asset_node.settings[setting_name]))
         elif input_control is GNExclusiveEnumEdit:
-            input_control.set_current_option_directly(asset_node.settings[setting_name])
+            input_control.set_current_option_directly(str(asset_node.settings[setting_name]))
         elif input_control is Range:
             if input_control.has_method("set_value_directly"):
                 input_control.set_value_directly(float(asset_node.settings[setting_name]))

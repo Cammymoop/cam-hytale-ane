@@ -5,6 +5,9 @@ var settings_file_path: String = "user://CHANE_settings.json"
 @export var display_decimal_places: = 3
 @export var custom_display_scale: float = -1
 
+@export var default_group_color: String = "blue"
+@export var default_is_group_shrinkwrap: bool = true
+
 @export var new_node_menu_height_ratio: = 0.85
 
 var detected_display_scale: float = 1.0
@@ -48,6 +51,9 @@ func get_settings_dict() -> Dictionary:
         "display_decimal_places": display_decimal_places,
         "custom_display_scale": custom_display_scale,
         
+        "default_group_color": default_group_color,
+        "default_is_group_shrinkwrap": default_is_group_shrinkwrap,
+        
         "new_node_menu_height": new_node_menu_height_ratio,
     }
 
@@ -76,6 +82,11 @@ func load_settings() -> void:
         display_decimal_places = parsed_settings["display_decimal_places"]
     if parsed_settings.has("custom_display_scale"):
         _update_display_scale(parsed_settings["custom_display_scale"])
+        
+    if parsed_settings.has("default_group_color"):
+        default_group_color = parsed_settings["default_group_color"]
+    if parsed_settings.has("default_is_group_shrinkwrap"):
+        default_is_group_shrinkwrap = parsed_settings["default_is_group_shrinkwrap"]
     
     if parsed_settings.has("new_node_menu_height"):
         new_node_menu_height_ratio = parsed_settings["new_node_menu_height"]

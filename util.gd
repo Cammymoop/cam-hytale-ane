@@ -45,3 +45,6 @@ func is_ctrl_cmd_pressed() -> bool:
     if OS.has_feature("macos"):
         ctrl_keycode = KEY_META
     return Input.is_key_pressed(ctrl_keycode)
+
+func is_shift_pressed() -> bool:
+    return Input.is_key_pressed(KEY_SHIFT)

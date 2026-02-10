@@ -8,7 +8,6 @@ signal closing
 
 @export var auto_confirm_single_type: bool = true
 
-@export var graph_edit: AssetNodeGraphEdit
 var schema: AssetNodesSchema
 
 @export var scroll_to_margin: float = 12
@@ -70,9 +69,6 @@ func _ready() -> void:
 
     if Engine.is_editor_hint():
         return
-    if not graph_edit:
-        push_warning("Graph edit is not set, please set it in the inspector")
-        print("Graph edit is not set, please set it in the inspector")
     schema = SchemaManager.schema
     
     #rebuild_preview_tree()
