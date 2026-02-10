@@ -13,6 +13,7 @@
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
 - Manual Curve editor now supports undo/redo
 - Can now resize the maximum height of the add new node menu
+- Manual Curve editor hides the ExportAs field by default, it has an extra menu that you can use to make it show up, this is an expirimental idea
 
 ### Fixes:
 - Fix nodes pasted from the system clipboard not being able to save their position
