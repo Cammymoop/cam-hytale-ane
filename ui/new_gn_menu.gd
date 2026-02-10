@@ -134,7 +134,7 @@ func _process(_delta: float) -> void:
     
     if Input.is_action_just_pressed("ui_cancel"):
         cancelled.emit()
-        closing.emit()
+        close_menu()
 
 func build_lookups() -> void:
     an_types_by_input_value_type.clear()
@@ -311,7 +311,7 @@ func open_menu(for_left_connection: bool, connection_value_type: String) -> void
 
     if auto_confirm_single_type and filter_set_single:
         node_type_picked.emit(filter_set_single_type)
-        closing.emit()
+        close_menu()
         return
 
     show_search_filter_input()
@@ -426,6 +426,10 @@ func tree_item_mouse_selected(_mouse_pos: Vector2, _buton_index: int) -> void:
 
 func tree_item_chosen() -> void:
     var tree_item: TreeItem = node_list_tree.get_selected()
+    prints("tree_item_chosen: %s" % tree_item.get_text(0))
+    await get_tree().process_frame
+    tree_item = node_list_tree.get_selected()
+    prints("tree_item_chosen after frame: %s" % tree_item.get_text(0))
     if not tree_item:
         print_debug("Tree item chosen but no tree item selected")
         return
@@ -435,11 +439,11 @@ func choose_item(tree_item: TreeItem) -> void:
     if not tree_item.has_meta("node_type"):
         print_debug("Tree item chosen but no node type meta found: ", tree_item.get_text(0))
         cancelled.emit()
-        closing.emit()
+        close_menu()
         return
 
     node_type_picked.emit(tree_item.get_meta("node_type"))
-    closing.emit()
+    close_menu()
 
 func select_and_scroll_to(tree_item: TreeItem) -> void:
     print("selecting and scrolling to", tree_item.get_text(0))
@@ -521,3 +525,9 @@ func scroll_to_list_pos(list_pos: Vector2) -> void:
         var scroll_amt: = view_rect.position.y + scroll_to_margin - list_pos.y
         prints("scrolling up", scroll_amt)
         scroll_bar.value -= scroll_amt
+
+# Deselect all itmes to prevent bug where multiple items can be selected if they are hidden which causes the wrong one
+# to be retrieved by get_selected()
+func close_menu() -> void:
+    node_list_tree.deselect_all()
+    closing.emit()

@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cexc55ou5wk1f"]
+
+[ext_resource type="Script" uid="uid://bkr5hsd4blgo2" path="res://ui/node_title_edit_popup.gd" id="1_4y1jf"]
+[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/data_editors/custom_line_edit.gd" id="2_hu11c"]
+
+[node name="NodeTitleEditPopup" type="PopupPanel" unique_id=1141757610]
+oversampling_override = 1.0
+position = Vector2i(820, 516)
+size = Vector2i(280, 47)
+visible = true
+script = ExtResource("1_4y1jf")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=641960464]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=596030130]
+layout_mode = 2
+alignment = 1
+
+[node name="CustomLineEdit" type="LineEdit" parent="MarginContainer/HBoxContainer" unique_id=693513782]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_hu11c")
+metadata/_custom_type_script = "uid://dyc1epdruun6x"
+
+[node name="SubmitButton" type="Button" parent="MarginContainer/HBoxContainer" unique_id=1134956035]
+layout_mode = 2
+text = "Ok"

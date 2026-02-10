@@ -10,9 +10,13 @@
 ### Improvements:
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
 - Manual Curve editor now supports undo/redo
+- Can now resize the maximum height of the add new node menu
+- Can now select a subtree by double-clicking on the base node's titlebar, or from the node context menu
 
 ### Fixes:
 - Fix nodes pasted from the system clipboard not being able to save their position
+- Fix not being able to use keyboard shortcuts after certain operations
+- Fix dropping the wrong node from the new node menu sometimes
 
 ## 0.3.0
 ### Visual curve editor!

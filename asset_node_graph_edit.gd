@@ -40,6 +40,9 @@ enum ContextMenuItems {
     DELETE_NODES,
     DISSOLVE_NODES,
     BREAK_CONNECTIONS,
+    
+    EDIT_TITLE,
+    SELECT_SUBTREE,
 
 }
 
@@ -408,7 +411,7 @@ func _gui_input(event: InputEvent) -> void:
                 clipboard_was_from_cut = false
             undo_manager.undo()
             #if not undo_manager.has_undo():
-            #    unedited = true
+                #unedited = true
         else:
             %ToastMessageContainer.show_toast_message("Nothing to Undo")
         
@@ -1367,6 +1370,7 @@ func init_duplicate_graph_node(duplicate_gn: CustomGraphNode, original_gn: Custo
         duplicate_gn.set_node_type_schema(original_gn.node_type_schema)
     duplicate_gn.ignore_invalid_connection_type = original_gn.ignore_invalid_connection_type
     duplicate_gn.was_right_clicked.connect(_on_graph_node_right_clicked)
+    duplicate_gn.titlebar_double_clicked.connect(_on_graph_node_titlebar_double_clicked)
     duplicate_gn.resizable = original_gn.resizable
     duplicate_gn.title = original_gn.title
     duplicate_gn.name = get_duplicate_gn_name(original_gn.name)
@@ -1432,6 +1436,7 @@ func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraph
     graph_node.title = asset_node.an_name
     
     graph_node.was_right_clicked.connect(_on_graph_node_right_clicked)
+    graph_node.titlebar_double_clicked.connect(_on_graph_node_titlebar_double_clicked)
     
     var node_schema: Dictionary = {}
     if asset_node.an_type and asset_node.an_type != "Unknown":
@@ -2205,6 +2210,7 @@ func single_node_metadata(scaled_positions: bool, an: HyAssetNode, owning_gn: Gr
     return metadata
 
 func on_new_node_type_picked(node_type: String) -> void:
+    prints("on_new_node_type_picked: %s" % node_type)
     var new_an: HyAssetNode = get_new_asset_node(node_type)
     var new_gn: CustomGraphNode = null
     if next_drop_has_connection:
@@ -2350,7 +2356,9 @@ func dissolve_gn_with_undo(graph_node: CustomGraphNode) -> void:
     create_undo_connection_change_step()
     remove_graph_node_without_undo(graph_node)
 
-
+func cut_all_connections_with_undo(graph_node: CustomGraphNode) -> void:
+    var all_connections: Array[Dictionary] = raw_connections(graph_node)
+    remove_multiple_connections(all_connections)
 
 func _on_graph_node_right_clicked(graph_node: CustomGraphNode) -> void:
     if connection_cut_active:
@@ -2360,6 +2368,35 @@ func _on_graph_node_right_clicked(graph_node: CustomGraphNode) -> void:
     context_menu_movement_acc = 24
     context_menu_gn = graph_node
     context_menu_ready = true
+
+func _on_graph_node_titlebar_double_clicked(graph_node: CustomGraphNode) -> void:
+    select_subtree(graph_node)
+
+func select_subtree(graph_node: CustomGraphNode) -> void:
+    deselect_all()
+    var subtree_gns: Array[CustomGraphNode] = get_subtree_gns(graph_node)
+    select_gns(subtree_gns)
+
+func get_subtree_gns(graph_node: CustomGraphNode) -> Array[CustomGraphNode]:
+    var subtree_gns: Array[CustomGraphNode] = [graph_node]
+    var in_connections: Array[Dictionary] = raw_in_connections(graph_node)
+    var safety: int = 100000
+    while in_connections.size() > 0:
+        var old_conns: = in_connections.duplicate()
+        in_connections.clear()
+        for conn_info in old_conns:
+            var subtree_gn: = get_node(NodePath(conn_info["to_node"])) as CustomGraphNode
+            if not subtree_gn or subtree_gns.has(subtree_gn):
+                continue
+            subtree_gns.append(subtree_gn)
+            in_connections.append_array(raw_in_connections(subtree_gn))
+        
+        safety -= 1
+        if safety <= 0:
+            push_error("get_subtree_gns: Safety limit reached, aborting")
+            break
+    return subtree_gns
+
 
 func cancel_context_menu() -> void:
     context_menu_gn = null
@@ -2383,8 +2420,12 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
     
     var plural_s: = "s" if multiple_selected else ""
     
+    context_menu.add_item("Edit Title", ContextMenuItems.EDIT_TITLE)
+
+    context_menu.add_separator()
+    
     context_menu.add_item("Copy Node" + plural_s, ContextMenuItems.COPY_NODES)
-    context_menu.add_item("Cut Node" + plural_s, ContextMenuItems.COPY_NODES)
+    context_menu.add_item("Cut Node" + plural_s, ContextMenuItems.CUT_NODES)
 
     context_menu.add_item("Delete Node" + plural_s, ContextMenuItems.DELETE_NODES)
     if not can_delete_gn(graph_node):
@@ -2397,22 +2438,74 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
             var dissolve_idx: int = context_menu.get_item_index(ContextMenuItems.DISSOLVE_NODES)
             context_menu.set_item_disabled(dissolve_idx, true)
         context_menu.id_pressed.connect(on_node_context_menu_id_pressed.bind(graph_node))
+        
+        context_menu.add_item("Cut All Connections", ContextMenuItems.BREAK_CONNECTIONS)
     
     context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
+    
+    if is_asset_node:
+        context_menu.add_separator()
+
+        context_menu.add_item("Select Subtree", ContextMenuItems.SELECT_SUBTREE)
 
     add_child(context_menu, true)
 
     context_menu.position = Util.get_context_menu_pos(get_global_mouse_position())
     context_menu.popup()
 
-func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_gn: GraphNode) -> void:
+func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_gn: CustomGraphNode) -> void:
     match node_context_menu_id:
+        ContextMenuItems.COPY_NODES:
+            _copy_request()
+        ContextMenuItems.CUT_NODES:
+            _cut_request()
         ContextMenuItems.DELETE_NODES:
             _delete_request_refs(get_selected_gns())
         ContextMenuItems.DISSOLVE_NODES:
-            dissolve_gn_with_undo(on_gn as CustomGraphNode)
+            dissolve_gn_with_undo(on_gn)
+        ContextMenuItems.BREAK_CONNECTIONS:
+            cut_all_connections_with_undo(on_gn)
         ContextMenuItems.DUPLICATE_NODES:
             duplicate_selected_gns()
+        ContextMenuItems.SELECT_SUBTREE:
+            select_subtree(on_gn)
+        
+        ContextMenuItems.EDIT_TITLE:
+            open_title_edit(on_gn)
+
+func open_title_edit(graph_node: CustomGraphNode) -> void:
+    var title_edit_popup: = preload("res://ui/node_title_edit_popup.tscn").instantiate() as PopupPanel
+    title_edit_popup.current_title = graph_node.title
+    title_edit_popup.new_title_submitted.connect(change_gn_title.bind(graph_node))
+    add_child(title_edit_popup, true)
+    title_edit_popup.position = Util.get_context_menu_pos(graph_node.get_global_position())
+    title_edit_popup.position -= Vector2i.ONE * 10
+    title_edit_popup.exclusive = true
+    title_edit_popup.popup()
+
+func change_gn_title(new_title: String, graph_node: CustomGraphNode) -> void:
+    unedited = false
+    var old_title: String = graph_node.title
+    _set_gn_title(graph_node, new_title)
+    create_change_title_undo_step(graph_node, old_title)
+
+func _set_gn_title(graph_node: CustomGraphNode, new_title: String) -> void:
+    graph_node.title = new_title
+    if graph_node.get_meta("hy_asset_node_id", ""):
+        var an: HyAssetNode = an_lookup.get(graph_node.get_meta("hy_asset_node_id", ""), null)
+        if an:
+            an.title = new_title
+
+func create_change_title_undo_step(graph_node: CustomGraphNode, old_title: String) -> void:
+    unedited = false
+    var new_title: String = graph_node.title
+    undo_manager.create_action("Change Node Title")
+    
+    undo_manager.add_do_method(_set_gn_title.bind(graph_node, new_title))
+    undo_manager.add_undo_method(_set_gn_title.bind(graph_node, old_title))
+
+    undo_manager.commit_action(false)
+
 
 
 func get_duplicate_gn_name(old_gn_name: String) -> String:

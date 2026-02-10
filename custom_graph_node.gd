@@ -2,6 +2,7 @@ class_name CustomGraphNode
 extends GraphNode
 
 signal was_right_clicked(graph_node: CustomGraphNode)
+signal titlebar_double_clicked(graph_node: CustomGraphNode)
 
 var node_type_schema: Dictionary
 var settings_syncer: SettingsSyncer = null
@@ -43,6 +44,10 @@ func _gui_input(event: InputEvent) -> void:
         return
     if event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
         was_right_clicked.emit(self)
+    if event.is_pressed() and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
+        if get_titlebar_hbox().get_global_rect().has_point(event.global_position):
+            titlebar_double_clicked.emit(self)
+
 
 func _draw_port(_slot_index: int, port_pos: Vector2i, _left: bool, color: Color) -> void:
     var base_icon: = get_theme_icon("port", "GraphNode") as DPITexture
