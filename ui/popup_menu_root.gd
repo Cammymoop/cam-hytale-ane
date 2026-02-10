@@ -88,3 +88,11 @@ func _unhandled_input(event: InputEvent) -> void:
         var focused_window: Window = Window.get_focused_window()
         if get_window() == focused_window:
             close_all()
+
+func _process(_delta: float) -> void:
+    if is_menu_visible():
+        var submenus_visible: int = 0
+        for menu in all_menus:
+            if menu.visible:
+                submenus_visible += 1
+        assert(submenus_visible > 0, "No submenu visible but one of the roots is")

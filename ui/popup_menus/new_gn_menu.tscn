@@ -3,6 +3,7 @@
 [ext_resource type="Theme" uid="uid://b08we05gf5iis" path="res://ui/new_node_menu_theme.tres" id="1_jor2c"]
 [ext_resource type="Script" uid="uid://c7vsellvjd3jj" path="res://ui/new_gn_menu.gd" id="2_nfqjc"]
 [ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/data_editors/custom_line_edit.gd" id="3_nfqjc"]
+[ext_resource type="Script" uid="uid://b7n1rtykdcx73" path="res://ui/popup_menus/resize_dragger.gd" id="4_k4idn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vw27"]
 content_margin_left = 4.0
@@ -114,11 +115,12 @@ modulate_color = Color(0.07715169, 0.19749302, 0.13582164, 1)
 
 [node name="NewGNMenu" type="PanelContainer" unique_id=342951991]
 custom_minimum_size = Vector2(360, 50)
+offset_right = 360.0
+offset_bottom = 152.0
 focus_mode = 2
 theme = ExtResource("1_jor2c")
 theme_type_variation = &"LightPanel"
 script = ExtResource("2_nfqjc")
-scroll_to_margin = null
 scroll_min_height = 40
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=216926222]
@@ -169,3 +171,33 @@ layout_mode = 2
 size_flags_horizontal = 4
 mouse_default_cursor_shape = 2
 text = "Show All"
+
+[node name="ResizeDragger" type="Control" parent="MarginContainer/VBoxContainer/ShowAllButton" unique_id=993121249]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -1.0
+offset_right = 30.0
+offset_bottom = 10.0
+mouse_default_cursor_shape = 9
+script = ExtResource("4_k4idn")
+
+[node name="Bar" type="ColorRect" parent="MarginContainer/VBoxContainer/ShowAllButton/ResizeDragger" unique_id=982847172]
+custom_minimum_size = Vector2(46, 3)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -9.0
+offset_right = 20.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.24337524, 0.28421077, 0.2702985, 1)

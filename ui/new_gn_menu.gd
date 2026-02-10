@@ -14,7 +14,6 @@ var schema: AssetNodesSchema
 @export var scroll_to_margin: float = 12
 
 @export var scroll_min_height: = 100
-@export var scroll_max_height_ratio: = 0.85
 var scroll_max_height: = 0
 
 @export_tool_button("Show Preview Content", "Tree") var show_prev: = rebuild_preview_tree
@@ -24,6 +23,7 @@ var scroll_max_height: = 0
 @onready var node_list_tree: Tree = scroll_container.get_node("Tree")
 @onready var show_all_btn: Button = find_child("ShowAllButton")
 @onready var filter_input: CustomLineEdit = find_child("FilterInput")
+@onready var resize_dragger: Control = find_child("ResizeDragger")
 
 var cur_filter_is_output: bool = true
 var cur_filter_is_neither: bool = false
@@ -79,6 +79,43 @@ func _ready() -> void:
 
     build_lookups()
     build_node_list()
+    
+    resize_dragger.dragged.connect(on_resize_dragged)
+    resize_dragger.drag_ended.connect(on_resize_drag_ended)
+
+func on_resize_dragged(relative_pos: Vector2) -> void:
+    var temp_scroll_max_height: = roundi(scroll_max_height + relative_pos.y * 2)
+    var extra_height: = roundi(size.y - scroll_container.size.y)
+    temp_scroll_max_height = clampi(temp_scroll_max_height, scroll_min_height + extra_height, get_window().size.y)
+    var allowed_max: = temp_scroll_max_height - extra_height
+
+    scroll_container.custom_minimum_size.y = clampi(int(node_list_tree.size.y), scroll_min_height, allowed_max)
+
+func on_resize_drag_ended(relative_pos: Vector2) -> void:
+    var window_height: = get_window().size.y
+    var new_scroll_max_height: = roundi(scroll_max_height + relative_pos.y * 2)
+    var extra_height: = roundi(size.y - scroll_container.size.y)
+    new_scroll_max_height = clampi(new_scroll_max_height, scroll_min_height + extra_height, window_height)
+    var ratio: = new_scroll_max_height / float(window_height)
+
+    ANESettings.new_node_menu_height_ratio = ratio
+    ANESettings.update_saved_settings()
+    set_max_popup_height()
+    on_tree_size_changed()
+
+func on_tree_size_changed() -> void:
+    var extra_height: = size.y - scroll_container.size.y
+    var allowed_max: = roundi(scroll_max_height - extra_height)
+    scroll_container.custom_minimum_size.y = clampi(int(node_list_tree.size.y), scroll_min_height, allowed_max)
+
+func set_max_popup_height() -> void:
+    var ratio: = ANESettings.new_node_menu_height_ratio
+    if Engine.is_editor_hint():
+        scroll_max_height = roundi(ProjectSettings.get_setting("display/window/size/viewport_height") * ratio)
+        return
+    var window_height: = get_window().size.y
+    scroll_max_height = roundi(window_height * ratio)
+
 
 func find_popup_menu_root(from_node: Node) -> void:
     var the_parent: Node = from_node.get_parent()
@@ -274,6 +311,7 @@ func open_menu(for_left_connection: bool, connection_value_type: String) -> void
 
     if auto_confirm_single_type and filter_set_single:
         node_type_picked.emit(filter_set_single_type)
+        closing.emit()
         return
 
     show_search_filter_input()
@@ -383,16 +421,6 @@ func _find_next_visible_item(cur_item: TreeItem, delta: int) -> TreeItem:
     else:
         return cur_item.get_prev_visible()
 
-func on_tree_size_changed() -> void:
-    scroll_container.custom_minimum_size.y = clampi(int(node_list_tree.size.y), scroll_min_height, scroll_max_height)
-
-func set_max_popup_height() -> void:
-    if Engine.is_editor_hint():
-        scroll_max_height = roundi(ProjectSettings.get_setting("display/window/size/viewport_height") * scroll_max_height_ratio)
-        return
-    var window_height: = get_window().size.y
-    scroll_max_height = roundi(window_height * scroll_max_height_ratio)
-
 func tree_item_mouse_selected(_mouse_pos: Vector2, _buton_index: int) -> void:
     tree_item_chosen()
 
@@ -438,6 +466,8 @@ func key_gui_input(event: InputEventKey) -> void:
         get_viewport().set_input_as_handled()
 
 func on_filter_text_changed(new_text: String) -> void:
+    if new_text and not new_text.strip_edges():
+        new_text = ""
     if new_text:
         NodeFuzzySearcher.search(new_text)
     has_search_filter = new_text.length() > 0

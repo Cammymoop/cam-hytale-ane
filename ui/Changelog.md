@@ -9,6 +9,7 @@
 
 ### Improvements:
 - "Dissolve Node" in the node context menu now works, it removes the node and tries to connect it's inputs to where it's output was connected
+- Manual Curve editor now supports undo/redo
 
 ### Fixes:
 - Fix nodes pasted from the system clipboard not being able to save their position

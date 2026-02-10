@@ -242,29 +242,40 @@ func load_file_real(json_file_path: String) -> void:
     FileDialogHandler.last_file_dialog_directory = json_file_path.get_base_dir()
     load_json_file(json_file_path)
 
-func _process(_delta: float) -> void:
-    if popup_menu_root.is_menu_visible():
-        return
-
-    if Input.is_action_just_pressed("open_file_shortcut"):
+func _shortcut_input(event: InputEvent) -> void:
+    if Input.is_action_just_pressed_by_event("open_file_shortcut", event):
+        accept_event()
+        if popup_menu_root.is_menu_visible():
+            popup_menu_root.close_all()
         FileDialogHandler.show_open_file_dialog()
-    elif Input.is_action_just_pressed("save_file_shortcut"):
+    elif Input.is_action_just_pressed_by_event("save_file_shortcut", event):
+        accept_event()
         if has_saved_to_cur_file:
             save_to_json_file(cur_file_path + "/" + cur_file_name)
             unedited = true
         else:
+            if popup_menu_root.is_menu_visible():
+                popup_menu_root.close_all()
             FileDialogHandler.show_save_file_dialog(cur_file_name != "")
-    elif Input.is_action_just_pressed("save_as_shortcut"):
+    elif Input.is_action_just_pressed_by_event("save_as_shortcut", event):
+        accept_event()
+        if popup_menu_root.is_menu_visible():
+            popup_menu_root.close_all()
         FileDialogHandler.show_save_file_dialog(false)
     elif Input.is_action_just_pressed("new_file_shortcut"):
+        accept_event()
         popup_menu_root.show_new_file_type_chooser()
 
-    if Input.is_action_just_pressed(&"graph_select_all_nodes"):
-        select_all()
-    elif Input.is_action_just_pressed(&"graph_deselect_all_nodes"):
-        deselect_all()
+    if not popup_menu_root.is_menu_visible():
+        if Input.is_action_just_pressed_by_event("graph_select_all_nodes", event):
+            accept_event()
+            select_all()
+        elif Input.is_action_just_pressed_by_event("graph_deselect_all_nodes", event):
+            prints("deselecting all nodes")
+            accept_event()
+            deselect_all()
 
-
+func _process(_delta: float) -> void:
     if cur_zoom_level != zoom:
         on_zoom_changed()
 
@@ -668,9 +679,10 @@ func select_all() -> void:
             c.selected = true
 
 func deselect_all() -> void:
-    for c in get_children():
-        if c is GraphNode:
-            c.selected = false
+    set_selected(null)
+    #for c in get_children():
+        #if c is GraphNode:
+            #c.selected = false
 
 func select_gns(gns: Array[CustomGraphNode]) -> void:
     deselect_all()

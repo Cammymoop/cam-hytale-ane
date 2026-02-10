@@ -61,9 +61,9 @@ func build_index() -> void:
 
 func search(query: String) -> void:
     search_results.clear()
-    if not query:
+    if not query.strip_edges():
         return
-    query = query.to_lower()
+    query = query.strip_edges().to_lower()
     var result_scores: Dictionary[StringName, int] = {}
     
     var fuzzy_query: String = query.replace(" ", "").substr(0, MAX_FUZZY_LENGTH)

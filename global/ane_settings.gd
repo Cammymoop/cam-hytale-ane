@@ -5,6 +5,8 @@ var settings_file_path: String = "user://CHANE_settings.json"
 @export var display_decimal_places: = 3
 @export var custom_display_scale: float = -1
 
+@export var new_node_menu_height_ratio: = 0.85
+
 var detected_display_scale: float = 1.0
 
 const GRAPH_NODE_MARGIN_BOTTOM_EXTRA: int = 6
@@ -45,6 +47,8 @@ func get_settings_dict() -> Dictionary:
     return {
         "display_decimal_places": display_decimal_places,
         "custom_display_scale": custom_display_scale,
+        
+        "new_node_menu_height": new_node_menu_height_ratio,
     }
 
 func update_saved_settings() -> void:
@@ -72,3 +76,6 @@ func load_settings() -> void:
         display_decimal_places = parsed_settings["display_decimal_places"]
     if parsed_settings.has("custom_display_scale"):
         _update_display_scale(parsed_settings["custom_display_scale"])
+    
+    if parsed_settings.has("new_node_menu_height"):
+        new_node_menu_height_ratio = parsed_settings["new_node_menu_height"]
