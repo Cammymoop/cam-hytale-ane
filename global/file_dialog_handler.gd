@@ -50,23 +50,20 @@ func on_open_dialog_closed(file_dialog: FileDialog) -> void:
     file_dialog.queue_free()
 
 
-func show_save_file_dialog(use_cur_file_name: bool) -> void:
-    var file_name: = ""
-    if use_cur_file_name:
-        var graph_edit: AssetNodeGraphEdit = get_tree().current_scene.find_child("AssetNodeGraphEdit")
-        file_name = graph_edit.cur_file_name
-
+func show_save_file_dialog(use_file_name: String = "", use_directory: String = "") -> void:
     remove_old_dialogs()
     var file_dialog: FileDialog = FileDialog.new()
     file_dialog.access = FileDialog.ACCESS_FILESYSTEM
     #file_dialog.use_native_dialog = true
-    if last_file_dialog_directory:
+    if use_directory:
+        file_dialog.current_dir = use_directory
+    elif last_file_dialog_directory:
         file_dialog.current_dir = last_file_dialog_directory
     else:
-        file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
-    
-    if file_name:
-        file_dialog.current_file = file_name
+        file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)    
+
+    if use_file_name:
+        file_dialog.current_file = use_file_name
 
     file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
     file_dialog.add_filter("*.json", "JSON files")

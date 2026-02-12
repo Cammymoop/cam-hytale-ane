@@ -1,13 +1,13 @@
 extends SceneTree
 
 const TEST_FILES = [
-	"test_files/example_biomes/Basic_.json",
-	"test_files/example_biomes/Basic.json",
-	"test_files/asset_node_test_data/all_densities.json",
-	"test_files/asset_node_test_data/all_positions_curves_vectors.json",
-	"test_files/asset_node_test_data/all_materials_and_props.json",
-	"test_files/asset_node_test_data/biome_and_misc.json",
-	"test_files/asset_node_test_data/new_stuff_added.json",
+	"schema/test_files/example_biomes/Basic_.json",
+	"schema/test_files/example_biomes/Basic.json",
+	"schema/test_files/asset_node_test_data/all_densities.json",
+	"schema/test_files/asset_node_test_data/all_positions_curves_vectors.json",
+	"schema/test_files/asset_node_test_data/all_materials_and_props.json",
+	"schema/test_files/asset_node_test_data/biome_and_misc.json",
+	"schema/test_files/asset_node_test_data/new_stuff_added.json",
 ]
 
 var schema: AssetNodesSchema
@@ -17,7 +17,7 @@ func _init():
 	print("Testing schema against %d files..." % TEST_FILES.size())
 	
 	# Load schema
-	schema = load("res://model/asset_nodes_schema.gd").new()
+	schema = load("res://schema/asset_nodes_schema.gd").new()
 	
 	# Run all validation checks
 	validate_value_types_complete()

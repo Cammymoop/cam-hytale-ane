@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://bwhg0fuyjqeh1"]
 
-[ext_resource type="Script" uid="uid://up6yt53g65m1" path="res://ui/theme_editor.gd" id="1_ayfwk"]
+[ext_resource type="Script" uid="uid://up6yt53g65m1" path="res://ui/theme_editor/theme_editor.gd" id="1_ayfwk"]
 [ext_resource type="Texture2D" uid="uid://c5yfuettbwecl" path="res://ui/assets/x_icon.tres" id="2_f3bh5"]
-[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/grey_theme.tres" id="3_832gf"]
-[ext_resource type="Script" uid="uid://c63ilmr6rjoox" path="res://ui/theme_colors_flow.gd" id="4_62tn8"]
-[ext_resource type="PackedScene" uid="uid://cln0fptfbhe8t" path="res://ui/theme_color_picker_button.tscn" id="5_lt2nm"]
-[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/data_editors/custom_line_edit.gd" id="6_803yc"]
-[ext_resource type="Script" uid="uid://cn8t60w06bwpc" path="res://ui/type_colors_flow.gd" id="7_ttcg5"]
-[ext_resource type="Script" uid="uid://dm0dehdgpmrnk" path="res://ui/type_color_button.gd" id="8_gnkjj"]
+[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/assets/theme/default/grey_theme.tres" id="3_832gf"]
+[ext_resource type="Script" uid="uid://c63ilmr6rjoox" path="res://ui/theme_editor/theme_colors_flow.gd" id="4_62tn8"]
+[ext_resource type="PackedScene" uid="uid://cln0fptfbhe8t" path="res://ui/theme_editor/theme_color_picker_button.tscn" id="5_lt2nm"]
+[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/custom_controls/custom_line_edit.gd" id="6_803yc"]
+[ext_resource type="Script" uid="uid://cn8t60w06bwpc" path="res://ui/theme_editor/type_colors_flow.gd" id="7_ttcg5"]
+[ext_resource type="Script" uid="uid://dm0dehdgpmrnk" path="res://ui/theme_editor/type_color_button.gd" id="8_gnkjj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ycdy4"]
 bg_color = Color(0.32915878, 0.32915822, 0.3291585, 1)

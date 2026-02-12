@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d0lsk14qu5fi4"]
 
-[ext_resource type="Script" uid="uid://bbhpphioejxw1" path="res://ui/new_file_type_chooser.gd" id="1_fataj"]
-[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/grey_theme.tres" id="2_pcht5"]
+[ext_resource type="Script" uid="uid://bbhpphioejxw1" path="res://ui/popup_menus/new_file_type_chooser.gd" id="1_fataj"]
+[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/assets/theme/default/grey_theme.tres" id="2_pcht5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2cqfq"]
 bg_color = Color(0.32915878, 0.32915822, 0.3291585, 1)

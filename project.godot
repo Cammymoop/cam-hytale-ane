@@ -16,22 +16,22 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Cam Hytale ANE (Asset Node Editor)"
 config/description="[Alpha] A custom, cross-platform Asset Node editor for hytale asset nodes, primarily for worldgen v2"
-config/version="0.3.2"
-run/main_scene="res://main.tscn"
+config/version="0.4.0"
+run/main_scene="res://graph_editor/standalone_editor.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="CamHytaleANE"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 run/low_processor_mode=true
-config/icon="res://icon.svg"
+config/icon="uid://dm1qflfglyyv7"
 
 [autoload]
 
 ANESettings="*uid://js4qrto53qyd"
-Util="*res://util.gd"
+Util="*res://global/util.gd"
 SchemaManager="*uid://dadtbq1o8e5kp"
 NodeFuzzySearcher="*uid://talo204sdbds"
-ThemeColorVariants="*res://ui/theme_color_variants.tscn"
-TypeColors="*res://model/type_colors.gd"
+ThemeColorVariants="*res://global/theme_color_variants.tscn"
+TypeColors="*res://global/type_colors.gd"
 ClipboardManager="*uid://bs1q4dced67u7"
 FileDialogHandler="*uid://dyeeven10x5a6"
 GlobalToaster="*uid://cm5uv0dl20h06"
@@ -41,12 +41,13 @@ GlobalToaster="*uid://cm5uv0dl20h06"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/subwindows/embed_subwindows=false
-window/stretch/scale=1.25
 window/per_pixel_transparency/allowed=true
 window/handheld/orientation=6
 
 [gui]
 
+timers/tooltip_delay_sec=0.33
+timers/tooltip_delay_sec.editor_hint=0.33
 theme/default_font_multichannel_signed_distance_field=true
 theme/default_font_generate_mipmaps=true
 

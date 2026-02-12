@@ -1,0 +1,169 @@
+[gd_scene format=3 uid="uid://b2bmrn4q5gtsa"]
+
+[ext_resource type="Script" uid="uid://bjrn01eomtfrm" path="res://graph_editor/custom_graph_nodes/manual_curve_special.gd" id="1_dv77j"]
+[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/assets/theme/default/grey_theme.tres" id="1_o8u1p"]
+[ext_resource type="Script" uid="uid://gxuxbfatctg6" path="res://ui/custom_controls/h_toggle_buttons.gd" id="3_o8u1p"]
+[ext_resource type="Texture2D" uid="uid://tjb2m0kgtvnl" path="res://ui/assets/extra_menu_button_icon.tres" id="4_pon0x"]
+[ext_resource type="PackedScene" uid="uid://c6fmf3d3ag8if" path="res://graph_editor/custom_graph_nodes/curve_plot.tscn" id="4_veyee"]
+[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/custom_controls/custom_line_edit.gd" id="5_p1gf7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_veyee"]
+bg_color = Color(0.08078333, 0.08078336, 0.08078327, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ManualCurveSpecial" type="GraphNode" unique_id=13672599 node_paths=PackedStringArray("curve_plot")]
+offset_left = 70.0
+offset_top = 1.0
+offset_right = 268.0
+offset_bottom = 299.0
+scale = Vector2(0.75, 0.75)
+mouse_filter = 1
+theme = ExtResource("1_o8u1p")
+title = "Manual Curve Points"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = false
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+slot/2/left_enabled = false
+slot/2/left_type = 0
+slot/2/left_color = Color(1, 1, 1, 1)
+slot/2/left_icon = null
+slot/2/right_enabled = false
+slot/2/right_type = 0
+slot/2/right_color = Color(1, 1, 1, 1)
+slot/2/right_icon = null
+slot/2/draw_stylebox = true
+slot/3/left_enabled = false
+slot/3/left_type = 0
+slot/3/left_color = Color(1, 1, 1, 1)
+slot/3/left_icon = null
+slot/3/right_enabled = false
+slot/3/right_type = 0
+slot/3/right_color = Color(1, 1, 1, 1)
+slot/3/right_icon = null
+slot/3/draw_stylebox = true
+slot/4/left_enabled = false
+slot/4/left_type = 0
+slot/4/left_color = Color(1, 1, 1, 1)
+slot/4/left_icon = null
+slot/4/right_enabled = false
+slot/4/right_type = 0
+slot/4/right_color = Color(1, 1, 1, 1)
+slot/4/right_icon = null
+slot/4/draw_stylebox = true
+script = ExtResource("1_dv77j")
+curve_plot = NodePath("GraphContainer/PanelContainer/CurvePlot")
+cur_mode = "graph"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=786482813]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="ModeButtons" type="HBoxContainer" parent="HBoxContainer2" unique_id=1652193247]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 0
+alignment = 1
+script = ExtResource("3_o8u1p")
+
+[node name="TableButton" type="Button" parent="HBoxContainer2/ModeButtons" unique_id=1130187292]
+layout_mode = 2
+theme_type_variation = &"ButtonOptLeft"
+toggle_mode = true
+button_pressed = true
+text = "Table"
+
+[node name="GraphButton" type="Button" parent="HBoxContainer2/ModeButtons" unique_id=1859879219]
+layout_mode = 2
+theme_type_variation = &"ButtonOptRight"
+toggle_mode = true
+text = "Graph"
+
+[node name="ExtraSettingsBtn" type="MenuButton" parent="HBoxContainer2" unique_id=1200232218]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+icon = ExtResource("4_pon0x")
+item_count = 1
+popup/item_0/text = "ExportAs"
+popup/item_0/checkable = 1
+popup/item_0/id = 0
+
+[node name="PointsTable" type="GridContainer" parent="." unique_id=239182184]
+layout_mode = 2
+columns = 5
+
+[node name="Label" type="Label" parent="PointsTable" unique_id=933467701]
+layout_mode = 2
+text = "in"
+
+[node name="LineEdit" type="LineEdit" parent="PointsTable" unique_id=2056604275]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="PointsTable" unique_id=1459446590]
+layout_mode = 2
+text = "out"
+
+[node name="LineEdit2" type="LineEdit" parent="PointsTable" unique_id=1765597625]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="PointsTable" unique_id=255249648]
+layout_mode = 2
+size_flags_vertical = 4
+text = "x"
+
+[node name="NewPointButton" type="Button" parent="." unique_id=432521125]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 12
+text = "New"
+
+[node name="GraphContainer" type="MarginContainer" parent="." unique_id=395424957]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="PanelContainer" type="PanelContainer" parent="GraphContainer" unique_id=1542995569]
+clip_children = 2
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_veyee")
+
+[node name="CurvePlot" parent="GraphContainer/PanelContainer" unique_id=1134121482 instance=ExtResource("4_veyee")]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=829898768]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1086712357]
+layout_mode = 2
+text = "ExportAs:"
+
+[node name="SettingEdit_ExportAs" type="LineEdit" parent="HBoxContainer" unique_id=486735601]
+layout_mode = 2
+size_flags_horizontal = 3
+expand_to_text_length = true
+script = ExtResource("5_p1gf7")
+metadata/_custom_type_script = "uid://dyc1epdruun6x"
+
+[editable path="GraphContainer/PanelContainer/CurvePlot"]

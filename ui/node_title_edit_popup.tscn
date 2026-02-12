@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cexc55ou5wk1f"]
 
 [ext_resource type="Script" uid="uid://bkr5hsd4blgo2" path="res://ui/node_title_edit_popup.gd" id="1_4y1jf"]
-[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/data_editors/custom_line_edit.gd" id="2_hu11c"]
+[ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/custom_controls/custom_line_edit.gd" id="2_hu11c"]
 
 [node name="NodeTitleEditPopup" type="PopupPanel" unique_id=1141757610]
 oversampling_override = 1.0
