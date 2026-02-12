@@ -42,6 +42,7 @@ enum ContextMenuItems {
     BREAK_CONNECTIONS,
     
     EDIT_TITLE,
+    EDIT_GROUP_TITLE,
     SELECT_SUBTREE,
 
 }
@@ -74,17 +75,17 @@ var temp_x_elements: = 10
 @onready var cur_zoom_level: = zoom
 @onready var grid_logical_enabled: = show_grid
 
-var copied_nodes: Array[GraphNode] = []
+var copied_nodes: Array[GraphElement] = []
 var copied_node_reference_offset: Vector2 = Vector2.ZERO
 var copied_from_screen_center_pos: Vector2 = Vector2.ZERO
-var copied_nodes_internal_connections: Array[Array] = []
+var copied_nodes_internal_connections: Dictionary[int, Array]
 var copied_nodes_ans: Array[HyAssetNode] = []
 var clipboard_was_from_cut: bool = false
 var clipboard_was_from_external: bool = false
 var copied_external_ans: Array[HyAssetNode] = []
 var in_graph_copy_id: String = ""
 
-var context_menu_gn: GraphNode = null
+var context_menu_target_node: Node = null
 var context_menu_movement_acc: = 0.0
 var context_menu_ready: bool = false
 
@@ -97,12 +98,15 @@ var input_port_drop_first_offset: Vector2 = Vector2(-2, -34)
 var input_port_drop_additional_offset: Vector2 = Vector2(0, -19)
 
 var undo_manager: UndoRedo = UndoRedo.new()
+var undo_tracked_nodes: Array[Node] = []
 var multi_connection_change: bool = false
-var cur_connection_added_gns: Array[GraphNode] = []
-var cur_connection_removed_gns: Array[GraphNode] = []
+var cur_connection_added_ges: Array[GraphElement] = []
+var cur_connection_removed_ges: Array[GraphElement] = []
 var cur_added_connections: Array[Dictionary] = []
 var cur_removed_connections: Array[Dictionary] = []
-var moved_nodes_positions: Dictionary[GraphNode, Vector2] = {}
+var cur_removed_group_relations: Array[Dictionary] = []
+var cur_added_group_relations: Array[Dictionary] = []
+var moved_nodes_positions: Dictionary[GraphElement, Vector2] = {}
 
 var file_menu_btn: MenuButton = null
 var file_menu_menu: PopupMenu = null
@@ -370,15 +374,15 @@ func set_root_node(new_root_node: HyAssetNode) -> void:
     if root_node in floating_tree_roots:
         floating_tree_roots.erase(root_node)
 
-func snap_gn(gn: GraphNode) -> void:
+func snap_ge(ge: GraphElement) -> void:
     if snapping_enabled:
-        gn.position_offset = gn.position_offset.snapped(Vector2.ONE * snapping_distance)
+        ge.position_offset = ge.position_offset.snapped(Vector2.ONE * snapping_distance)
 
-func snap_gns(gns: Array) -> void:
+func snap_ges(ges: Array) -> void:
     if not snapping_enabled:
         return
-    for gn in gns:
-        snap_gn(gn)
+    for ge in ges:
+        snap_ge(ge)
 
 func is_mouse_wheel_event(event: InputEvent) -> bool:
     return event is InputEventMouseButton and (
@@ -601,21 +605,21 @@ func _register_asset_node(asset_node: HyAssetNode) -> void:
     else:
         all_asset_node_ids.append(asset_node.an_node_id)
 
-func _delete_request(delete_gn_names: Array[StringName]) -> void:
-    var gns_to_remove: Array[GraphNode] = []
-    for gn_name in delete_gn_names:
-        var gn: GraphNode = get_node_or_null(NodePath(gn_name))
-        if gn:
-            gns_to_remove.append(gn)
-    _delete_request_refs(gns_to_remove)
+func _delete_request(delete_ge_names: Array[StringName]) -> void:
+    var ges_to_remove: Array[GraphElement] = []
+    for ge_name in delete_ge_names:
+        var ge: GraphElement = get_node_or_null(NodePath(ge_name))
+        if ge:
+            ges_to_remove.append(ge)
+    _delete_request_refs(ges_to_remove)
     
-func _delete_request_refs(delete_gns: Array[GraphNode]) -> void:
+func _delete_request_refs(delete_ges: Array[GraphElement]) -> void:
     var root_gn: GraphNode = get_root_gn()
-    if root_gn in delete_gns:
-        delete_gns.erase(root_gn)
-    if delete_gns.size() == 0:
+    if root_gn in delete_ges:
+        delete_ges.erase(root_gn)
+    if delete_ges.size() == 0:
         return
-    remove_gns_with_connections_and_undo(delete_gns)
+    remove_ges_with_connections_and_undo(delete_ges)
 
 func _connect_right_request(from_gn_name: StringName, from_port: int, dropped_pos: Vector2) -> void:
     dropping_new_node_at = dropped_pos
@@ -683,26 +687,35 @@ func get_selected_gns() -> Array[GraphNode]:
             selected_gns.append(c)
     return selected_gns
 
+func get_selected_ges() -> Array[GraphElement]:
+    var selected_ges: Array[GraphElement] = []
+    for ge in get_children():
+        if ge is GraphElement and ge.selected:
+            selected_ges.append(ge)
+    return selected_ges
+
 func select_all() -> void:
     for c in get_children():
-        if c is GraphNode:
+        if c is GraphElement:
             c.selected = true
 
 func deselect_all() -> void:
     set_selected(null)
-    #for c in get_children():
-        #if c is GraphNode:
-            #c.selected = false
 
 func select_gns(gns: Array[CustomGraphNode]) -> void:
+    var ges: Array[GraphElement] = []
+    ges.assign(gns)
+    select_ges(ges)
+
+func select_ges(ges: Array[GraphElement]) -> void:
     deselect_all()
-    for gn in gns:
-        gn.selected = true
+    for ge in ges:
+        ge.selected = true
 
 func _duplicate_request() -> void:
-    duplicate_selected_gns()
+    duplicate_selected_ges()
 
-func duplicate_selected_gns() -> void:
+func duplicate_selected_ges() -> void:
     # TODO: dont clobber the clipboard
     _copy_request()
     _paste_request()
@@ -724,31 +737,31 @@ func get_root_gn() -> GraphNode:
     return gn_lookup[root_node.an_node_id]
 
 func _cut_request() -> void:
-    var selected_gns: Array[GraphNode] = get_selected_gns()
+    var selected_ges: Array[GraphElement] = get_selected_ges()
     var root_gn: GraphNode = get_root_gn()
-    if root_gn in selected_gns:
-        selected_gns.erase(root_gn)
-    if selected_gns.size() == 0:
+    if root_gn in selected_ges:
+        selected_ges.erase(root_gn)
+    if selected_ges.size() == 0:
         return
-    _copy_or_cut_gns(selected_gns)
+    _copy_or_cut_ges(selected_ges)
     # this gets set to false if we ever undo. so that we never try to re-use the cut nodes while they actually exist in the graph
     clipboard_was_from_cut = true
     # do the removal and create the undo step for removing them (separate from clipboard)
-    remove_gns_with_connections_and_undo(copied_nodes)
+    remove_ges_with_connections_and_undo(copied_nodes)
 
 func _copy_request() -> void:
-    var selected_gns: Array[GraphNode] = get_selected_gns()
-    var selected_gn_names: Array[String] = []
-    for gn in selected_gns:
-        selected_gn_names.append(gn.name)
-    prints("selected gns: %s" % [selected_gn_names])
-    _copy_or_cut_gns(selected_gns)
+    var selected_ges: Array[GraphElement] = get_selected_ges()
+    var selected_ge_names: Array[String] = []
+    for ge in selected_ges:
+        selected_ge_names.append(ge.name)
+    #prints("selected gns: %s" % [selected_ge_names])
+    _copy_or_cut_ges(selected_ges)
     clipboard_was_from_cut = false
 
-func _copy_or_cut_gns(gns: Array[GraphNode]) -> void:
+func _copy_or_cut_ges(ges: Array[GraphElement]) -> void:
     if copied_nodes:
         discard_copied_nodes()
-    copied_nodes = gns
+    copied_nodes = ges
     save_copied_nodes_internal_connections()
     save_copied_nodes_an_references()
     copied_from_screen_center_pos = scroll_offset + (get_viewport_rect().size / (2 * zoom))
@@ -757,16 +770,19 @@ func _copy_or_cut_gns(gns: Array[GraphNode]) -> void:
 
 func save_copied_nodes_internal_connections() -> void:
     var copied_nodes_names: Array[String] = []
-    for gn in copied_nodes:
-        copied_nodes_names.append(gn.name)
+    for ge in copied_nodes:
+        copied_nodes_names.append(ge.name)
 
     copied_nodes_internal_connections.clear()
-    for gn_idx in copied_nodes.size():
-        var gn: GraphNode = copied_nodes[gn_idx]
+    for ge_idx in copied_nodes.size():
+        var graph_node: = copied_nodes[ge_idx] as CustomGraphNode
+        if not graph_node:
+            continue
+
         var this_internal_connections: Array[Dictionary] = []
-        var gn_connections: = raw_connections(gn)
+        var gn_connections: = raw_connections(graph_node)
         for conn_info in gn_connections:
-            if conn_info["from_node"] != gn.name:
+            if conn_info["from_node"] != graph_node.name:
                 continue
             var index_of_to_node: int = copied_nodes_names.find(conn_info["to_node"])
             if index_of_to_node == -1:
@@ -776,12 +792,13 @@ func save_copied_nodes_internal_connections() -> void:
                 "to_port": 0,
                 "to_node": index_of_to_node,
             })
-        copied_nodes_internal_connections.append(this_internal_connections)
+        copied_nodes_internal_connections[ge_idx] = this_internal_connections
 
 func save_copied_nodes_an_references() -> void:
     copied_nodes_ans.clear()
-    for gn in copied_nodes:
-        copied_nodes_ans.append_array(get_gn_own_asset_nodes(gn))
+    for ge in copied_nodes:
+        if ge is CustomGraphNode:
+            copied_nodes_ans.append_array(get_gn_own_asset_nodes(ge))
 
 func _paste_request() -> void:
     ClipboardManager.load_copied_nodes_from_clipboard(self)
@@ -805,6 +822,8 @@ func _paste_request() -> void:
     var pasted_nodes: = _add_pasted_nodes(copied_nodes, copied_nodes_ans, not clipboard_was_from_cut)
     var new_connections_needed: Array[Dictionary] = []
     for gn_idx in copied_nodes.size():
+        if not copied_nodes_internal_connections.has(gn_idx):
+            continue
         var copied_input_connections: Array[Dictionary] = copied_nodes_internal_connections[gn_idx]
         for input_conn_idx in copied_input_connections.size():
             var new_conn_info: Dictionary = copied_input_connections[input_conn_idx].duplicate()
@@ -814,12 +833,12 @@ func _paste_request() -> void:
     
     for pasted_gn in pasted_nodes:
         pasted_gn.position_offset += destination_offset
-        snap_gn(pasted_gn)
+        snap_ge(pasted_gn)
         pasted_gn.selected = true
     add_multiple_connections(new_connections_needed, false)
     
     cur_added_connections = new_connections_needed
-    cur_connection_added_gns = pasted_nodes
+    cur_connection_added_ges = pasted_nodes
     create_undo_connection_change_step()
 
 func paste_from_external() -> void:
@@ -834,32 +853,38 @@ func paste_from_external() -> void:
     select_gns(added_gns)
     
     cur_added_connections = get_internal_connections_for_gns(added_gns)
-    cur_connection_added_gns.assign(added_gns)
+    cur_connection_added_ges.assign(added_gns)
     create_undo_connection_change_step()
     discard_copied_nodes()
     
 
 
-func _add_pasted_nodes(gns: Array[GraphNode], asset_node_set: Array[HyAssetNode], make_duplicates: bool) -> Array[GraphNode]:
-    var pasted_gns: Array[GraphNode] = []
+func _add_pasted_nodes(ges: Array[GraphElement], asset_node_set: Array[HyAssetNode], make_duplicates: bool) -> Array[GraphElement]:
+    var pasted_ges: Array[GraphElement] = []
     if not make_duplicates:
         var pasted_an_roots: Array[HyAssetNode] = get_an_roots_within_set(asset_node_set)
         floating_tree_roots.append_array(pasted_an_roots)
-        pasted_gns = gns
-        for gn in gns:
-            var owned_ans: Array[HyAssetNode] = get_gn_own_asset_nodes(gn, asset_node_set)
-            for owned_an in owned_ans:
-                if owned_an not in all_asset_nodes:
-                    add_existing_asset_node(owned_an)
-            if gn.get_meta("hy_asset_node_id", ""):
-                gn_lookup[gn.get_meta("hy_asset_node_id", "")] = gn
-            add_child(gn, true)
+        pasted_ges = ges
+        for ge in ges:
+            if ge is CustomGraphNode:
+                for owned_an in get_gn_own_asset_nodes(ge, asset_node_set):
+                    if owned_an not in all_asset_nodes:
+                        add_existing_asset_node(owned_an)
+                if ge.get_meta("hy_asset_node_id", ""):
+                    gn_lookup[ge.get_meta("hy_asset_node_id", "")] = ge
+            add_child(ge, true)
     else:
-        for gn in gns:
-            var duplicate_gn: = duplicate_graph_node(gn, asset_node_set)
-            add_child(duplicate_gn, true)
-            pasted_gns.append(duplicate_gn)
-    return pasted_gns
+        for ge in ges:
+            var duplicate_ge: = duplicate_graph_element(ge, asset_node_set)
+            add_child(duplicate_ge, true)
+            pasted_ges.append(duplicate_ge)
+    return pasted_ges
+
+func duplicate_graph_element(the_graph_element: GraphElement, allowed_an_list: Array[HyAssetNode] = []) -> GraphElement:
+    if the_graph_element is GraphFrame:
+        return the_graph_element.duplicate()
+    else:
+        return duplicate_graph_node(the_graph_element, allowed_an_list)
 
 func duplicate_graph_node(gn: CustomGraphNode, allowed_an_list: Array[HyAssetNode] = []) -> CustomGraphNode:
     var duplicate_gn: CustomGraphNode
@@ -904,7 +929,7 @@ func clear_graph() -> void:
     asset_node_meta.clear()
     all_meta.clear()
     for child in get_children():
-        if child is GraphNode:
+        if child is GraphElement:
             remove_child(child)
             child.queue_free()
     
@@ -1261,7 +1286,7 @@ func make_and_position_graph_nodes_for_trees(an_roots: Array[HyAssetNode], posit
             connect_children(new_graph_nodes[0])
         
         if not positions_as_loaded:
-            snap_gns(new_graph_nodes)
+            snap_ges(new_graph_nodes)
     return all_added_gns
 
 func make_and_add_graph_node(asset_node: HyAssetNode, at_global_pos: Vector2, centered: bool = false, snap_now: bool = false) -> CustomGraphNode:
@@ -1271,7 +1296,7 @@ func make_and_add_graph_node(asset_node: HyAssetNode, at_global_pos: Vector2, ce
     if centered:
         new_gn.position_offset -= new_gn.size / 2
     if snap_now:
-        snap_gn(new_gn)
+        snap_ge(new_gn)
     return new_gn
 
 func global_pos_to_position_offset(the_global_pos: Vector2) -> Vector2:
@@ -1405,13 +1430,15 @@ func get_child_node_of_class(parent: Node, class_names: Array[String]) -> Node:
             return found_node
     return null
 
-func update_all_gns_themes() -> void:
+func update_all_ges_themes() -> void:
     for child in get_children():
         if child is CustomGraphNode:
-            update_gn_theme(child)
+            update_custom_gn_theme(child)
             child.update_port_colors()
+        elif child is GraphFrame:
+            update_group_theme(child)
 
-func update_gn_theme(graph_node: CustomGraphNode) -> void:
+func update_custom_gn_theme(graph_node: CustomGraphNode) -> void:
     var output_type: String = graph_node.theme_color_output_type
     if not output_type:
         return
@@ -1419,6 +1446,10 @@ func update_gn_theme(graph_node: CustomGraphNode) -> void:
     var theme_var_color: String = TypeColors.get_color_for_type(output_type)
     if ThemeColorVariants.has_theme_color(theme_var_color):
         graph_node.theme = ThemeColorVariants.get_theme_color_variant(theme_var_color)
+
+func update_group_theme(_group: GraphFrame) -> void:
+    # for now groups dont change themes based on type -> color assignments
+    pass
 
 func new_graph_node(asset_node: HyAssetNode, newly_created: bool) -> CustomGraphNode:
     var graph_node: CustomGraphNode = null
@@ -1725,13 +1756,17 @@ func handle_mouse_event(event: InputEventMouse) -> void:
 
         if mouse_btn_event.button_index == MOUSE_BUTTON_RIGHT:
             if context_menu_ready and not mouse_btn_event.is_pressed():
-                actually_right_click_gn(context_menu_gn)
+                if context_menu_target_node is CustomGraphNode:
+                    actually_right_click_gn(context_menu_target_node)
+                elif context_menu_target_node is GraphFrame:
+                    actually_right_click_group(context_menu_target_node)
 
             if mouse_btn_event.is_pressed():
                 if mouse_btn_event.ctrl_pressed:
                     start_connection_cut(mouse_btn_event.global_position)
                 else:
                     mouse_panning = true
+                    check_for_group_context_menu_click_start(mouse_btn_event)
             elif mouse_panning:
                 mouse_panning = false
             elif connection_cut_active:
@@ -1751,6 +1786,21 @@ func handle_mouse_event(event: InputEventMouse) -> void:
             add_connection_cut_point(mouse_motion_event.global_position)
         elif mouse_panning:
             scroll_offset -= mouse_motion_event.relative
+
+func check_for_group_context_menu_click_start(mouse_btn_event: InputEventMouseButton) -> void:
+    var mouse_pos: = global_pos_to_position_offset(mouse_btn_event.global_position)
+    for group in get_all_groups():
+        var group_rect: = group.get_rect()
+        group_rect.position = group.position_offset
+        if group_rect.has_point(mouse_pos):
+            print("Group clicked: %s" % group.title)
+
+func get_all_groups() -> Array[GraphFrame]:
+    var groups: Array[GraphFrame] = []
+    for child in get_children():
+        if child is GraphFrame:
+            groups.append(child)
+    return groups
 
 func on_zoom_changed() -> void:
     cur_zoom_level = zoom
@@ -1802,14 +1852,47 @@ func _on_requested_open_file(path: String) -> void:
 func on_begin_node_move() -> void:
     moved_nodes_positions.clear()
     var detach_from_groups: bool = Util.is_shift_pressed()
-    var selected_nodes: Array[GraphNode] = get_selected_gns()
-    for gn in selected_nodes:
+    var selected_nodes: Array[GraphElement] = get_selected_ges()
+    var moved_nodes: Array[GraphElement] = []
+    for ge in selected_nodes:
+        moved_nodes.append(ge)
+        if ge is GraphFrame:
+            var group_member_names: Array[StringName] = get_attached_nodes_of_frame(ge.name)
+            for member_name in group_member_names:
+                moved_nodes.append(get_node(NodePath(member_name)))
+
+    var sel_groups: Dictionary[GraphElement, GraphFrame]
+    if detach_from_groups:
+        sel_groups = get_graph_elements_cur_groups(selected_nodes)
+
+    for ge in moved_nodes:
         if detach_from_groups:
-            detach_graph_element_from_frame(gn.name)
-        moved_nodes_positions[gn] = gn.position_offset
+            var this_nodes_group: GraphFrame = sel_groups[ge]
+            if this_nodes_group not in moved_nodes:
+                remove_ge_from_group(ge, sel_groups[ge], true)
+        moved_nodes_positions[ge] = ge.position_offset
+
+func get_graph_elements_cur_groups(ges: Array[GraphElement]) -> Dictionary[GraphElement, GraphFrame]:
+    var group_names: Dictionary[GraphElement, GraphFrame] = {}
+    var group_memeber_names: Dictionary[String, Array] = {}
+    var named_groups: Dictionary[String, GraphFrame] = {}
+    for group in get_all_groups():
+        named_groups[group.name] = group
+        var group_members: Array[StringName] = get_attached_nodes_of_frame(group.name)
+        group_memeber_names[group.name] = group_members
+
+    for ge in ges:
+        for group_name in group_memeber_names.keys():
+            if ge.name in group_memeber_names[group_name]:
+                group_names[ge] = named_groups[group_name]
+                break
+    return group_names
 
 func on_end_node_move() -> void:
-    var selected_nodes: Array[GraphNode] = get_selected_gns()
+    _end_node_move_deferred.call_deferred()
+
+func _end_node_move_deferred() -> void:
+    var selected_nodes: Array[GraphElement] = get_selected_ges()
     # For now I'm keeping the undo step of moving and inserting into the connection separate
     create_move_nodes_undo_step(selected_nodes)
     if selected_nodes.size() == 1 and selected_nodes[0] is CustomGraphNode:
@@ -1862,45 +1945,103 @@ func get_conn_info_value_type(conn_info: Dictionary) -> String:
         push_error("get_conn_info_value_type: to node %s not found or is not CustomGraphNode" % conn_info["to_node"])
     return to_gn.node_type_schema["output_value_type"]
 
-func _set_gns_offsets(new_positions: Dictionary[GraphNode, Vector2]) -> void:
-    for gn in new_positions.keys():
-        gn.position_offset = new_positions[gn]
+func _set_ges_offsets(new_positions: Dictionary[GraphElement, Vector2]) -> void:
+    for ge in new_positions.keys():
+        ge.position_offset = new_positions[ge]
 
-func create_move_nodes_undo_step(moved_nodes: Array[GraphNode]) -> void:
+func create_move_nodes_undo_step(moved_nodes: Array[GraphElement]) -> void:
     unedited = false
     if moved_nodes.size() == 0:
         return
-    var new_positions: Dictionary[GraphNode, Vector2] = {}
-    for gn in moved_nodes:
-        new_positions[gn] = gn.position_offset
+
+    var removed_group_relations: Array[Dictionary] = cur_removed_group_relations.duplicate_deep()
+    var added_group_relations: Array[Dictionary] = cur_added_group_relations.duplicate_deep()
+    
+    prints("move nodes undo step: num removed group relations: %d, num added group relations: %d" % [removed_group_relations.size(), added_group_relations.size()])
+
+    var new_positions: Dictionary[GraphElement, Vector2] = {}
+    for ge in moved_nodes:
+        new_positions[ge] = ge.position_offset
     undo_manager.create_action("Move Nodes")
-    undo_manager.add_do_method(_set_gns_offsets.bind(new_positions))
-    undo_manager.add_undo_method(_set_gns_offsets.bind(moved_nodes_positions.duplicate_deep()))
+
+    undo_manager.add_do_method(_set_ges_offsets.bind(new_positions))
+    if removed_group_relations.size() > 0:
+        undo_manager.add_do_method(_break_group_relations.bind(removed_group_relations))
+    if added_group_relations.size() > 0:
+        undo_manager.add_do_method(_assign_group_relations.bind(added_group_relations))
+
+    undo_manager.add_undo_method(_set_ges_offsets.bind(moved_nodes_positions.duplicate_deep()))
+    if added_group_relations.size() > 0:
+        undo_manager.add_undo_method(_break_group_relations.bind(added_group_relations))
+    if removed_group_relations.size() > 0:
+        undo_manager.add_undo_method(_assign_group_relations.bind(removed_group_relations, true))
+
     undo_manager.commit_action(false)
+
+func _break_group_relations(group_relations: Array[Dictionary]) -> void:
+    for group_relation in group_relations:
+        _break_group_relation(group_relation)
+
+func remove_ge_from_group(ge: GraphElement, group: GraphFrame, with_undo: bool) -> void:
+    var group_relation: = {"group": group, "member": ge}
+    _break_group_relation(group_relation)
+    if with_undo:
+        cur_removed_group_relations.append(group_relation)
+
+func _break_group_relation(group_relation: Dictionary) -> void:
+    var group: = group_relation["group"] as GraphFrame
+    var member_elements: = get_attached_nodes_of_frame(group.name)
+    var member_graph_element: = group_relation["member"] as GraphElement
+    if member_graph_element.name in member_elements:
+        detach_graph_element_from_frame(member_graph_element.name)
+
+func _assign_group_relations(group_relations: Array[Dictionary], extra_debug: bool = false) -> void:
+    for group_relation in group_relations:
+        if extra_debug:
+            prints("assigning group relation: %s -> %s" % [group_relation["group"].name, group_relation["member"].name])
+        _assign_group_relation(group_relation)
+
+func add_ge_to_group(ge: GraphElement, group: GraphFrame) -> void:
+    _assign_group_relation({"group": group, "member": ge})
+
+func add_ges_to_group(ges: Array[GraphElement], group: GraphFrame) -> void:
+    var ge_names: Array = []
+    for ge in ges:
+        ge_names.append(ge.name)
+    _attach_ge_names_to_group(ge_names, group.name)
+
+func _attach_ge_names_to_group(ge_names: Array, group_name: StringName) -> void:
+    for ge_name in ge_names:
+        attach_graph_element_to_frame(ge_name, group_name)
+
+func _assign_group_relation(group_relation: Dictionary) -> void:
+    var group: = group_relation["group"] as GraphFrame
+    var member_graph_element: = group_relation["member"] as GraphElement
+    attach_graph_element_to_frame(member_graph_element.name, group.name)
 
 ## Undo/Redo registering for actions which add or remove nodes and connections between nodes
 ## This method does not do any adding or removing itself, so that still needs to be done before or after calling
-## before calling, set cur_added_connections, cur_removed_connections, cur_connection_added_gns, and cur_connection_removed_gns
+## before calling, set cur_added_connections, cur_removed_connections, cur_connection_added_ges, and cur_connection_removed_ges
 ## does not currently support adding and removing graph nodes during the same step
 func create_undo_connection_change_step() -> void:
     unedited = false
-    var added_gns: Array[GraphNode] = cur_connection_added_gns.duplicate_deep()
-    var removed_gns: Array[GraphNode] = cur_connection_removed_gns.duplicate_deep()
+    var added_ges: Array[GraphElement] = cur_connection_added_ges.duplicate()
+    var removed_ges: Array[GraphElement] = cur_connection_removed_ges.duplicate()
     var added_conns: Array[Dictionary] = cur_added_connections.duplicate_deep()
     var removed_conns: Array[Dictionary] = cur_removed_connections.duplicate_deep()
-    cur_connection_added_gns.clear()
-    cur_connection_removed_gns.clear()
+    cur_connection_added_ges.clear()
+    cur_connection_removed_ges.clear()
     cur_added_connections.clear()
     cur_removed_connections.clear()
     
-    if added_gns.size() > 0 and removed_gns.size() > 0:
+    if added_ges.size() > 0 and removed_ges.size() > 0:
         print_debug("Trying to add and remove graph nodes in the same undo step")
         return
     
     var undo_step_name: = "Connection Change"
-    if added_gns.size() > 0:
+    if added_ges.size() > 0:
         undo_step_name = "Add Nodes With Connections"
-    elif removed_gns.size() > 0:
+    elif removed_ges.size() > 0:
         undo_step_name = "Remove Nodes (With Connections)"
 
     undo_manager.create_action(undo_step_name)
@@ -1908,60 +2049,63 @@ func create_undo_connection_change_step() -> void:
     # careful of the order of operations
     # we make sure to add relevant nodes before trying to connect them, and remove them after removing their connections
     # REDOS
-    if added_gns.size() > 0:
-        var the_ans: Dictionary[GraphNode, HyAssetNode] = {}
-        for the_gn in added_gns:
-            if the_gn.get_meta("hy_asset_node_id", ""):
-                var the_an: HyAssetNode = an_lookup.get(the_gn.get_meta("hy_asset_node_id", ""))
-                the_ans[the_gn] = the_an
-        undo_manager.add_do_method(redo_add_gns.bind(added_gns, the_ans))
+    if added_ges.size() > 0:
+        var the_ans: Dictionary[GraphElement, HyAssetNode] = {}
+        for the_ge in added_ges:
+            if the_ge.get_meta("hy_asset_node_id", ""):
+                var the_an: HyAssetNode = an_lookup.get(the_ge.get_meta("hy_asset_node_id", ""))
+                the_ans[the_ge] = the_an
+        undo_manager.add_do_method(redo_add_ges.bind(added_ges, the_ans))
 
     if added_conns.size() > 0:
         undo_manager.add_do_method(add_multiple_connections.bind(added_conns, false))
     if removed_conns.size() > 0:
         undo_manager.add_do_method(remove_multiple_connections.bind(removed_conns, false))
 
-    if removed_gns.size() > 0:
-        undo_manager.add_do_method(redo_remove_gns.bind(removed_gns))
+    if removed_ges.size() > 0:
+        undo_manager.add_do_method(redo_remove_ges.bind(removed_ges))
     
     # UNDOS
-    if removed_gns.size() > 0:
-        var the_ans: Dictionary[GraphNode, HyAssetNode] = {}
-        for the_gn in removed_gns:
-            print("collecting asset nodes for gn being removed: %s" % the_gn.name)
-            print("gn asset node id: %s" % the_gn.get_meta("hy_asset_node_id", ""))
-            if the_gn.get_meta("hy_asset_node_id", ""):
-                var the_an: HyAssetNode = an_lookup.get(the_gn.get_meta("hy_asset_node_id", ""))
-                print("asset node: %s" % the_an)
-                the_ans[the_gn] = the_an
-        undo_manager.add_undo_method(undo_remove_gns.bind(removed_gns, the_ans))
+    if removed_ges.size() > 0:
+        var the_ans: Dictionary[GraphElement, HyAssetNode] = {}
+        for the_ge in removed_ges:
+            print("collecting asset nodes for ge being removed: %s" % the_ge.name)
+            var an_id: String = the_ge.get_meta("hy_asset_node_id", "")
+            if an_id:
+                var the_an: HyAssetNode = an_lookup.get(an_id)
+                print("ge asset node id: %s, asset node: %s" % [an_id, the_an])
+                the_ans[the_ge] = the_an
+        undo_manager.add_undo_method(undo_remove_ges.bind(removed_ges, the_ans))
 
     if added_conns.size() > 0:
         undo_manager.add_undo_method(remove_multiple_connections.bind(added_conns, false))
     if removed_conns.size() > 0:
         undo_manager.add_undo_method(add_multiple_connections.bind(removed_conns, false))
 
-    if added_gns.size() > 0:
-        undo_manager.add_undo_method(undo_add_gns.bind(added_gns))
+    if added_ges.size() > 0:
+        undo_manager.add_undo_method(undo_add_ges.bind(added_ges))
     
     undo_manager.commit_action(false)
 
-func remove_gns_with_connections_and_undo(gns_to_remove: Array[GraphNode]) -> void:
-    if (cur_connection_added_gns.size() > 0 or
-        cur_connection_removed_gns.size() > 0 or
+func remove_ges_with_connections_and_undo(ges_to_remove: Array[GraphElement]) -> void:
+    if (cur_connection_added_ges.size() > 0 or
+        cur_connection_removed_ges.size() > 0 or
         cur_added_connections.size() > 0 or
         cur_removed_connections.size() > 0):
             push_error("Trying to remove graph nodes during a pending undo step")
             return
 
     var connections_needing_removal: Array[Dictionary] = []
-    for gn in gns_to_remove:
+    for graph_element in ges_to_remove:
+        var gn: = graph_element as CustomGraphNode
+        if not gn:
+            continue
         var gn_connections: Array[Dictionary] = raw_connections(gn)
         for conn_info in gn_connections:
             if conn_info["from_node"] == gn.name:
                 # exclude outgoing connections to other removed nodes (they would be duplicates of the below case)
-                var to_gn: = get_node(NodePath(conn_info["to_node"])) as GraphNode
-                if to_gn in gns_to_remove:
+                var to_gn: = get_node(NodePath(conn_info["to_node"])) as GraphElement
+                if to_gn in ges_to_remove:
                     continue
                 connections_needing_removal.append(conn_info)
             elif conn_info["to_node"] == gn.name:
@@ -1970,73 +2114,82 @@ func remove_gns_with_connections_and_undo(gns_to_remove: Array[GraphNode]) -> vo
                 print_debug("connection neither from nor to the node it was retreived by? node: %s, connection info: %s" % [gn.name, conn_info])
 
     if not connections_needing_removal:
-        remove_unconnected_gns_with_undo(gns_to_remove)
+        remove_unconnected_ges_with_undo(ges_to_remove)
     else:
-        cur_connection_removed_gns.append_array(gns_to_remove)
+        cur_connection_removed_ges.append_array(ges_to_remove)
         cur_removed_connections.append_array(connections_needing_removal)
         remove_multiple_connections(connections_needing_removal, false)
         create_undo_connection_change_step()
-    remove_multiple_gns_without_undo(gns_to_remove)
+    remove_multiple_ges_without_undo(ges_to_remove)
 
-func remove_multiple_gns_without_undo(gns_to_remove: Array[GraphNode]) -> void:
-    for gn in gns_to_remove:
-        remove_graph_node_without_undo(gn)
+func remove_multiple_ges_without_undo(ges_to_remove: Array[GraphElement]) -> void:
+    for ge in ges_to_remove:
+        remove_ge_without_undo(ge)
 
-func remove_graph_node_without_undo(gn: GraphNode) -> void:
-    var an_id: String = gn.get_meta("hy_asset_node_id", "")
+func remove_ge_without_undo(ge: GraphElement) -> void:
+    var an_id: String = ge.get_meta("hy_asset_node_id", "")
     if an_id:
         var asset_node: HyAssetNode = an_lookup.get(an_id, null)
         if asset_node:
             remove_asset_node(asset_node)
-    remove_child(gn)
+    remove_child(ge)
 
-func remove_unconnected_gns_with_undo(gns_to_remove: Array[GraphNode]) -> void:
+func remove_unconnected_ges_with_undo(ges_to_remove: Array[GraphElement]) -> void:
     unedited = false
     undo_manager.create_action("Remove Graph Nodes")
-    var removed_asset_nodes: Dictionary[GraphNode, HyAssetNode] = {}
-    for the_gn in gns_to_remove:
-        if the_gn.get_meta("hy_asset_node_id", ""):
-            removed_asset_nodes[the_gn] = an_lookup[the_gn.get_meta("hy_asset_node_id")]
+    var removed_asset_nodes: Dictionary[GraphElement, HyAssetNode] = {}
+    for the_ge in ges_to_remove:
+        if the_ge.get_meta("hy_asset_node_id", ""):
+            removed_asset_nodes[the_ge] = an_lookup[the_ge.get_meta("hy_asset_node_id")]
     
-    var removed_gn_list: = gns_to_remove.duplicate()
+    var removed_ge_list: = ges_to_remove.duplicate()
 
-    undo_manager.add_do_method(redo_remove_gns.bind(removed_gn_list))
+    undo_manager.add_do_method(redo_remove_ges.bind(removed_ge_list))
     
-    undo_manager.add_undo_method(undo_remove_gns.bind(removed_gn_list, removed_asset_nodes))
+    undo_manager.add_undo_method(undo_remove_ges.bind(removed_ge_list, removed_asset_nodes))
 
     undo_manager.commit_action(false)
 
-func create_add_new_gn_undo_step(the_new_gn: GraphNode) -> void:
-    create_add_new_gns_undo_step([the_new_gn])
+func create_add_new_ge_undo_step(the_new_ge: GraphElement) -> void:
+    create_add_new_ges_undo_step([the_new_ge])
 
-func create_add_new_gns_undo_step(new_gns: Array[GraphNode]) -> void:
+func create_add_new_ges_undo_step(new_ges: Array[GraphElement]) -> void:
     unedited = false
-    undo_manager.create_action("Add New Graph Node")
-    var added_asset_nodes: Dictionary[GraphNode, HyAssetNode] = {}
-    for the_gn in new_gns:
-        if the_gn.get_meta("hy_asset_node_id", ""):
-            added_asset_nodes[the_gn] = an_lookup[the_gn.get_meta("hy_asset_node_id")]
+    undo_manager.create_action("Add New Graph Nodes")
+    var added_asset_nodes: Dictionary[GraphElement, HyAssetNode] = {}
+    for the_ge in new_ges:
+        var an_id: String = the_ge.get_meta("hy_asset_node_id", "")
+        if an_id:
+            added_asset_nodes[the_ge] = an_lookup[an_id]
 
-    undo_manager.add_do_method(redo_add_gns.bind(new_gns, added_asset_nodes))
+    undo_manager.add_do_method(redo_add_ges.bind(new_ges, added_asset_nodes))
     
-    undo_manager.add_undo_method(undo_add_gns.bind(new_gns))
+    undo_manager.add_undo_method(undo_add_ges.bind(new_ges))
 
     undo_manager.commit_action(false)
 
-func undo_remove_gns(the_gns: Array[GraphNode], the_ans: Dictionary[GraphNode, HyAssetNode]) -> void:
-    for the_gn in the_gns:
-        print_debug("Undo remove GN: %s" % the_gn.name)
-        _undo_remove_gn(the_gn, the_ans[the_gn])
+func undo_remove_ges(the_ges: Array[GraphElement], the_ans: Dictionary[GraphElement, HyAssetNode]) -> void:
+    for the_ge in the_ges:
+        print_debug("Undo remove GE: %s" % the_ge.name)
+        _undo_remove_ge(the_ge, the_ans.get(the_ge, null))
 
-func _undo_remove_gn(the_graph_node: GraphNode, the_asset_node: HyAssetNode) -> void:
-    _undo_redo_add_gn_and_an(the_graph_node, the_asset_node)
+func _undo_remove_ge(the_graph_element: GraphElement, the_asset_node: HyAssetNode) -> void:
+    if the_asset_node:
+        assert(the_graph_element is GraphNode, "Graph element with asset node must be a GraphNode")
+        _undo_redo_add_gn_and_an(the_graph_element, the_asset_node)
+    else:
+        _undo_redo_add_ge(the_graph_element)
 
-func redo_add_gns(the_gns: Array[GraphNode], the_ans: Dictionary[GraphNode, HyAssetNode]) -> void:
-    for the_gn in the_gns:
-        redo_add_graph_node(the_gn, the_ans[the_gn])
+func redo_add_ges(the_ges: Array[GraphElement], the_ans: Dictionary[GraphElement, HyAssetNode]) -> void:
+    for the_ge in the_ges:
+        _redo_add_graph_element(the_ge, the_ans.get(the_ge, null))
 
-func redo_add_graph_node(the_graph_node: GraphNode, the_asset_node: HyAssetNode) -> void:
-    _undo_redo_add_gn_and_an(the_graph_node, the_asset_node)
+func _redo_add_graph_element(the_graph_element: GraphElement, the_asset_node: HyAssetNode) -> void:
+    if the_asset_node:
+        assert(the_graph_element is GraphNode, "Graph element with asset node must be a GraphNode")
+        _undo_redo_add_gn_and_an(the_graph_element as GraphNode, the_asset_node)
+    else:
+        _undo_redo_add_ge(the_graph_element)
 
 func _undo_redo_add_gn_and_an(the_graph_node: GraphNode, the_asset_node: HyAssetNode) -> void:
     _register_asset_node(the_asset_node)
@@ -2044,26 +2197,29 @@ func _undo_redo_add_gn_and_an(the_graph_node: GraphNode, the_asset_node: HyAsset
     gn_lookup[the_asset_node.an_node_id] = the_graph_node
     add_child(the_graph_node, true)
 
-func redo_remove_gns(the_gns: Array[GraphNode]) -> void:
-    for the_gn in the_gns:
-        _redo_remove_gn(the_gn)
+func _undo_redo_add_ge(the_graph_element: GraphElement) -> void:
+    add_child(the_graph_element, true)
 
-func _redo_remove_gn(the_graph_node: GraphNode) -> void:
-    _undo_redo_remove_gn(the_graph_node)
+func redo_remove_ges(the_ges: Array[GraphElement]) -> void:
+    for the_ge in the_ges:
+        _redo_remove_ge(the_ge)
 
-func undo_add_gns(the_gns: Array[GraphNode]) -> void:
-    for the_gn in the_gns:
-        undo_add_graph_node(the_gn)
+func _redo_remove_ge(the_graph_element: GraphElement) -> void:
+    _undo_redo_remove_ge(the_graph_element)
 
-func undo_add_graph_node(the_graph_node: GraphNode) -> void:
-    _undo_redo_remove_gn(the_graph_node)
+func undo_add_ges(the_ges: Array[GraphElement]) -> void:
+    for the_ge in the_ges:
+        undo_add_graph_element(the_ge)
 
-func _undo_redo_remove_gn(the_graph_node: GraphNode) -> void:
-    if the_graph_node.get_meta("hy_asset_node_id", ""):
-        var the_asset_node: HyAssetNode = an_lookup[the_graph_node.get_meta("hy_asset_node_id", "")]
+func undo_add_graph_element(the_graph_element: GraphElement) -> void:
+    _undo_redo_remove_ge(the_graph_element)
+
+func _undo_redo_remove_ge(the_graph_element: GraphElement) -> void:
+    if the_graph_element.get_meta("hy_asset_node_id", ""):
+        var an_id: String = the_graph_element.get_meta("hy_asset_node_id", "")
+        var the_asset_node: HyAssetNode = an_lookup[an_id]
         remove_asset_node(the_asset_node)
-    remove_child(the_graph_node)
-
+    remove_child(the_graph_element)
 
 func _on_requested_save_file(file_path: String) -> void:
     await get_tree().process_frame
@@ -2194,11 +2350,32 @@ func serialize_node_editor_metadata() -> Dictionary:
     serialized_metadata["$FloatingNodes"] = floating_trees_serialized
     serialized_metadata["$WorkspaceID"] = hy_workspace_id
     
+    serialized_metadata["$Groups"] = serialize_groups()
+    
     for other_key in all_meta.keys():
         if serialized_metadata.has(other_key):
             continue
         serialized_metadata[other_key] = all_meta[other_key]
     return serialized_metadata
+
+func serialize_groups() -> Array[Dictionary]:
+    var groups: Array[Dictionary] = []
+    for group in get_all_groups():
+        groups.append(serialize_group(group))
+    return groups
+
+func serialize_group(group: GraphFrame) -> Dictionary:
+    var serialized_group: Dictionary = {}
+    var adjusted_pos: = group.position_offset / json_positions_scale
+    var adjusted_size: = group.size / json_positions_scale
+    serialized_group["$name"] = group.title
+    serialized_group["$Position"] = {
+        "$x": adjusted_pos.x,
+        "$y": adjusted_pos.y,
+    }
+    serialized_group["$width"] = adjusted_size.x
+    serialized_group["$height"] = adjusted_size.y
+    return serialized_group
 
 func get_metadata_for_gns(gns: Array[GraphNode], scaled_positions: bool, relative_to_offset: Vector2 = Vector2.ZERO) -> Dictionary:
     var node_metadata: Dictionary = {}
@@ -2256,15 +2433,15 @@ func on_new_node_type_picked(node_type: String) -> void:
             next_drop_has_connection["from_port"] = input_conn_index
             new_gn.position_offset += input_port_drop_first_offset + (input_port_drop_additional_offset * input_conn_index)
 
-        snap_gn(new_gn)
-        cur_connection_added_gns.append(new_gn)
+        snap_ge(new_gn)
+        cur_connection_added_ges.append(new_gn)
         add_connection(next_drop_has_connection)
     else:
         var screen_center_pos: = get_viewport().get_visible_rect().size / 2
         new_gn = make_and_add_graph_node(new_an, screen_center_pos)
         new_gn.position_offset -= new_gn.size / 2
-        snap_gn(new_gn)
-        create_add_new_gn_undo_step(new_gn)
+        snap_ge(new_gn)
+        create_add_new_ge_undo_step(new_gn)
 
     
 func get_dissolve_info(graph_node: GraphNode) -> Dictionary:
@@ -2370,9 +2547,9 @@ func dissolve_gn_with_undo(graph_node: CustomGraphNode) -> void:
     
     multi_connection_change = false
 
-    cur_connection_removed_gns.append(graph_node)
+    cur_connection_removed_ges.append(graph_node)
     create_undo_connection_change_step()
-    remove_graph_node_without_undo(graph_node)
+    remove_ge_without_undo(graph_node)
 
 func cut_all_connections_with_undo(graph_node: CustomGraphNode) -> void:
     var all_connections: Array[Dictionary] = raw_connections(graph_node)
@@ -2383,8 +2560,11 @@ func _on_graph_node_right_clicked(graph_node: CustomGraphNode) -> void:
         return
     if not graph_node.selectable:
         return
+    ready_context_menu_for(graph_node)
+
+func ready_context_menu_for(for_node: Node) -> void:
     context_menu_movement_acc = 24
-    context_menu_gn = graph_node
+    context_menu_target_node = for_node
     context_menu_ready = true
 
 func _on_graph_node_titlebar_double_clicked(graph_node: CustomGraphNode) -> void:
@@ -2417,18 +2597,17 @@ func get_subtree_gns(graph_node: CustomGraphNode) -> Array[CustomGraphNode]:
 
 
 func cancel_context_menu() -> void:
-    context_menu_gn = null
+    reset_context_menu_target()
+
+func reset_context_menu_target() -> void:
+    context_menu_target_node = null
     context_menu_ready = false
 
 func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
-    context_menu_gn = null
-    context_menu_ready = false
-    var multiple_selected: bool = false
+    reset_context_menu_target()
     if not graph_node.selected:
         deselect_all()
         set_selected(graph_node)
-    elif get_selected_gns().size() > 1:
-        multiple_selected = true
     
     var is_asset_node: bool = graph_node.get_meta("hy_asset_node_id", "") != ""
 
@@ -2436,19 +2615,10 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
 
     context_menu.name = "NodeContextMenu"
     
-    var plural_s: = "s" if multiple_selected else ""
-    
     context_menu.add_item("Edit Title", ContextMenuItems.EDIT_TITLE)
-
     context_menu.add_separator()
     
-    context_menu.add_item("Copy Node" + plural_s, ContextMenuItems.COPY_NODES)
-    context_menu.add_item("Cut Node" + plural_s, ContextMenuItems.CUT_NODES)
-
-    context_menu.add_item("Delete Node" + plural_s, ContextMenuItems.DELETE_NODES)
-    if not can_delete_gn(graph_node):
-        var delete_idx: int = context_menu.get_item_index(ContextMenuItems.DELETE_NODES)
-        context_menu.set_item_disabled(delete_idx, true)
+    set_context_menu_common_options(context_menu)
     
     if is_asset_node:
         context_menu.add_item("Dissolve Node", ContextMenuItems.DISSOLVE_NODES)
@@ -2458,8 +2628,6 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
         context_menu.id_pressed.connect(on_node_context_menu_id_pressed.bind(graph_node))
         
         context_menu.add_item("Cut All Connections", ContextMenuItems.BREAK_CONNECTIONS)
-    
-    context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
     
     if is_asset_node:
         context_menu.add_separator()
@@ -2471,32 +2639,82 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
     context_menu.position = Util.get_context_menu_pos(get_global_mouse_position())
     context_menu.popup()
 
-func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_gn: CustomGraphNode) -> void:
+func actually_right_click_group(group: GraphFrame) -> void:
+    reset_context_menu_target()
+    if not group.selected:
+        group.selected = true
+    var context_menu: PopupMenu = PopupMenu.new()
+    context_menu.name = "GroupContextMenu"
+    
+    context_menu.add_item("Edit Group Title", ContextMenuItems.EDIT_GROUP_TITLE)
+    context_menu.add_separator()
+    
+    set_context_menu_common_options(context_menu)
+    
+    context_menu.position = Util.get_context_menu_pos(get_global_mouse_position())
+    context_menu.popup()
+
+func set_context_menu_common_options(context_menu: PopupMenu) -> PopupMenu:
+    var selected_nodes: Array[GraphElement] = get_selected_ges()
+
+    var multiple_selected: bool = selected_nodes.size() > 1
+    
+    var plural_s: = "s" if multiple_selected else ""
+
+    context_menu.add_item("Copy Node" + plural_s, ContextMenuItems.COPY_NODES)
+    context_menu.add_item("Cut Node" + plural_s, ContextMenuItems.CUT_NODES)
+
+    context_menu.add_item("Delete Node" + plural_s, ContextMenuItems.DELETE_NODES)
+    if not multiple_selected and not can_delete_ge(selected_nodes[0]):
+        var delete_idx: int = context_menu.get_item_index(ContextMenuItems.DELETE_NODES)
+        context_menu.set_item_disabled(delete_idx, true)
+    
+    context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
+    return context_menu
+
+func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_ge: GraphElement) -> void:
     match node_context_menu_id:
         ContextMenuItems.COPY_NODES:
             _copy_request()
         ContextMenuItems.CUT_NODES:
             _cut_request()
         ContextMenuItems.DELETE_NODES:
-            _delete_request_refs(get_selected_gns())
+            _delete_request_refs(get_selected_ges())
         ContextMenuItems.DISSOLVE_NODES:
-            dissolve_gn_with_undo(on_gn)
+            if on_ge is CustomGraphNode:
+                dissolve_gn_with_undo(on_ge)
         ContextMenuItems.BREAK_CONNECTIONS:
-            cut_all_connections_with_undo(on_gn)
+            if on_ge is CustomGraphNode:
+                cut_all_connections_with_undo(on_ge)
         ContextMenuItems.DUPLICATE_NODES:
-            duplicate_selected_gns()
+            duplicate_selected_ges()
         ContextMenuItems.SELECT_SUBTREE:
-            select_subtree(on_gn)
+            if on_ge is CustomGraphNode:
+                select_subtree(on_ge)
         
         ContextMenuItems.EDIT_TITLE:
-            open_title_edit(on_gn)
+            if on_ge is CustomGraphNode:
+                open_gn_title_edit(on_ge)
+        ContextMenuItems.EDIT_GROUP_TITLE:
+            if on_ge is GraphFrame:
+                open_group_title_edit(on_ge)
 
-func open_title_edit(graph_node: CustomGraphNode) -> void:
+func open_gn_title_edit(graph_node: CustomGraphNode) -> void:
     var title_edit_popup: = preload("res://ui/node_title_edit_popup.tscn").instantiate() as PopupPanel
     title_edit_popup.current_title = graph_node.title
     title_edit_popup.new_title_submitted.connect(change_gn_title.bind(graph_node))
     add_child(title_edit_popup, true)
     title_edit_popup.position = Util.get_context_menu_pos(graph_node.get_global_position())
+    title_edit_popup.position -= Vector2i.ONE * 10
+    title_edit_popup.exclusive = true
+    title_edit_popup.popup()
+
+func open_group_title_edit(group: GraphFrame) -> void:
+    var title_edit_popup: = preload("res://ui/node_title_edit_popup.tscn").instantiate() as PopupPanel
+    title_edit_popup.current_title = group.title
+    title_edit_popup.new_title_submitted.connect(change_group_title.bind(group))
+    add_child(title_edit_popup, true)
+    title_edit_popup.position = Util.get_context_menu_pos(group.get_global_position())
     title_edit_popup.position -= Vector2i.ONE * 10
     title_edit_popup.exclusive = true
     title_edit_popup.popup()
@@ -2514,13 +2732,28 @@ func _set_gn_title(graph_node: CustomGraphNode, new_title: String) -> void:
         if an:
             an.title = new_title
 
-func create_change_title_undo_step(graph_node: CustomGraphNode, old_title: String) -> void:
+func change_group_title(new_title: String, group: GraphFrame) -> void:
     unedited = false
-    var new_title: String = graph_node.title
+    var old_title: String = group.title
+    _set_group_title(group, new_title)
+    create_change_title_undo_step(group, old_title)
+
+func _set_group_title(group: GraphFrame, new_title: String) -> void:
+    group.title = new_title
+
+func create_change_title_undo_step(graph_element: GraphElement, old_title: String) -> void:
+    if not (graph_element is CustomGraphNode or graph_element is GraphFrame):
+        return
+    unedited = false
+    var new_title: String = graph_element.title
     undo_manager.create_action("Change Node Title")
     
-    undo_manager.add_do_method(_set_gn_title.bind(graph_node, new_title))
-    undo_manager.add_undo_method(_set_gn_title.bind(graph_node, old_title))
+    if graph_element is CustomGraphNode:
+        undo_manager.add_do_method(_set_gn_title.bind(graph_element, new_title))
+        undo_manager.add_undo_method(_set_gn_title.bind(graph_element, old_title))
+    else:
+        undo_manager.add_do_method(_set_group_title.bind(graph_element, new_title))
+        undo_manager.add_undo_method(_set_group_title.bind(graph_element, old_title))
 
     undo_manager.commit_action(false)
 
@@ -2564,6 +2797,13 @@ func can_delete_gn(graph_node: CustomGraphNode) -> bool:
         return false
     return true
 
+func can_delete_ge(graph_element: GraphElement) -> bool:
+    if graph_element is CustomGraphNode:
+        return can_delete_gn(graph_element)
+    elif graph_element is GraphFrame:
+        return true
+    return false
+
 func deserialize_and_add_group_and_attach_graph_nodes(group_data: Dictionary) -> GraphFrame:
     var new_group: = deserialize_and_add_group(group_data, true, true)
     var ges_to_attach: Array[GraphElement] = []
@@ -2585,7 +2825,7 @@ func deserialize_and_add_group_and_attach_graph_nodes(group_data: Dictionary) ->
             var child_titlebar_center: Vector2 = child_hbox_rect.get_center()
             if new_group_rect.has_point(child_titlebar_center):
                 ges_to_attach.append(child)
-    attach_ges_to_group(ges_to_attach, new_group)
+    add_ges_to_group(ges_to_attach, new_group)
     return new_group
             
 
@@ -2639,15 +2879,10 @@ func new_test_group() -> void:
     new_group.position_offset = global_pos_to_position_offset(screen_center_pos)
     new_group.position_offset -= new_group.size / 2
 
-func attach_ges_to_group(ges: Array[GraphElement], group: GraphFrame) -> void:
-    var ge_names: Array = []
-    for ge in ges:
-        ge_names.append(ge.name)
-    _attach_ges_to_group(ge_names, group.name)
-
 func _link_to_group_request(graph_element_names: Array, group_name: StringName) -> void:
-    _attach_ges_to_group(graph_element_names, group_name)
-
-func _attach_ges_to_group(ge_names: Array, group_name: StringName) -> void:
-    for ge_name in ge_names:
-        attach_graph_element_to_frame(ge_name, group_name)
+    prints("link to group request")
+    _attach_ge_names_to_group(graph_element_names, group_name)
+    cur_added_group_relations.append({
+        "group": get_node(NodePath(group_name)) as GraphFrame,
+        "member": get_node(NodePath(graph_element_names[0])) as GraphElement,
+    })

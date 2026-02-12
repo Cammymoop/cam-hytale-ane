@@ -85,27 +85,29 @@ func deserialize_clipboard_data_roots(parsed_clipboard: Dictionary, graph_edit: 
     graph_edit.asset_node_meta = prev_asset_node_meta
     return all_deserialized_ans
 
-func get_copied_asset_node_set(graph_edit: AssetNodeGraphEdit) -> Array[HyAssetNode]:
-    var copied_gns: Array[GraphNode] = graph_edit.copied_nodes.duplicate()
-    return graph_edit.get_an_set_for_graph_nodes(copied_gns)
-
 
 func serialize_copied_nodes(graph_edit: AssetNodeGraphEdit) -> String:
-    var center_of_mass: Vector2 = Util.average_graph_node_pos_offset(graph_edit.copied_nodes)
+    var copied_gns: Array[GraphNode] = []
+    for ge in graph_edit.copied_nodes:
+        if ge is CustomGraphNode:
+            copied_gns.append(ge)
+
+    var center_of_mass: Vector2 = Util.average_graph_element_pos_offset(graph_edit.copied_nodes)
+    var serialized_groups: Array[Dictionary] = graph_edit.serialize_groups()
     var serialized_data: Dictionary = {
         "what_is_this": "Clipboard data from Cam Hytale Asset Node Editor",
         "copied_from": "CamHytaleANE:%s" % graph_edit.get_plain_version(),
         "asset_node_data": [],
         "included_metadata": {
-            "node_metadata": graph_edit.get_metadata_for_gns(graph_edit.copied_nodes, false, center_of_mass),
+            "node_metadata": graph_edit.get_metadata_for_gns(copied_gns, false, center_of_mass),
             "hanging_connections": [],
             "links": [],
-            "groups": [],
+            "groups": serialized_groups,
         }
     }
-    var copied_an_set: Array[HyAssetNode] = get_copied_asset_node_set(graph_edit)
+
+    var copied_an_set: Array[HyAssetNode] = graph_edit.get_an_set_for_graph_nodes(copied_gns)
     var copied_an_roots: Array[HyAssetNode] = graph_edit.get_an_roots_within_set(copied_an_set)
-    print("serializing %s asset nodes" % copied_an_set.size())
     for copied_an_root in copied_an_roots:
         var serialized_tree: = copied_an_root.serialize_within_set(SchemaManager.schema, graph_edit.gn_lookup, copied_an_set)
         serialized_data["asset_node_data"].append(serialized_tree)

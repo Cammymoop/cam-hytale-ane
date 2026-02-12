@@ -11,10 +11,10 @@ func random_str(length: int) -> String:
     the_str += ("%04x" % (randi() & 0xFFFF)).substr(0, length)
     return the_str
 
-func average_graph_node_pos_offset(gns: Array[GraphNode]) -> Vector2:
+func average_graph_element_pos_offset(ges: Array[GraphElement]) -> Vector2:
     var offsets: Array[Vector2] = []
-    for gn in gns:
-        offsets.append(gn.position_offset)
+    for ge in ges:
+        offsets.append(ge.position_offset)
     return average_vector2(offsets)
     
 func average_vector2(vectors: Array[Vector2]) -> Vector2:
