@@ -239,6 +239,18 @@ corner_radius_top_right = 3
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gngh3"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uww5w"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 2.0
+bg_color = Color(0.17654261, 0.34860754, 0.306728, 1)
+border_width_bottom = 2
+border_color = Color(0.05490196, 0.16862746, 0.14117648, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_detail = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnost"]
 content_margin_left = 14.0
 content_margin_top = 4.0
@@ -439,6 +451,7 @@ GraphNode/colors/resizer_color = Color(0.875, 0.875, 0.875, 1)
 GraphNode/constants/port_h_offset = 0
 GraphNode/constants/separation = 2
 GraphNode/icons/port = ExtResource("2_6tukj")
+GraphNode/styles/group_indicator_tab = SubResource("StyleBoxFlat_uww5w")
 GraphNode/styles/panel = SubResource("StyleBoxFlat_qnost")
 GraphNode/styles/panel_focus = SubResource("StyleBoxFlat_1bvp3")
 GraphNode/styles/panel_selected = SubResource("StyleBoxFlat_5vw27")

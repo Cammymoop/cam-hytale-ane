@@ -8,6 +8,9 @@ var node_type_schema: Dictionary
 var settings_syncer: SettingsSyncer = null
 @export_storage var theme_color_output_type: String = ""
 
+var is_in_graph_group: bool = false
+var in_group_with_theme: Theme = null
+
 # For usage in the inpector at runtime to jump to the asset node easier
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR)
 var found_asset_node: HyAssetNode = null
@@ -43,6 +46,7 @@ func _gui_input(event: InputEvent) -> void:
     if not event is InputEventMouseButton:
         return
     if event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
+        prints("right clicked on graph node: %s" % title)
         was_right_clicked.emit(self)
     if event.is_pressed() and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
         if get_titlebar_hbox().get_global_rect().has_point(event.global_position):
@@ -120,3 +124,28 @@ func get_slot_control_nodes() -> Array[Control]:
             continue
         slot_control_nodes.append(child)
     return slot_control_nodes
+
+func update_is_in_graph_group(new_value: bool, group_theme: Theme = null) -> void:
+    is_in_graph_group = new_value
+    in_group_with_theme = group_theme
+    queue_redraw()
+
+func _draw() -> void:
+    # Draw indicator if this node is in a group
+    if is_in_graph_group:
+        var from_theme: = in_group_with_theme if in_group_with_theme else theme
+        if not from_theme:
+            from_theme = preload("res://ui/grey_theme.tres")
+        var indicator_stylebox: = from_theme.get_stylebox("group_indicator_tab", "GraphNode")
+
+        var gn_top_center: = Vector2(size.x / 2, 0)
+
+        var indicator_width: = maxf(indicator_stylebox.get_minimum_size().x, size.x * 0.5)
+        var indicator_height: = indicator_stylebox.get_minimum_size().y
+
+        var indicator_rect: = Rect2(
+            gn_top_center.x - (indicator_width / 2), gn_top_center.y - indicator_height,
+            indicator_width, indicator_height
+        )
+        draw_style_box(indicator_stylebox, indicator_rect)
+    

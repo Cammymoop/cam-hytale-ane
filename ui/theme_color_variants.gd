@@ -97,6 +97,8 @@ func _make_theme_color_variant(color_name: String, color_color: Color) -> void:
     make_colored_duplicate_sb_flat.call("panel_selected", "GraphNode", true, true)
     make_colored_duplicate_sb_flat.call("titlebar", "GraphNode", true)
     make_colored_duplicate_sb_flat.call("titlebar_selected", "GraphNode", true, true)
+    # custom stylebox for tab showing group membership
+    make_colored_duplicate_sb_flat.call("group_indicator_tab", "GraphNode", true, true)
 
     make_colored_duplicate_sb_flat.call("panel", "GraphFrame", true)
     make_colored_duplicate_sb_flat.call("panel_selected", "GraphFrame", true, true)

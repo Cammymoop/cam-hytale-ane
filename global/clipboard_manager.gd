@@ -21,8 +21,11 @@ func send_copied_nodes_to_clipboard(graph_edit: AssetNodeGraphEdit) -> void:
     DisplayServer.clipboard_set(data_stamp + serialized_data)
 
 func load_copied_nodes_from_clipboard(graph_edit: AssetNodeGraphEdit) -> bool:
-    if not enable_system_clipboard or not DisplayServer.clipboard_has():
+    if not enable_system_clipboard:
         print("checking for paste but clipboard is not enabled")
+        return false
+    if not DisplayServer.clipboard_has():
+        # No text to paste
         return false
     var raw_clipboard_data: String = DisplayServer.clipboard_get()
     if not raw_clipboard_data.begins_with("[CamHytaleANE_CLIPBOARD](("):

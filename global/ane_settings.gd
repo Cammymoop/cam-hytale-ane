@@ -2,6 +2,8 @@ extends Node
 
 var settings_file_path: String = "user://CHANE_settings.json"
 
+const MENU_ICON_SIZE: = 14
+
 @export var display_decimal_places: = 3
 @export var custom_display_scale: float = -1
 

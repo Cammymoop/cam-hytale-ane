@@ -295,6 +295,18 @@ content_margin_bottom = 4.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gngh3"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xl3hv"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 2.0
+bg_color = Color(0.35686275, 0.35686275, 0.35686275, 1)
+border_width_bottom = 2
+border_color = Color(0.15294118, 0.15294118, 0.15294118, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_detail = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tueky"]
 content_margin_left = 14.0
 content_margin_top = 4.0
@@ -495,6 +507,7 @@ GraphFrameTitleLabel/styles/normal = SubResource("StyleBoxEmpty_gngh3")
 GraphNode/colors/resizer_color = Color(0.875, 0.875, 0.875, 1)
 GraphNode/constants/port_h_offset = 0
 GraphNode/constants/separation = 2
+GraphNode/styles/group_indicator_tab = SubResource("StyleBoxFlat_xl3hv")
 GraphNode/styles/panel = SubResource("StyleBoxFlat_tueky")
 GraphNode/styles/panel_focus = SubResource("StyleBoxFlat_1bvp3")
 GraphNode/styles/panel_selected = SubResource("StyleBoxFlat_tkgfw")

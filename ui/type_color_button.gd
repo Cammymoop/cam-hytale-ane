@@ -4,8 +4,6 @@ signal type_color_changed
 
 const TypeColorsFlow = preload("res://ui/type_colors_flow.gd")
 
-const ICON_SIZE: = 14
-
 var type_name: String = ""
 var is_setup: = false
 
@@ -44,15 +42,10 @@ func update_visuals() -> void:
 func on_pressed() -> void:
     update_color_name_options()
 
-func get_icon_for_color(icon_color: Color) -> Texture2D:
-    var img: = Image.create(ICON_SIZE, ICON_SIZE, false, Image.FORMAT_RGB8)
-    img.fill(icon_color)
-    return ImageTexture.create_from_image(img)
-
 func update_color_name_options() -> void:
     popup_menu.clear()
     for color_name in ThemeColorVariants.get_theme_colors():
-        popup_menu.add_icon_item(get_icon_for_color(ThemeColorVariants.get_theme_color(color_name)), color_name)
+        popup_menu.add_icon_item(Util.get_icon_for_color(ThemeColorVariants.get_theme_color(color_name)), color_name)
 
 func reset_to_default() -> void:
     TypeColors.custom_color_names.erase(type_name)

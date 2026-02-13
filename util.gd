@@ -48,3 +48,9 @@ func is_ctrl_cmd_pressed() -> bool:
 
 func is_shift_pressed() -> bool:
     return Input.is_key_pressed(KEY_SHIFT)
+
+func get_icon_for_color(icon_color: Color) -> Texture2D:
+    var icon_size: = ANESettings.MENU_ICON_SIZE
+    var img: = Image.create(icon_size, icon_size, false, Image.FORMAT_RGB8)
+    img.fill(icon_color)
+    return ImageTexture.create_from_image(img)
