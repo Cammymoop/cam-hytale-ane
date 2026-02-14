@@ -2,17 +2,30 @@
 
 ## 0.3.2
 ### New Features:
-- Group support!
+- **Group support!** This might still have a bit of bugs, especially when it comes to undo/redo and copy/paste, please let me know or create an issue if you notice any odd behavior
   - Can now load groups created in the official Node Editor
   - You can now create groups, change their accent color, create nested groups, etc
+  - Select a group by left-clicking on it's titlebar or by right clicking anywhere inside the group (not on another node)
   - When moving a node, hold shift when first clicking or press shift while dragging to remove the node from it's current group
   - Drop a node above a group to add it into the group
-  - Groups will automatically shrink to only cover the current members
+  - Dropping a new connection into a group will also add the new node to the group
+  - Groups will automatically shrink to only cover the current members, this can be changed per-group from the context menu
+  - Add keyboard shortcut for "Cut Inclusive" (ctr-shift-x) Which cuts all selected nodes as well as all unselected nodes inside of selected groups
+
+### Improvements:
+- Dragging points in Manual Curve editor now creates multiple undo steps, one per click and release
+- Many more options in the context menu for managing the current selection, adding new nodes/groups, etc
+- New select subtree mode "Greedy" which selects all nodes in a subtree, all groups that contain any of the nodes in the subtree, and all other nodes inside those groups 
+  - good for keeping floating nodes associated with a subtree by including them in a group with others in the subtree
+  - the default behavior of double clicking a node's titlebar is the non-greedy version but this can be toggled in the settings menu
+  - the non-greedy version also selects groups, but only if all of the group's members are part of the subtree
 
 ### Fixes:
+- More fixes to cases where keyboard shortcuts were not being detected properly
 - Fix duplicated or pasted nodes showing default values or broken inputs for some fields
-- Fix Dragging points in Manual Curve with multiple clicks not creating multiple undo steps
-- Fix deselct all shortcut not doing anything
+- Fix deselect all keyboard shortcut not doing anything
+- Fix a regression (I think?) error in the schema for ClusterProp nodes
+- Lots of other fixes in relation to copy and paste, duplicate, and undo/redo in general
 
 ## 0.3.1
 ### New Features:

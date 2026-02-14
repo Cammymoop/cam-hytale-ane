@@ -52,6 +52,7 @@ enum ContextMenuItems {
     SET_GROUP_NO_SHRINKWRAP,
 
     SELECT_SUBTREE,
+    SELECT_SUBTREE_GREEDY,
     SELECT_GROUP_NODES,
     SELECT_GROUPS_NODES,
     SELECT_ALL,
@@ -307,10 +308,6 @@ func _shortcut_input(event: InputEvent) -> void:
             accept_event()
             delete_selected_nodes_inclusive()
 
-#func _unhandled_key_input(event: InputEvent) -> void:
-    #if Input.is_action_just_pressed_by_event("test_key", event):
-        #accept_event()
-
 func _process(_delta: float) -> void:
     if is_moving_nodes() and not cur_move_detached_nodes and Util.is_shift_pressed():
         change_current_node_move_to_detach_mode()
@@ -359,12 +356,19 @@ func setup_settings_menu() -> void:
     menu_hbox.add_child(settings_menu_btn)
     menu_hbox.move_child(settings_menu_btn, 0)
     settings_menu_menu.index_pressed.connect(on_settings_menu_index_pressed)
+    settings_menu_menu.about_to_popup.connect(on_settings_menu_about_to_popup)
+
+func on_settings_menu_about_to_popup() -> void:
+    var dbl_click_is_greedy: = ANESettings.select_subtree_is_greedy
+    settings_menu_menu.set_item_checked(1, dbl_click_is_greedy)
 
 func on_settings_menu_index_pressed(index: int) -> void:
     var menu_item_text: = settings_menu_menu.get_item_text(index)
     match menu_item_text:
         "Customize Theme Colors":
             popup_menu_root.show_theme_editor()
+    if index == 1:
+        ANESettings.set_subtree_greedy_mode(not ANESettings.select_subtree_is_greedy)
 
 func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     cur_file_name = ""
@@ -2071,7 +2075,6 @@ func on_begin_node_move() -> void:
     for ge in moved_nodes:
         moved_nodes_old_positions[ge] = ge.position_offset
         if ge is GraphFrame:
-            prints("moved group: %s, pos: %s, size: %s" % [ge.title, ge.position_offset, ge.size])
             moved_groups_old_sizes[ge as GraphFrame] = ge.size
 
     # Finally, detach nodes/groups from their direct parent if the direct parent is not included in the selection
@@ -2170,7 +2173,6 @@ func on_end_node_move() -> void:
     _end_node_move_deferred.call_deferred()
 
 func _end_node_move_deferred() -> void:
-    prints("end node move deferred, cur changed group relations, added: %s, removed: %s" % [cur_added_group_relations, cur_removed_group_relations])
     var selected_nodes: Array[GraphElement] = get_selected_ges()
     # For now I'm keeping the undo step of moving and inserting into the connection separate
     create_move_nodes_undo_step(selected_nodes)
@@ -2457,7 +2459,6 @@ func remove_unconnected_ges_with_undo(ges_to_remove: Array[GraphElement]) -> voi
     undo_manager.add_undo_method(undo_remove_ges.bind(removed_ge_list, removed_asset_nodes))
     
     cur_removed_group_relations = get_graph_elements_cur_group_relations(ges_to_remove)
-    prints("removed group relations: %s" % [cur_removed_group_relations])
     add_group_membership_to_cur_undo_action(true)
 
     undo_manager.commit_action(false)
@@ -2989,12 +2990,57 @@ func ready_context_menu_for(for_node: Node) -> void:
     context_menu_ready = true
 
 func _on_graph_node_titlebar_double_clicked(graph_node: CustomGraphNode) -> void:
-    select_subtree(graph_node)
+    select_subtree(graph_node, ANESettings.select_subtree_is_greedy)
 
-func select_subtree(graph_node: CustomGraphNode) -> void:
+## Select all nodes connected to the input side of this graph node
+## If greedy = false (default) will only select groups if all of it's members were also selected
+## If greedy = true will select any group that contains at least one of the nodes in the subtree and will also select all nodes in that group
+## Never selects outer groups of the group the root node is in,
+## the group the root node is in is only selected if all of it's members (inclusive) are selected even if greedy is true
+func select_subtree(root_gn: CustomGraphNode, greedy: bool = false) -> void:
     deselect_all()
-    var subtree_gns: Array[CustomGraphNode] = get_subtree_gns(graph_node)
+    var subtree_gns: Array[CustomGraphNode] = get_subtree_gns(root_gn)
     select_gns(subtree_gns)
+    
+    # Select any groups that you've selected all the members of
+    var all_groups: = get_all_groups()
+    var group_of_tree_root: GraphFrame = get_element_frame(root_gn.name)
+    for group in all_groups:
+        var inclusive_group_members: Array[GraphElement] = get_recursive_group_members(group)
+        if inclusive_group_members.size() == 0:
+            continue
+        var is_outer_group_of_root: bool = false
+        for member in inclusive_group_members:
+            if member == group_of_tree_root:
+                is_outer_group_of_root = true
+                break
+        if is_outer_group_of_root:
+            continue
+
+        var all_selected: bool = true
+        var any_selected: bool = false
+        for member in inclusive_group_members:
+            if member is GraphFrame:
+                continue
+            if not member.selected:
+                all_selected = false
+                if not greedy:
+                    break
+            else:
+                any_selected = true
+        if group == group_of_tree_root:
+            if all_selected:
+                group.selected = true
+        else:
+            if (greedy and any_selected) or (not greedy and all_selected):
+                group.selected = true
+    
+    if greedy:
+        for selected_group in get_selected_groups():
+            var inclusive_selected_members: Array[GraphElement] = get_recursive_group_members(selected_group)
+            for member in inclusive_selected_members:
+                if not member.selected:
+                    member.selected = true
 
 func get_subtree_gns(graph_node: CustomGraphNode) -> Array[CustomGraphNode]:
     var subtree_gns: Array[CustomGraphNode] = [graph_node]
@@ -3166,6 +3212,7 @@ func set_context_menu_select_options(context_menu: PopupMenu, over_graph_node: b
     
     if over_graph_node:
         context_menu.add_item("Select Subtree", ContextMenuItems.SELECT_SUBTREE)
+        context_menu.add_item("Select Subtree (Greedy)", ContextMenuItems.SELECT_SUBTREE_GREEDY)
     
     var num_selected_groups: int = get_selected_groups().size()
     if num_selected_groups > 0:
@@ -3223,7 +3270,10 @@ func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_
         
         ContextMenuItems.SELECT_SUBTREE:
             if is_graph_node:
-                select_subtree(on_ge)
+                select_subtree(on_ge, false)
+        ContextMenuItems.SELECT_SUBTREE_GREEDY:
+            if is_graph_node:
+                select_subtree(on_ge, true)
         ContextMenuItems.SELECT_GROUP_NODES:
             if is_group:
                 deselect_all()

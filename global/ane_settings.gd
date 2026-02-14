@@ -13,6 +13,8 @@ const MENU_ICON_SIZE: = 14
 
 @export var new_node_menu_height_ratio: = 0.85
 
+@export var select_subtree_is_greedy: bool = false
+
 var detected_display_scale: float = 1.0
 
 const GRAPH_NODE_MARGIN_BOTTOM_EXTRA: int = 6
@@ -41,6 +43,10 @@ func _update_display_scale(new_display_scale: float) -> void:
     else:
         get_window().content_scale_factor = new_display_scale
 
+func set_subtree_greedy_mode(new_is_greedy: bool) -> void:
+    select_subtree_is_greedy = new_is_greedy
+    update_saved_settings()
+
 func has_custom_display_scale() -> bool:
     return custom_display_scale != -1
 
@@ -58,6 +64,8 @@ func get_settings_dict() -> Dictionary:
         "default_is_group_shrinkwrap": default_is_group_shrinkwrap,
         
         "new_node_menu_height": new_node_menu_height_ratio,
+        
+        "select_subtree_is_greedy": select_subtree_is_greedy,
     }
 
 func update_saved_settings() -> void:
@@ -93,3 +101,6 @@ func load_settings() -> void:
     
     if parsed_settings.has("new_node_menu_height"):
         new_node_menu_height_ratio = parsed_settings["new_node_menu_height"]
+    
+    if parsed_settings.has("select_subtree_is_greedy"):
+        select_subtree_is_greedy = parsed_settings["select_subtree_is_greedy"]
