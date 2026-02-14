@@ -12,6 +12,7 @@
 ### Fixes:
 - Fix duplicated or pasted nodes showing default values or broken inputs for some fields
 - Fix Dragging points in Manual Curve with multiple clicks not creating multiple undo steps
+- Fix deselct all shortcut not doing anything
 
 ## 0.3.1
 ### New Features:
