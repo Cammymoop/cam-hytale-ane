@@ -53,7 +53,13 @@ func load_copied_nodes_from_clipboard(graph_edit: AssetNodeGraphEdit) -> bool:
     graph_edit.copied_external_ans = all_deserialized_ans
     graph_edit.clipboard_was_from_external = true
     
+    load_copied_groups(parsed_data["included_metadata"].get("groups", []), graph_edit)
+    
     return true
+
+func load_copied_groups(groups: Array, graph_edit: AssetNodeGraphEdit) -> void:
+    for group in groups:
+        graph_edit.copied_external_groups.append(group)
 
 func parse_clipboard_data(clipboard_data: String, current_copy_id: String) -> Dictionary:
     var trimmed: String = clipboard_data.trim_prefix("[CamHytaleANE_CLIPBOARD]((")
@@ -91,12 +97,15 @@ func deserialize_clipboard_data_roots(parsed_clipboard: Dictionary, graph_edit: 
 
 func serialize_copied_nodes(graph_edit: AssetNodeGraphEdit) -> String:
     var copied_gns: Array[GraphNode] = []
+    var copied_groups: Array[GraphFrame] = []
     for ge in graph_edit.copied_nodes:
         if ge is CustomGraphNode:
             copied_gns.append(ge)
+        elif ge is GraphFrame:
+            copied_groups.append(ge)
 
     var center_of_mass: Vector2 = Util.average_graph_element_pos_offset(graph_edit.copied_nodes)
-    var serialized_groups: Array[Dictionary] = graph_edit.serialize_groups()
+    var serialized_groups: Array[Dictionary] = graph_edit.serialize_groups(copied_groups, false, center_of_mass)
     var serialized_data: Dictionary = {
         "what_is_this": "Clipboard data from Cam Hytale Asset Node Editor",
         "copied_from": "CamHytaleANE:%s" % graph_edit.get_plain_version(),

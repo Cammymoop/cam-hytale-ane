@@ -40,6 +40,7 @@ enum ContextMenuItems {
 
     DELETE_NODES,
     DELETE_NODES_DEEP,
+    DELETE_GROUPS_ONLY,
     DISSOLVE_NODES,
     BREAK_CONNECTIONS,
     
@@ -94,6 +95,7 @@ var copied_nodes_ans: Array[HyAssetNode] = []
 var clipboard_was_from_cut: bool = false
 var clipboard_was_from_external: bool = false
 var copied_external_ans: Array[HyAssetNode] = []
+var copied_external_groups: Array[Dictionary] = []
 var in_graph_copy_id: String = ""
 
 var context_menu_target_node: Node = null
@@ -751,8 +753,10 @@ func get_selected_ges() -> Array[GraphElement]:
 func get_selected_groups() -> Array[GraphFrame]:
     var selected_groups: Array[GraphFrame] = []
     for ge in get_children():
-        if ge is GraphFrame and ge.selected:
-            selected_groups.append(ge)
+        if ge is GraphFrame:
+            prints("looking for selected group, group: %s, selected: %s" % [ge.title, ge.selected])
+            if ge.selected:
+                selected_groups.append(ge)
     return selected_groups
 
 ## Get all selected graph elements and group members of selected groups including recusively through sub-groups
@@ -841,6 +845,7 @@ func discard_copied_nodes() -> void:
             if an.an_node_id in asset_node_meta:
                 asset_node_meta.erase(an.an_node_id)
     copied_external_ans.clear()
+    copied_external_groups.clear()
     in_graph_copy_id = ""
 
 func get_root_gn() -> GraphNode:
@@ -984,16 +989,53 @@ func paste_from_external() -> void:
     var an_roots: Array[HyAssetNode] = get_an_roots_within_set(copied_external_ans)
     floating_tree_roots.append_array(an_roots)
     var added_gns: = make_and_position_graph_nodes_for_trees(an_roots, false, screen_center_pos)
+    var added_ges: Array[GraphElement] = []
+    added_ges.append_array(added_gns)
     json_positions_scale = old_json_scale
+    
+    var added_groups: Array[GraphFrame] = []
+    for group_data in copied_external_groups:
+        var new_group: = deserialize_and_add_group(group_data, false, false)
+        added_groups.append(new_group)
+        added_ges.append(new_group)
+    add_nodes_inside_to_groups(added_groups, added_ges, true)
 
-    select_gns(added_gns)
+    select_ges(added_ges)
     
     cur_added_connections = get_internal_connections_for_gns(added_gns)
-    cur_connection_added_ges.assign(added_gns)
+    cur_connection_added_ges.assign(added_ges)
     create_undo_connection_change_step()
     discard_copied_nodes()
-    
 
+func add_nodes_inside_to_groups(groups: Array[GraphFrame], ges: Array[GraphElement], with_undo: bool) -> void:
+    var group_rects: Array[Rect2] = []
+    for group in groups:
+        group_rects.append(get_pos_offset_rect(group))
+    
+    # TODO: better detection in the case of nested groups
+    var added_group_relations: Array[Dictionary] = []
+    for graph_element in ges:
+        var ge_rect: Rect2 = get_pos_offset_rect(graph_element)
+        for group_idx in group_rects.size():
+            var group_rect: Rect2 = group_rects[group_idx]
+            var the_group: GraphFrame = groups[group_idx]
+            if graph_element is GraphFrame:
+                if graph_element == the_group:
+                    continue
+                if group_rect.encloses(ge_rect):
+                    added_group_relations.append({
+                        "group": the_group,
+                        "member": graph_element,
+                    })
+                    break
+            else:
+                if group_rect.has_point(ge_rect.get_center()):
+                    added_group_relations.append({
+                        "group": the_group,
+                        "member": graph_element,
+                    })
+                    break
+    add_group_relations(added_group_relations, with_undo)
 
 func _add_pasted_nodes(ges: Array[GraphElement], asset_node_set: Array[HyAssetNode], make_duplicates: bool) -> Array[GraphElement]:
     var pasted_ges: Array[GraphElement] = []
@@ -1938,7 +1980,6 @@ func check_for_group_context_menu_click_start(mouse_btn_event: InputEventMouseBu
     var mouse_pos_offset: = global_pos_to_position_offset(mouse_btn_event.global_position)
     for group in get_all_groups():
         var group_rect: = get_pos_offset_rect(group)
-        prints("checking right click for group at mouse: %s, group rect: %s" % [mouse_pos_offset, group_rect])
         if group_rect.has_point(mouse_pos_offset):
             ready_context_menu_for(group)
 
@@ -2101,12 +2142,33 @@ func get_graph_elements_cur_groups(ges: Array[GraphElement], include_all_groups:
 func get_graph_elements_cur_group_relations(ges: Array[GraphElement]) -> Array[Dictionary]:
     var group_relations: Array[Dictionary] = []
     var cur_groups_of_ges: Dictionary[GraphElement, GraphFrame] = get_graph_elements_cur_groups(ges)
+    var the_groups: Array[GraphFrame] = []
+    for ge in ges:
+        if ge is GraphFrame:
+            the_groups.append(ge)
+    group_relations.append_array(get_groups_cur_relations(the_groups))
     for ge in ges:
         if cur_groups_of_ges.has(ge):
+            if cur_groups_of_ges[ge] in the_groups:
+                # already added by adding all group relations above
+                continue
             group_relations.append({
                 "group": cur_groups_of_ges[ge],
                 "member": ge,
             })
+    return group_relations
+
+func get_groups_cur_relations(groups: Array[GraphFrame]) -> Array[Dictionary]:
+    var group_relations: Array[Dictionary] = []
+    for group in groups:
+        var group_member_names: Array[StringName] = get_attached_nodes_of_frame(group.name)
+        for mem_name in group_member_names:
+            var mem: = get_node(NodePath(mem_name)) as GraphElement
+            if mem:
+                group_relations.append({
+                    "group": group,
+                    "member": mem,
+                })
     return group_relations
 
 func on_end_node_move() -> void:
@@ -2213,6 +2275,11 @@ func _break_group_relation(group_relation: Dictionary) -> void:
         detach_graph_element_from_frame(member_graph_element.name)
         if member_graph_element is CustomGraphNode:
             member_graph_element.update_is_in_graph_group(false)
+
+func add_group_relations(group_relations: Array[Dictionary], with_undo: bool) -> void:
+    _assign_group_relations(group_relations)
+    if with_undo:
+        cur_added_group_relations.append_array(group_relations)
 
 func _assign_group_relations(group_relations: Array[Dictionary]) -> void:
     for group_relation in group_relations:
@@ -2321,8 +2388,10 @@ func create_undo_connection_change_step() -> void:
         undo_manager.add_undo_method(undo_add_ges.bind(added_ges))
     
     # Add group membership changes from adding or removing nodes
-    if removed_ges.size() > 0 or added_ges.size() > 0:
-        add_group_membership_to_cur_undo_action(true)
+    if removed_ges.size() > 0:
+        add_group_membership_to_cur_undo_action(true, false)
+    elif added_ges.size() > 0:
+        add_group_membership_to_cur_undo_action(false, true)
     
     undo_manager.commit_action(false)
 
@@ -2359,7 +2428,7 @@ func remove_ges_with_connections_and_undo(ges_to_remove: Array[GraphElement]) ->
         cur_removed_connections.append_array(connections_needing_removal)
         remove_multiple_connections(connections_needing_removal, false)
         create_undo_connection_change_step()
-    remove_multiple_ges_without_undo(ges_to_remove)
+        remove_multiple_ges_without_undo(ges_to_remove)
 
 func remove_multiple_ges_without_undo(ges_to_remove: Array[GraphElement]) -> void:
     for ge in ges_to_remove:
@@ -2389,9 +2458,30 @@ func remove_unconnected_ges_with_undo(ges_to_remove: Array[GraphElement]) -> voi
     undo_manager.add_undo_method(undo_remove_ges.bind(removed_ge_list, removed_asset_nodes))
     
     cur_removed_group_relations = get_graph_elements_cur_group_relations(ges_to_remove)
+    prints("removed group relations: %s" % [cur_removed_group_relations])
     add_group_membership_to_cur_undo_action(true)
 
     undo_manager.commit_action(false)
+    remove_multiple_ges_without_undo(ges_to_remove)
+    refresh_graph_elements_in_frame_status()
+
+func remove_groups_only_with_undo(groups_to_remove: Array[GraphFrame]) -> void:
+    unedited = false
+    var removed_ge_list: Array[GraphElement] = []
+    var group_relations: = get_groups_cur_relations(groups_to_remove)
+    removed_ge_list.append_array(groups_to_remove)
+    undo_manager.create_action("Remove Groups")
+
+    undo_manager.add_do_method(redo_remove_ges.bind(removed_ge_list))
+
+    # just because we need the typed version of the dictionary
+    var rm_an: Dictionary[GraphElement, HyAssetNode] = {}
+    undo_manager.add_undo_method(undo_remove_ges.bind(removed_ge_list, rm_an))
+    
+    cur_removed_group_relations = group_relations
+    add_group_membership_to_cur_undo_action(true)
+
+    undo_manager.commit_action(true)
 
 func create_add_new_ge_undo_step(the_new_ge: GraphElement) -> void:
     create_add_new_ges_undo_step([the_new_ge])
@@ -2441,8 +2531,8 @@ func create_move_nodes_undo_step(moved_nodes: Array[GraphElement]) -> void:
     undo_manager.commit_action(false)
 
 ## Add appropriate bindings for undoing/redoing group membership changes to an existing undo, call after all other steps are added
-## If removing nodes entirely, set skip_redo_remove to true
-func add_group_membership_to_cur_undo_action(skip_redo_remove: bool = false, skip_undo_remove: bool = false) -> void:
+## If removing nodes entirely, set for_removal to true, for adding nodes, set for_adding to true
+func add_group_membership_to_cur_undo_action(for_removal: bool = false, for_adding: bool = false) -> void:
     var removed_group_relations: Array[Dictionary] = cur_removed_group_relations.duplicate_deep()
     var added_group_relations: Array[Dictionary] = cur_added_group_relations.duplicate_deep()
     
@@ -2452,15 +2542,17 @@ func add_group_membership_to_cur_undo_action(skip_redo_remove: bool = false, ski
     # if graph relations are removed because a node is removed, it doesn't need to be explicitly redone,
     # since re-doing node removal will already remove the node from the group.
     # it actually makes the order of operations tougher, it will error if trying to remove an already removed node from a group, so I'm just skipping it
-    if removed_group_relations.size() > 0 and not skip_redo_remove:
+    if removed_group_relations.size() > 0 and not for_removal:
         undo_manager.add_do_method(_break_group_relations.bind(removed_group_relations))
     if added_group_relations.size() > 0:
         undo_manager.add_do_method(_assign_group_relations.bind(added_group_relations))
+    undo_manager.add_do_method(refresh_graph_elements_in_frame_status)
 
     if added_group_relations.size() > 0:
         undo_manager.add_undo_method(_break_group_relations.bind(added_group_relations))
-    if removed_group_relations.size() > 0 and not skip_undo_remove:
+    if removed_group_relations.size() > 0 and not for_adding:
         undo_manager.add_undo_method(_assign_group_relations.bind(removed_group_relations))
+    undo_manager.add_undo_method(refresh_graph_elements_in_frame_status)
 
 func undo_remove_ges(the_ges: Array[GraphElement], the_ans: Dictionary[GraphElement, HyAssetNode]) -> void:
     for the_ge in the_ges:
@@ -2644,7 +2736,7 @@ func serialize_node_editor_metadata() -> Dictionary:
     serialized_metadata["$FloatingNodes"] = floating_trees_serialized
     serialized_metadata["$WorkspaceID"] = hy_workspace_id
     
-    serialized_metadata["$Groups"] = serialize_groups()
+    serialized_metadata["$Groups"] = serialize_all_groups()
     
     for other_key in all_meta.keys():
         if serialized_metadata.has(other_key):
@@ -2652,16 +2744,31 @@ func serialize_node_editor_metadata() -> Dictionary:
         serialized_metadata[other_key] = all_meta[other_key]
     return serialized_metadata
 
-func serialize_groups() -> Array[Dictionary]:
-    var groups: Array[Dictionary] = []
-    for group in get_all_groups():
-        groups.append(serialize_group(group))
-    return groups
+func serialize_all_groups(use_position_scale: bool = true) -> Array[Dictionary]:
+    return serialize_groups(get_all_groups(), use_position_scale)
 
-func serialize_group(group: GraphFrame) -> Dictionary:
+func serialize_groups(the_groups: Array[GraphFrame], use_position_scale: bool = true, relative_to_offset: Vector2 = Vector2.ZERO) -> Array[Dictionary]:
+    if the_groups.size() == 0:
+        return []
+    var serialized_groups: Array[Dictionary] = []
+    for group in the_groups:
+        serialized_groups.append(serialize_group(group, use_position_scale, relative_to_offset))
+    return serialized_groups
+
+func serialize_group(group: GraphFrame, use_position_scale: bool = true, relative_to_offset: Vector2 = Vector2.ZERO) -> Dictionary:
     var serialized_group: Dictionary = {}
-    var adjusted_pos: = group.position_offset / json_positions_scale
-    var adjusted_size: = group.size / json_positions_scale
+
+    var adjusted_size: = group.size
+    if use_position_scale:
+        adjusted_size /= json_positions_scale
+
+    var adjusted_pos: = group.position_offset
+    prints("group pos: %s, relative: %s (%s)" % [group.position_offset, group.position_offset - relative_to_offset, relative_to_offset])
+    adjusted_pos -= relative_to_offset
+    if use_position_scale:
+        adjusted_pos /= json_positions_scale
+    adjusted_pos = adjusted_pos.round()
+
     serialized_group["$name"] = group.title
     serialized_group["$Position"] = {
         "$x": adjusted_pos.x,
@@ -2695,6 +2802,7 @@ func single_node_metadata(scaled_positions: bool, an: HyAssetNode, owning_gn: Gr
     elif owning_gn:
         position_offset = owning_gn.position_offset + Vector2(owning_gn.size.x + 100, 0)
 
+    prints("gn pos: %s, relative: %s (%s)" % [position_offset, position_offset - relative_to_offset, relative_to_offset])
     position_offset -= relative_to_offset
     if scaled_positions:
         position_offset /= json_positions_scale
@@ -2933,7 +3041,7 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
         context_menu.add_item("Cut All Connections", ContextMenuItems.BREAK_CONNECTIONS)
     
     context_menu.add_separator()
-    set_context_menu_select_options(context_menu, true)
+    set_context_menu_select_options(context_menu, true, false)
 
     add_child(context_menu, true)
 
@@ -2965,7 +3073,7 @@ func actually_right_click_group(group: GraphFrame) -> void:
     set_context_menu_common_options(context_menu)
     
     context_menu.add_separator()
-    set_context_menu_select_options(context_menu, false)
+    set_context_menu_select_options(context_menu, false, true)
     
     var multiple_groups_selected: bool = get_selected_groups().size() > 1
     if not multiple_groups_selected:
@@ -3006,8 +3114,8 @@ func actually_right_click_nothing() -> void:
     add_child(context_menu, true)
     
     context_menu.add_separator()
-    set_context_menu_select_options(context_menu, false)
-
+    set_context_menu_select_options(context_menu, false, false)
+    
     context_menu.position = get_popup_pos_at_mouse()
     context_menu_pos_offset = global_pos_to_position_offset(get_global_mouse_position())
     context_menu.popup()
@@ -3017,6 +3125,7 @@ func set_context_menu_common_options(context_menu: PopupMenu) -> void:
 
     var multiple_selected: bool = selected_nodes.size() > 1
     
+    var num_selected_groups: int = get_selected_groups().size()
     var plural_s: = "s" if multiple_selected else ""
 
     context_menu.add_item("Copy Node" + plural_s, ContextMenuItems.COPY_NODES)
@@ -3034,12 +3143,13 @@ func set_context_menu_common_options(context_menu: PopupMenu) -> void:
         var delete_idx: int = context_menu.get_item_index(ContextMenuItems.DELETE_NODES)
         context_menu.set_item_disabled(delete_idx, true)
     
-    if get_selected_groups().size() > 0:
+    if num_selected_groups > 0:
         context_menu.add_item("Delete Nodes (Including All Inside Selected Groups)", ContextMenuItems.DELETE_NODES_DEEP)
+        context_menu.add_item("Remove Selected Groups (Keeping Nodes Inside)", ContextMenuItems.DELETE_GROUPS_ONLY)
     
     context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
 
-func set_context_menu_select_options(context_menu: PopupMenu, over_graph_node: bool) -> void:
+func set_context_menu_select_options(context_menu: PopupMenu, over_graph_node: bool, over_group: bool) -> void:
     context_menu.add_item("Select All", ContextMenuItems.SELECT_ALL)
     context_menu.add_item("Deselect All", ContextMenuItems.DESELECT_ALL)
     context_menu.add_item("Invert Selection", ContextMenuItems.INVERT_SELECTION)
@@ -3049,8 +3159,9 @@ func set_context_menu_select_options(context_menu: PopupMenu, over_graph_node: b
     
     var num_selected_groups: int = get_selected_groups().size()
     if num_selected_groups > 0:
-        context_menu.add_item("Select All Nodes In This Group", ContextMenuItems.SELECT_GROUP_NODES)
-        if num_selected_groups > 1:
+        if over_group:
+            context_menu.add_item("Select All Nodes In This Group", ContextMenuItems.SELECT_GROUP_NODES)
+        if not over_group or num_selected_groups > 1:
             context_menu.add_item("Select All Nodes In Selected Groups", ContextMenuItems.SELECT_GROUPS_NODES)
 
 func set_context_menu_new_node_options(context_menu: PopupMenu) -> void:
@@ -3081,6 +3192,9 @@ func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_
             _delete_request_refs(get_selected_ges())
         ContextMenuItems.DELETE_NODES_DEEP:
             delete_selected_nodes_inclusive()
+        ContextMenuItems.DELETE_GROUPS_ONLY:
+            var selected_groups: = get_selected_groups()
+            remove_groups_only_with_undo(selected_groups)
         ContextMenuItems.DISSOLVE_NODES:
             if is_graph_node:
                 dissolve_gn_with_undo(on_ge)
@@ -3105,8 +3219,9 @@ func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_
                 deselect_all()
                 select_nodes_in_group(on_ge)
         ContextMenuItems.SELECT_GROUPS_NODES:
+            var selected_groups: Array[GraphFrame] = get_selected_groups()
             deselect_all()
-            for group in get_selected_groups():
+            for group in selected_groups:
                 select_nodes_in_group(group)
         ContextMenuItems.SELECT_ALL:
             select_all()
@@ -3283,7 +3398,6 @@ func deserialize_and_add_group_and_attach_graph_nodes(group_data: Dictionary) ->
     add_ges_to_group(ges_to_attach, new_group)
     return new_group
             
-
 func deserialize_and_add_group(group_data: Dictionary, json_pos_scale: bool, abs_position: bool) -> GraphFrame:
     var group_size: Vector2 = Vector2(group_data.get("$width", 0), group_data.get("$height", 0))
     if group_size.x == 0:
@@ -3303,7 +3417,7 @@ func deserialize_and_add_group(group_data: Dictionary, json_pos_scale: bool, abs
         pos_offset -= relative_root_position
     else:
         var screen_center_pos: = get_viewport().get_visible_rect().size / 2
-        pos_offset -= global_pos_to_position_offset(screen_center_pos)
+        pos_offset += global_pos_to_position_offset(screen_center_pos)
     
     var group_color_name: String = ""
     var has_custom_color: bool = false
