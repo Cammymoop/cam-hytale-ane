@@ -2,10 +2,16 @@
 
 ## 0.3.2
 ### New Features:
-- Group support! (WIP)
+- Group support!
+  - Can now load groups created in the official Node Editor
+  - You can now create groups, change their accent color, create nested groups, etc
+  - When moving a node, hold shift when first clicking or press shift while dragging to remove the node from it's current group
+  - Drop a node above a group to add it into the group
+  - Groups will automatically shrink to only cover the current members
 
 ### Fixes:
 - Fix duplicated or pasted nodes showing default values or broken inputs for some fields
+- Fix Dragging points in Manual Curve with multiple clicks not creating multiple undo steps
 
 ## 0.3.1
 ### New Features:

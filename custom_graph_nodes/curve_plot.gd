@@ -3,6 +3,7 @@ class_name CurvePlot
 
 signal delete_point(point_idx: int)
 signal points_adjusted(new_points: Array[Vector2])
+signal points_adjustment_ended
 signal points_changed(new_points: Array[Vector2])
 
 
@@ -457,6 +458,7 @@ func drop_point(event: InputEventMouseButton) -> void:
     if not get_rect().has_point(event.position):
         start_animating_region()
     input_changed_curve(get_domain_to_output())
+    points_adjustment_ended.emit()
 
 func _gui_input(event: InputEvent) -> void:
     if not (is_using_curve and is_curve_points_editable):

@@ -3,6 +3,22 @@ extends Node
 func unique_id_string() -> String:
     return "%s-%s-%s-%s-%s" % [random_str(8), random_str(4), random_str(4), random_str(4), random_str(12)]
 
+func rect2_clamp_point(rect: Rect2, point: Vector2) -> Vector2:
+    return point.max(rect.position).min(rect.end)
+
+func rect2_clamp_rect2_pos(limit_rect: Rect2, rect: Rect2) -> Vector2:
+    if rect.size.x > limit_rect.size.x and rect.size.y > limit_rect.size.y:
+        return limit_rect.position
+
+    var clamp_start_pos: = rect2_clamp_point(limit_rect, rect.position)
+    var final_clamped: = rect2_clamp_point(limit_rect, rect.end) - rect.size
+    if rect.size.x > limit_rect.size.x or rect.position.x < limit_rect.position.x:
+        final_clamped.x = clamp_start_pos.x
+    if rect.size.y > limit_rect.size.y or rect.position.y < limit_rect.position.y:
+        final_clamped.y = clamp_start_pos.y
+    
+    return final_clamped
+
 func random_str(length: int) -> String:
     var the_str: = ""
     while length > 4:
@@ -34,11 +50,20 @@ func _average_vector2_small(vectors: Array[Vector2]) -> Vector2:
         total += vector
     return total / vectors.size()
 
-func get_context_menu_pos(mouse_pos: Vector2i) -> Vector2i:
+func get_popup_window_pos(mouse_pos: Vector2i) -> Vector2i:
     var window: = get_window()
     if not window.gui_embed_subwindows:
         return mouse_pos + window.position
     return mouse_pos
+
+func clamp_popup_pos_inside_window(popup_pos: Vector2i, popup_size: Vector2, parent_window: Window) -> Vector2i:
+    if not parent_window.gui_embed_subwindows:
+        var window_in_screen_rect: = parent_window.get_visible_rect()
+        window_in_screen_rect.position = Vector2(parent_window.position)
+        return Vector2i(rect2_clamp_rect2_pos(window_in_screen_rect, Rect2(popup_pos, popup_size)))
+    
+    var global_pos_rect: = Rect2(Vector2.ZERO, parent_window.size)
+    return Vector2i(rect2_clamp_rect2_pos(global_pos_rect, Rect2(popup_pos, popup_size)))
 
 func is_ctrl_cmd_pressed() -> bool:
     var ctrl_keycode: = KEY_CTRL

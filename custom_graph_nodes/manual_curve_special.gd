@@ -8,6 +8,8 @@ var asset_node: HyAssetNode
 
 var my_points: Array[Vector2] = []
 
+var next_adjust_is_new: bool = true
+
 var points_table: GridContainer
 var graph_container: MarginContainer
 @onready var mode_buttons: HToggleButtons = find_child("ModeButtons")
@@ -55,6 +57,7 @@ func _ready() -> void:
     curve_plot.set_as_manual_curve()
     curve_plot.points_changed.connect(replace_points)
     curve_plot.points_adjusted.connect(adjust_points)
+    curve_plot.points_adjustment_ended.connect(points_adjustment_ended)
     curve_plot.delete_point.connect(remove_point_at)
     
     make_settings_syncer(asset_node)
@@ -180,6 +183,10 @@ func adjust_points(new_points: Array[Vector2]) -> void:
     my_points = new_points
     update_ans_from_my_points()
     create_points_adj_undo_step(old_points)
+    next_adjust_is_new = false
+
+func points_adjustment_ended() -> void:
+    next_adjust_is_new = true
 
 func update_ans_from_my_points() -> void:
     resize_ans_from_my_points()
@@ -290,7 +297,8 @@ func create_points_change_undo_step(old_points: Array[Vector2]) -> void:
     graph_edit.undo_manager.commit_action(false)
 
 func create_points_adj_undo_step(old_points: Array[Vector2]) -> void:
-    graph_edit.undo_manager.create_action("Move Manual Curve Points", UndoRedo.MERGE_ENDS)
+    var merge_mode: = UndoRedo.MERGE_DISABLE if next_adjust_is_new else UndoRedo.MERGE_ENDS
+    graph_edit.undo_manager.create_action("Move Manual Curve Points", merge_mode)
 
     graph_edit.undo_manager.add_do_method(undo_redo_change_points.bind(my_points.duplicate()))
 

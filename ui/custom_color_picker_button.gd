@@ -56,7 +56,7 @@ func open_context_menu() -> void:
     context_menu.add_item("Reset to Default")
     if not name_label.text in ThemeColorVariants.theme_colors:
         context_menu.add_item("Remove Color")
-    context_menu.position = Util.get_context_menu_pos(get_global_mouse_position())
+    context_menu.position = Util.get_popup_window_pos(get_global_mouse_position())
     context_menu.popup()
 
 func on_context_menu_index_pressed(idx: int) -> void:

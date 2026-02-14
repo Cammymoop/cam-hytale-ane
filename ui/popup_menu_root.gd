@@ -85,6 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
         return
     
     if Input.is_action_just_pressed_by_event("ui_close_dialog", event):
+        accept_event()
         var focused_window: Window = Window.get_focused_window()
         if get_window() == focused_window:
             close_all()

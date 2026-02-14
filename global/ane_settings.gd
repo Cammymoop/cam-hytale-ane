@@ -9,6 +9,7 @@ const MENU_ICON_SIZE: = 14
 
 @export var default_group_color: String = "blue"
 @export var default_is_group_shrinkwrap: bool = true
+@export var default_group_size: Vector2 = Vector2(460, 300)
 
 @export var new_node_menu_height_ratio: = 0.85
 
