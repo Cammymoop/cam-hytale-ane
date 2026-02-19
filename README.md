@@ -38,7 +38,7 @@ Alpha, usable but not very stable
 <hr>
 <div align="center">
 
-![Powered By Godot](./public/powered_by_godot_dark.png#gh-dark-mode-only)
-![Powered By Godot](./public/powered_by_godot_light.png#gh-light-mode-only)
+[![Powered By Godot](./public/powered_by_godot_dark.png#gh-dark-mode-only)](https://godotengine.org)
+[![Powered By Godot](./public/powered_by_godot_light.png#gh-light-mode-only)](https://godotengine.org)
 
 </div>
