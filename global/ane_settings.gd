@@ -7,9 +7,10 @@ const MENU_ICON_SIZE: = 14
 @export var display_decimal_places: = 3
 @export var custom_display_scale: float = -1
 
-@export var default_group_color: String = "blue"
+@export var default_group_color: String = "blue-purple"
 @export var default_is_group_shrinkwrap: bool = true
 @export var default_group_size: Vector2 = Vector2(460, 300)
+@export var auto_color_imported_nested_groups: bool = true
 
 @export var new_node_menu_height_ratio: = 0.85
 
@@ -62,6 +63,8 @@ func get_settings_dict() -> Dictionary:
         
         "default_group_color": default_group_color,
         "default_is_group_shrinkwrap": default_is_group_shrinkwrap,
+        "default_group_size": JSON.from_native(default_group_size),
+        "auto_color_imported_nested_groups": auto_color_imported_nested_groups,
         
         "new_node_menu_height": new_node_menu_height_ratio,
         
@@ -71,7 +74,7 @@ func get_settings_dict() -> Dictionary:
 func update_saved_settings() -> void:
     var file: = FileAccess.open(settings_file_path, FileAccess.WRITE)
     var settings_dict: = get_settings_dict()
-    file.store_string(JSON.stringify(settings_dict))
+    file.store_string(JSON.stringify(settings_dict, "\t", false))
     file.close()
 
 func load_settings() -> void:
@@ -98,6 +101,10 @@ func load_settings() -> void:
         default_group_color = parsed_settings["default_group_color"]
     if parsed_settings.has("default_is_group_shrinkwrap"):
         default_is_group_shrinkwrap = parsed_settings["default_is_group_shrinkwrap"]
+    if parsed_settings.has("default_group_size"):
+        default_group_size = JSON.to_native(parsed_settings["default_group_size"])
+    if parsed_settings.has("auto_color_imported_nested_groups"):
+        auto_color_imported_nested_groups = parsed_settings["auto_color_imported_nested_groups"]
     
     if parsed_settings.has("new_node_menu_height"):
         new_node_menu_height_ratio = parsed_settings["new_node_menu_height"]

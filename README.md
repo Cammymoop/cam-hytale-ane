@@ -30,7 +30,7 @@ Alpha, usable but not very stable
 ### Unique Features:
 * Custom Manual Curve Editor with a built-in visual editor
 
-![Manual Curve Editor](img/manual_curve_editor.png)
+![Manual Curve Editor](./public/manual_curve_editor.png)
 * Easily customizable colors for every type of node
 * Auto-add node if there is only one possible node for the connection type you dragged out
 * Stay tuned for more

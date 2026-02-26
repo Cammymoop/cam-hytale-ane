@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dy4m7qppu28it"]
+
+[ext_resource type="Script" uid="uid://d4bhc8xnybdw3" path="res://global/theme_color_variants.gd" id="1_4ov32"]
+
+[node name="ThemeColorVariants" type="Node" unique_id=812994497]
+script = ExtResource("1_4ov32")
+theme_colors = Dictionary[String, Color]({
+"blue-green": Color(0.17816022, 0.6860125, 0.68470734, 1),
+"red": Color(0.94521934, 0.3410991, 0.3634493, 1),
+"blue-purple": Color(0.39744312, 0.48860967, 0.9523359, 1),
+"dark-purple": Color(0.4492784, 0.16953036, 0.45245785, 1),
+"green": Color(0.147, 0.474, 0.242, 1),
+"yellow": Color(0.8657965, 0.7555446, 0.2697462, 1),
+"grey": Color(0.694361, 0.694361, 0.694361, 1),
+"light-blue": Color(0.4397499, 0.7192587, 0.8914432, 1),
+"light-green": Color(0.44939917, 0.7642293, 0.5653562, 1),
+"light-orange": Color(0.8499852, 0.57967234, 0.40709686, 1),
+"light-purple": Color(0.66071993, 0.5118148, 0.86888707, 1),
+"orange": Color(0.787175, 0.52734774, 0.08356921, 1),
+"light-blue-green": Color(0.40868154, 0.7849201, 0.8004483, 1),
+"yellow-green": Color(0.69803923, 0.827451, 0.12941177, 1),
+"brown": Color(0.5091481, 0.36303934, 0.28639063, 1),
+"purple": Color(0.48474133, 0.3782017, 0.741389, 1),
+"yellow-brown": Color(0.6509804, 0.5647059, 0.27058825, 1),
+"blue": Color(0.050938904, 0.4467247, 0.64619416, 1),
+})
