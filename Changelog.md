@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1
+Fixed a critical bug in 0.4.0 where ctr_right clicking to cut connections then undoing would add many duplicate copies of connected asset nodes on save
+
 ## 0.4.0
 This is a big refactor and rewrite of the core editor code which will make lots of new stuff possible but the new stuff is relatively minimal for this release
 
