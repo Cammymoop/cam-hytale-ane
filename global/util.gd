@@ -23,9 +23,9 @@ func get_plain_version() -> String:
     return "v%s" % ProjectSettings.get_setting("application/config/version")
 
 func get_version_number_string() -> String:
-    var prerelease_string: = " Alpha"
+    var prerelease_string: = " Beta"
     if OS.has_feature("debug"):
-        prerelease_string = " Alpha (Debug)"
+        prerelease_string = " Beta (Debug)"
     return get_plain_version() + prerelease_string
 
 func random_str(length: int) -> String:
@@ -317,3 +317,15 @@ func _loose_dict_match(dict_a: Dictionary, dict_b: Dictionary, depth: int) -> bo
                 return false
         # ignore arrays
     return true
+
+func unique_conn_infos(conn_infos: Array[Dictionary]) -> Array[Dictionary]:
+    var stringified: Array[String] = []
+    for conn_info in conn_infos:
+        var stringified_info: String = JSON.stringify(conn_info, "", false)
+        if stringified_info in stringified:
+            continue
+        stringified.append(stringified_info)
+    var unstringified: Array[Dictionary] = []
+    for stringified_info in stringified:
+        unstringified.append(JSON.parse_string(stringified_info))
+    return unstringified

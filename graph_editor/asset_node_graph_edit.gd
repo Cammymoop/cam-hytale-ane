@@ -755,6 +755,8 @@ func do_connection_cut() -> void:
     var is_new_step: = editor.undo_manager.is_new_step
     
     var num_cut: = 0
+    
+    var removed_connections: Array[Dictionary] = []
 
     var vp_rect: = get_viewport_rect()
     var prev_cut_point: = connection_cut_start_point
@@ -781,8 +783,16 @@ func do_connection_cut() -> void:
                 if not connection_at_point:
                     break
                 num_cut += 1
-                remove_connection_info(connection_at_point)
+                removed_connections.append(connection_at_point)
+                # temporarily cut the connection so we dont detect it again
+                disconnect_node(connection_at_point["from_node"], connection_at_point["from_port"], connection_at_point["to_node"], connection_at_point["to_port"])
         prev_cut_point = cut_global_pos
+    
+    # re-add the temporarily cut connections
+    for connection_info in removed_connections:
+        connect_node(connection_info["from_node"], connection_info["from_port"], connection_info["to_node"], connection_info["to_port"])
+    
+    remove_multiple_connections(removed_connections)
     
 
     if is_new_step:

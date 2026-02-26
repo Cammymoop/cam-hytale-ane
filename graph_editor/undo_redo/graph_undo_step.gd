@@ -6,7 +6,7 @@ var new_default_graph_nodes_info: Dictionary[String, Dictionary] = {}
 
 var added_connections: Array[Dictionary] = []
 var removed_connections: Array[Dictionary] = []
-var no_commit_remvoed_connections: Array[Dictionary] = []
+var no_commit_removed_connections: Array[Dictionary] = []
 
 var added_group_relations: Array[Dictionary] = []
 var removed_group_relations: Array[Dictionary] = []
@@ -31,12 +31,15 @@ var selected_before_names: Array[String] = []
 
 func add_graph_node_conn_infos(conn_infos: Array[Dictionary]) -> void:
 	added_connections.append_array(conn_infos)
+	added_connections = Util.unique_conn_infos(added_connections)
 
 func remove_graph_node_conn_infos(conn_infos: Array[Dictionary], skip_on_commit: bool = false) -> void:
 	if skip_on_commit:
-		no_commit_remvoed_connections.append_array(conn_infos)
+		no_commit_removed_connections.append_array(conn_infos)
+		no_commit_removed_connections = Util.unique_conn_infos(no_commit_removed_connections)
 	else:
 		removed_connections.append_array(conn_infos)
+		removed_connections = Util.unique_conn_infos(removed_connections)
 
 func add_graph_node_connection(from_gn_name: String, from_port: int, to_gn_name: String, to_port: int) -> void:
 	added_connections.append({
@@ -156,9 +159,9 @@ func register_action(undo_redo: UndoRedo, graph: CHANE_AssetNodeGraphEdit, edito
 	if removed_connections.size() > 0:
 		undo_redo.add_undo_method(graph.undo_redo_add_connections.bind(removed_connections))
 		undo_redo.add_do_method(graph.undo_redo_remove_connections.bind(removed_connections))
-	if no_commit_remvoed_connections.size() > 0:
-		undo_redo.add_undo_method(graph.undo_redo_add_connections.bind(no_commit_remvoed_connections))
-		undo_redo.add_do_method(graph.undo_redo_remove_connections.bind(no_commit_remvoed_connections, true))
+	if no_commit_removed_connections.size() > 0:
+		undo_redo.add_undo_method(graph.undo_redo_add_connections.bind(no_commit_removed_connections))
+		undo_redo.add_do_method(graph.undo_redo_remove_connections.bind(no_commit_removed_connections, true))
 	if added_connections.size() > 0:
 		undo_redo.add_undo_method(graph.undo_redo_remove_connections.bind(added_connections))
 		undo_redo.add_do_method(graph.undo_redo_add_connections.bind(added_connections))

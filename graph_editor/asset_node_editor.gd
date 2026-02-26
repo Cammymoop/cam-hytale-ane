@@ -984,6 +984,8 @@ func disconnect_graph_nodes(conn_infos: Array[Dictionary], graph: CHANE_AssetNod
     
     # Remove all the raw connections even if there are missing asset nodes
     graph_undo_step.remove_graph_node_conn_infos(conn_infos)
+    graph_undo_step.remove_graph_node_conn_infos(conn_infos)
+    graph_undo_step.remove_graph_node_conn_infos(conn_infos)
 
     for conn_info in conn_infos:
         var from_an: = get_gn_main_asset_node(get_graph_gn(graph, conn_info["from_node"]))

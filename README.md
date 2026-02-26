@@ -11,7 +11,7 @@
 > PLEASE READ: This is an alpha release, it is provided as-is, please take care to properly version control or backup any files you may be editing.
 
 ## Current Status:
-Alpha, usable but not very stable
+Beta, fully functional, still has some rough edges though
 
 ### What works:
 * WorldGen Asset Node workspaces (Biome, Density, BlockMask, Assignments)
