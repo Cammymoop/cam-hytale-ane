@@ -4,8 +4,6 @@ extends GraphNode
 signal was_right_clicked(graph_node: CustomGraphNode)
 signal titlebar_double_clicked(graph_node: CustomGraphNode)
 
-@export_storage var theme_color_output_type: String = ""
-
 var is_in_graph_group: bool = false
 var in_group_with_theme: Theme = null
 
@@ -128,6 +126,9 @@ func update_enabled_slots() -> void:
 
 func get_output_value_type() -> String:
     return output_value_types.get("OUT", "Unknown")
+
+func get_theme_value_type() -> String:
+    return get_output_value_type()
 
 func get_input_value_type_list() -> Array[String]:
     var value_types: Array[String] = []

@@ -4,6 +4,8 @@ class_name CHANE_AssetNodeGraphEdit
 const UndoStep = preload("res://graph_editor/undo_redo/undo_step.gd")
 const GraphUndoStep = preload("res://graph_editor/undo_redo/graph_undo_step.gd")
 
+const ContextMenuItems = CHANE_AssetNodeEditor.ContextMenuItems
+
 signal zoom_changed(new_zoom: float)
 
 const SpecialGNFactory = preload("res://graph_editor/custom_graph_nodes/special_gn_factory.gd")
@@ -47,6 +49,8 @@ var settings_menu_menu: PopupMenu = null
 
 func _ready() -> void:
     assert(popup_menu_root != null, "Popup menu root is not set, please set it in the inspector")
+    
+    ANESettings.group_settings_updated.connect(on_group_settings_updated)
     
     focus_exited.connect(on_focus_exited)
 
@@ -206,6 +210,7 @@ func setup_settings_menu() -> void:
     var menu_hbox: = get_menu_hbox()
     menu_hbox.add_child(settings_menu_btn)
     menu_hbox.move_child(settings_menu_btn, 0)
+
     settings_menu_menu.index_pressed.connect(on_settings_menu_index_pressed)
     settings_menu_menu.about_to_popup.connect(on_settings_menu_about_to_popup)
 
@@ -698,7 +703,7 @@ func update_all_ges_themes() -> void:
             update_group_theme(child)
 
 func update_custom_gn_theme(graph_node: CustomGraphNode) -> void:
-    var output_type: String = graph_node.theme_color_output_type
+    var output_type: String = graph_node.get_theme_value_type()
     if not output_type:
         return
     
@@ -1469,21 +1474,28 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
 
     context_menu.name = "NodeContextMenu"
     
-    context_menu.add_item("Edit Title", CHANE_AssetNodeEditor.ContextMenuItems.EDIT_TITLE)
+    context_menu.add_item("Edit Title", ContextMenuItems.EDIT_TITLE)
     context_menu.add_separator()
     
     set_context_menu_common_options(context_menu)
     
     if is_asset_node:
-        context_menu.add_item("Dissolve Node", CHANE_AssetNodeEditor.ContextMenuItems.DISSOLVE_NODES)
+        context_menu.add_item("Dissolve Node", ContextMenuItems.DISSOLVE_NODES)
         if not can_dissolve_gn(graph_node):
-            var dissolve_idx: int = context_menu.get_item_index(CHANE_AssetNodeEditor.ContextMenuItems.DISSOLVE_NODES)
+            var dissolve_idx: int = context_menu.get_item_index(ContextMenuItems.DISSOLVE_NODES)
             context_menu.set_item_disabled(dissolve_idx, true)
         
-        context_menu.add_item("Cut All Connections", CHANE_AssetNodeEditor.ContextMenuItems.BREAK_CONNECTIONS)
+        context_menu.add_item("Cut All Connections", ContextMenuItems.BREAK_CONNECTIONS)
     
     context_menu.add_separator()
     set_context_menu_select_options(context_menu, true, false)
+    
+    context_menu.add_check_item("Check item", 1000)
+    context_menu.set_item_checked(context_menu.get_item_index(1000), true)
+    context_menu.add_check_item("Uncheck item", 1001)
+    context_menu.set_item_checked(context_menu.get_item_index(1001), false)
+    prints("unchecked icon color map: %s" % [get_theme_icon("unchecked", "PopupMenu").color_map])
+    prints("unchecked icon source: %s" % [get_theme_icon("unchecked", "PopupMenu").get_source()])
 
     add_child(context_menu, true)
 
@@ -1500,16 +1512,21 @@ func actually_right_click_group(group: GraphFrame) -> void:
     context_menu.id_pressed.connect(on_node_context_menu_id_pressed.bind(group))
     context_menu.name = "GroupContextMenu"
     
-    context_menu.add_item("Edit Group Title", CHANE_AssetNodeEditor.ContextMenuItems.EDIT_GROUP_TITLE)
+    context_menu.add_item("Edit Group Title", ContextMenuItems.EDIT_GROUP_TITLE)
     var change_group_color_submenu: PopupMenu = get_color_name_menu()
     change_group_color_submenu.index_pressed.connect(on_change_group_color_name_index_pressed.bind(change_group_color_submenu, group))
-    context_menu.add_submenu_node_item("Change Group Accent Color", change_group_color_submenu, CHANE_AssetNodeEditor.ContextMenuItems.CHANGE_GROUP_COLOR)
+    context_menu.add_submenu_node_item("Change Group Accent Color", change_group_color_submenu, ContextMenuItems.CHANGE_GROUP_COLOR)
 
     context_menu.add_separator()
     
     set_context_menu_new_node_options(context_menu)
-    var new_group_idx: int = context_menu.get_item_index(CHANE_AssetNodeEditor.ContextMenuItems.CREATE_NEW_GROUP)
+    var new_group_idx: int = context_menu.get_item_index(ContextMenuItems.CREATE_NEW_GROUP)
     context_menu.set_item_text(new_group_idx, "Create New Inner Group")
+    
+    context_menu.add_item("Set Group Size As Default for New Groups", ContextMenuItems.SET_GROUP_SIZE_AS_DEFAULT)
+    if group.size == ANESettings.default_group_size:
+        var set_group_size_idx: int = context_menu.get_item_index(ContextMenuItems.SET_GROUP_SIZE_AS_DEFAULT)
+        context_menu.set_item_disabled(set_group_size_idx, true)
     context_menu.add_separator()
     
     set_context_menu_common_options(context_menu)
@@ -1521,12 +1538,12 @@ func actually_right_click_group(group: GraphFrame) -> void:
     if not multiple_groups_selected:
         var is_shrinkwrap_enabled: bool = group.autoshrink_enabled
         if is_shrinkwrap_enabled:
-            context_menu.add_item("Disable Shrinkwrap", CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_NO_SHRINKWRAP)
+            context_menu.add_item("Disable Shrinkwrap", ContextMenuItems.SET_GROUP_NO_SHRINKWRAP)
         else:
-            context_menu.add_item("Enable Shrinkwrap", CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_SHRINKWRAP)
+            context_menu.add_item("Enable Shrinkwrap", ContextMenuItems.SET_GROUP_SHRINKWRAP)
     else:
-        context_menu.add_item("Enable Shrinkwrap for Selected Groups", CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_SHRINKWRAP)
-        context_menu.add_item("Disable Shrinkwrap for Selected Groups", CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_NO_SHRINKWRAP)
+        context_menu.add_item("Enable Shrinkwrap for Selected Groups", ContextMenuItems.SET_GROUP_SHRINKWRAP)
+        context_menu.add_item("Disable Shrinkwrap for Selected Groups", ContextMenuItems.SET_GROUP_NO_SHRINKWRAP)
     
     add_child(context_menu, true)
     
@@ -1541,16 +1558,16 @@ func actually_right_click_nothing() -> void:
     context_menu.name = "NothingContextMenu"
     
     if not editor.is_loaded:
-        context_menu.add_item("New File", CHANE_AssetNodeEditor.ContextMenuItems.NEW_FILE)
+        context_menu.add_item("New File", ContextMenuItems.NEW_FILE)
         return
     
     set_context_menu_new_node_options(context_menu)
     context_menu.add_separator()
     
     var paste_plural_s: = "s" if editor.current_copied_fragment_has_multiple() else ""
-    context_menu.add_item("Paste Nodes" + paste_plural_s, CHANE_AssetNodeEditor.ContextMenuItems.PASTE_NODES)
+    context_menu.add_item("Paste Nodes" + paste_plural_s, ContextMenuItems.PASTE_NODES)
     if not editor.check_if_can_paste():
-        var paste_idx: int = context_menu.get_item_index(CHANE_AssetNodeEditor.ContextMenuItems.PASTE_NODES)
+        var paste_idx: int = context_menu.get_item_index(ContextMenuItems.PASTE_NODES)
         context_menu.set_item_disabled(paste_idx, true)
     
     add_child(context_menu, true)
@@ -1570,124 +1587,130 @@ func set_context_menu_common_options(context_menu: PopupMenu) -> void:
     var num_selected_groups: int = get_selected_groups().size()
     var plural_s: = "s" if multiple_selected else ""
 
-    context_menu.add_item("Copy Node" + plural_s, CHANE_AssetNodeEditor.ContextMenuItems.COPY_NODES)
-    context_menu.add_item("Cut Node" + plural_s, CHANE_AssetNodeEditor.ContextMenuItems.CUT_NODES)
+    context_menu.add_item("Copy Node" + plural_s, ContextMenuItems.COPY_NODES)
+    context_menu.add_item("Cut Node" + plural_s, ContextMenuItems.CUT_NODES)
 
     
     var paste_plural_s: = "s" if editor.current_copied_fragment_has_multiple() else ""
-    context_menu.add_item("Paste Node" + paste_plural_s, CHANE_AssetNodeEditor.ContextMenuItems.PASTE_NODES)
+    context_menu.add_item("Paste Node" + paste_plural_s, ContextMenuItems.PASTE_NODES)
     if not editor.check_if_can_paste():
-        var paste_idx: int = context_menu.get_item_index(CHANE_AssetNodeEditor.ContextMenuItems.PASTE_NODES)
+        var paste_idx: int = context_menu.get_item_index(ContextMenuItems.PASTE_NODES)
         context_menu.set_item_disabled(paste_idx, true)
 
-    context_menu.add_item("Delete Node" + plural_s, CHANE_AssetNodeEditor.ContextMenuItems.DELETE_NODES)
+    context_menu.add_item("Delete Node" + plural_s, ContextMenuItems.DELETE_NODES)
     if not multiple_selected and not can_delete_ge(selected_nodes[0]):
-        var delete_idx: int = context_menu.get_item_index(CHANE_AssetNodeEditor.ContextMenuItems.DELETE_NODES)
+        var delete_idx: int = context_menu.get_item_index(ContextMenuItems.DELETE_NODES)
         context_menu.set_item_disabled(delete_idx, true)
     
     if num_selected_groups > 0:
-        context_menu.add_item("Delete Nodes (Including All Inside Selected Groups)", CHANE_AssetNodeEditor.ContextMenuItems.DELETE_NODES_DEEP)
-        context_menu.add_item("Remove Selected Groups (Keeping Nodes Inside)", CHANE_AssetNodeEditor.ContextMenuItems.DELETE_GROUPS_ONLY)
+        context_menu.add_item("Delete Nodes (Including All Inside Selected Groups)", ContextMenuItems.DELETE_NODES_DEEP)
+        context_menu.add_item("Remove Selected Groups (Keeping Nodes Inside)", ContextMenuItems.DELETE_GROUPS_ONLY)
     
-    context_menu.add_item("Duplicate Node" + plural_s, CHANE_AssetNodeEditor.ContextMenuItems.DUPLICATE_NODES)
+    context_menu.add_item("Duplicate Node" + plural_s, ContextMenuItems.DUPLICATE_NODES)
 
 func set_context_menu_select_options(context_menu: PopupMenu, over_graph_node: bool, over_group: bool) -> void:
-    context_menu.add_item("Select All", CHANE_AssetNodeEditor.ContextMenuItems.SELECT_ALL)
-    context_menu.add_item("Deselect All", CHANE_AssetNodeEditor.ContextMenuItems.DESELECT_ALL)
-    context_menu.add_item("Invert Selection", CHANE_AssetNodeEditor.ContextMenuItems.INVERT_SELECTION)
+    context_menu.add_item("Select All", ContextMenuItems.SELECT_ALL)
+    context_menu.add_item("Deselect All", ContextMenuItems.DESELECT_ALL)
+    context_menu.add_item("Invert Selection", ContextMenuItems.INVERT_SELECTION)
     
     if over_graph_node:
-        context_menu.add_item("Select Subtree", CHANE_AssetNodeEditor.ContextMenuItems.SELECT_SUBTREE)
-        context_menu.add_item("Select Subtree (Greedy)", CHANE_AssetNodeEditor.ContextMenuItems.SELECT_SUBTREE_GREEDY)
+        context_menu.add_item("Select Subtree", ContextMenuItems.SELECT_SUBTREE)
+        context_menu.add_item("Select Subtree (Greedy)", ContextMenuItems.SELECT_SUBTREE_GREEDY)
     
     var num_selected_groups: int = get_selected_groups().size()
     if num_selected_groups > 0:
         if over_group:
-            context_menu.add_item("Select All Nodes In This Group", CHANE_AssetNodeEditor.ContextMenuItems.SELECT_GROUP_NODES)
+            context_menu.add_item("Select All Nodes In This Group", ContextMenuItems.SELECT_GROUP_NODES)
         if not over_group or num_selected_groups > 1:
-            context_menu.add_item("Select All Nodes In Selected Groups", CHANE_AssetNodeEditor.ContextMenuItems.SELECT_GROUPS_NODES)
+            context_menu.add_item("Select All Nodes In Selected Groups", ContextMenuItems.SELECT_GROUPS_NODES)
 
 func set_context_menu_new_node_options(context_menu: PopupMenu) -> void:
-    context_menu.add_item("Create New Node", CHANE_AssetNodeEditor.ContextMenuItems.CREATE_NEW_NODE)
-    context_menu.add_item("Create New Group", CHANE_AssetNodeEditor.ContextMenuItems.CREATE_NEW_GROUP)
+    context_menu.add_item("Create New Node", ContextMenuItems.CREATE_NEW_NODE)
+    context_menu.add_item("Create New Group", ContextMenuItems.CREATE_NEW_GROUP)
 
-func on_node_context_menu_id_pressed(node_context_menu_id: CHANE_AssetNodeEditor.ContextMenuItems, on_ge: GraphElement) -> void:
+func on_node_context_menu_id_pressed(node_context_menu_id: ContextMenuItems, on_ge: GraphElement) -> void:
     var is_graph_node: bool = on_ge and on_ge is CustomGraphNode
     var is_group: bool = on_ge and on_ge is GraphFrame
 
     match node_context_menu_id:
-        CHANE_AssetNodeEditor.ContextMenuItems.COPY_NODES:
+        ContextMenuItems.COPY_NODES:
             _copy_request()
-        CHANE_AssetNodeEditor.ContextMenuItems.CUT_NODES:
+        ContextMenuItems.CUT_NODES:
             _cut_request()
-        CHANE_AssetNodeEditor.ContextMenuItems.CUT_NODES_DEEP:
+        ContextMenuItems.CUT_NODES_DEEP:
             cut_selected_nodes_inclusive()
-        CHANE_AssetNodeEditor.ContextMenuItems.PASTE_NODES:
+        ContextMenuItems.PASTE_NODES:
             paste_copied_fragment_at(context_menu_pos_offset)
-        CHANE_AssetNodeEditor.ContextMenuItems.DELETE_NODES:
+        ContextMenuItems.DELETE_NODES:
             delete_ges(get_selected_ges())
-        CHANE_AssetNodeEditor.ContextMenuItems.DELETE_NODES_DEEP:
+        ContextMenuItems.DELETE_NODES_DEEP:
             delete_selected_nodes_inclusive()
-        CHANE_AssetNodeEditor.ContextMenuItems.DELETE_GROUPS_ONLY:
+        ContextMenuItems.DELETE_GROUPS_ONLY:
             var selected_groups: = get_selected_groups()
             remove_groups_only_with_undo(selected_groups)
-        CHANE_AssetNodeEditor.ContextMenuItems.DISSOLVE_NODES:
+        ContextMenuItems.DISSOLVE_NODES:
             if is_graph_node:
                 dissolve_gn_with_undo(on_ge)
-        CHANE_AssetNodeEditor.ContextMenuItems.BREAK_CONNECTIONS:
+        ContextMenuItems.BREAK_CONNECTIONS:
             if is_graph_node:
                 cut_all_connections_with_undo(on_ge)
-        CHANE_AssetNodeEditor.ContextMenuItems.DUPLICATE_NODES:
+        ContextMenuItems.DUPLICATE_NODES:
             duplicate_selected_ges()
         
-        CHANE_AssetNodeEditor.ContextMenuItems.EDIT_TITLE:
+        ContextMenuItems.EDIT_TITLE:
             if is_graph_node:
                 open_gn_title_edit(on_ge)
-        CHANE_AssetNodeEditor.ContextMenuItems.EDIT_GROUP_TITLE:
+        ContextMenuItems.EDIT_GROUP_TITLE:
             if is_group:
                 open_group_title_edit(on_ge)
         
-        CHANE_AssetNodeEditor.ContextMenuItems.SELECT_SUBTREE:
+        ContextMenuItems.SELECT_SUBTREE:
             if is_graph_node:
                 select_subtree(on_ge, false)
-        CHANE_AssetNodeEditor.ContextMenuItems.SELECT_SUBTREE_GREEDY:
+        ContextMenuItems.SELECT_SUBTREE_GREEDY:
             if is_graph_node:
                 select_subtree(on_ge, true)
-        CHANE_AssetNodeEditor.ContextMenuItems.SELECT_GROUP_NODES:
+        ContextMenuItems.SELECT_GROUP_NODES:
             if is_group:
                 deselect_all()
                 select_nodes_in_group(on_ge)
-        CHANE_AssetNodeEditor.ContextMenuItems.SELECT_GROUPS_NODES:
+        ContextMenuItems.SELECT_GROUPS_NODES:
             var selected_groups: Array[GraphFrame] = get_selected_groups()
             deselect_all()
             for group in selected_groups:
                 select_nodes_in_group(group)
-        CHANE_AssetNodeEditor.ContextMenuItems.SELECT_ALL:
+        ContextMenuItems.SELECT_ALL:
             select_all()
-        CHANE_AssetNodeEditor.ContextMenuItems.DESELECT_ALL:
+        ContextMenuItems.DESELECT_ALL:
             deselect_all()
-        CHANE_AssetNodeEditor.ContextMenuItems.INVERT_SELECTION:
+        ContextMenuItems.INVERT_SELECTION:
             invert_selection()
         
-        CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_SHRINKWRAP:
+        ContextMenuItems.SET_GROUP_SHRINKWRAP:
             var selected_groups: Array[GraphFrame] = get_selected_groups()
             set_groups_shrinkwrap_with_undo(selected_groups, true)
-        CHANE_AssetNodeEditor.ContextMenuItems.SET_GROUP_NO_SHRINKWRAP:
+        ContextMenuItems.SET_GROUP_NO_SHRINKWRAP:
             var selected_groups: Array[GraphFrame] = get_selected_groups()
             set_groups_shrinkwrap_with_undo(selected_groups, false)
-        CHANE_AssetNodeEditor.ContextMenuItems.CREATE_NEW_NODE:
+        ContextMenuItems.CREATE_NEW_NODE:
             var into_group: = on_ge if is_group else null
             editor.show_new_node_menu_for_pos(context_menu_pos_offset, self, into_group)
-        CHANE_AssetNodeEditor.ContextMenuItems.CREATE_NEW_GROUP:
+        ContextMenuItems.CREATE_NEW_GROUP:
             var into_group: = on_ge if is_group else null
             add_new_group_pending_title_undo_step(context_menu_pos_offset, into_group)
         
-        CHANE_AssetNodeEditor.ContextMenuItems.NEW_FILE:
+        ContextMenuItems.NEW_FILE:
             popup_menu_root.show_new_file_type_chooser()
+        
+        ContextMenuItems.SET_GROUP_SIZE_AS_DEFAULT:
+            if is_group:
+                ANESettings.set_default_group_size(on_ge.size)
 
 func on_change_group_color_name_index_pressed(index: int, color_name_menu: PopupMenu, group: GraphFrame) -> void:
     var color_name: String = color_name_menu.get_item_text(index)
-    if not ThemeColorVariants.has_theme_color(color_name):
+    if color_name == "Use Default":
+        color_name = ""
+    if color_name != "" and not ThemeColorVariants.has_theme_color(color_name):
         return
     set_group_color_with_undo(group, color_name)
 
@@ -1742,6 +1765,8 @@ func _set_group_title(group: GraphFrame, new_title: String) -> void:
 
 func change_ge_title_to(new_title: String, graph_element: GraphElement) -> void:
     if not "title" in graph_element:
+        return
+    if graph_element.title == new_title:
         return
     var action_name: String = "Change Group Title" if graph_element is GraphFrame else "Change Node Title"
     var graph_undo_step: = editor.undo_manager.start_or_continue_graph_undo_step(action_name, self)
@@ -1811,10 +1836,12 @@ func get_default_group_color_name() -> String:
     return TypeColors.fallback_color
 
 func set_group_color_with_undo(group: GraphFrame, new_color_name: String) -> void:
-    var graph_undo_step: = editor.undo_manager.start_or_continue_graph_undo_step("Change Group Accent Color", self)
     var from_color_name: String = group.get_meta("custom_color_name", "")
     if not group.get_meta("has_custom_color", false):
         from_color_name = ""
+    if from_color_name == new_color_name:
+        return
+    var graph_undo_step: = editor.undo_manager.start_or_continue_graph_undo_step("Change Group Accent Color", self)
     graph_undo_step.group_accent_colors_from[group.name as String] = from_color_name
     graph_undo_step.group_accent_colors_to[group.name as String] = new_color_name
     editor.undo_manager.commit_if_new()
@@ -1846,19 +1873,22 @@ func remove_group_accent_color(group: GraphFrame) -> void:
     group.set_meta("custom_color_name", "")
     group.theme = ThemeColorVariants.get_theme_color_variant(get_default_group_color_name())
 
-func _make_new_group(group_title: String = "Group", group_size: Vector2 = Vector2(100, 100)) -> GraphFrame:
+func _make_new_group(group_title: String = "Group", group_size: Vector2 = Vector2(100, 100), with_name: String = "") -> GraphFrame:
     var new_group: = GraphFrame.new()
-    new_group.name = editor.graph_node_factory.new_graph_node_name("Group")
+    if with_name:
+        new_group.name = with_name
+    else:
+        new_group.name = editor.graph_node_factory.new_graph_node_name("Group")
     _set_group_shrinkwrap(new_group, ANESettings.default_is_group_shrinkwrap)
     new_group.size = group_size
     _set_group_title(new_group, group_title)
     
     return new_group
 
-func add_new_group(at_pos_offset: Vector2, with_title: String = "Group", with_size: Vector2 = Vector2.ZERO) -> GraphFrame:
+func add_new_group(at_pos_offset: Vector2, with_title: String = "Group", with_size: Vector2 = Vector2.ZERO, with_name: String = "") -> GraphFrame:
     if with_size == Vector2.ZERO:
         with_size = ANESettings.default_group_size
-    var new_group: = _make_new_group(with_title, with_size)
+    var new_group: = _make_new_group(with_title, with_size, with_name)
 
     add_graph_element_child(new_group)
     new_group.position_offset = at_pos_offset
@@ -1867,11 +1897,28 @@ func add_new_group(at_pos_offset: Vector2, with_title: String = "Group", with_si
     new_group.raise_request.emit()
     return new_group
 
-func add_new_colored_group(with_color: String, at_pos_offset: Vector2, with_title: String = "Group", with_size: Vector2 = Vector2.ZERO) -> GraphFrame:
-    var new_group: = add_new_group(at_pos_offset, with_title, with_size)
+func add_new_colored_group(with_color: String, at_pos_offset: Vector2, with_title: String = "Group", with_size: Vector2 = Vector2.ZERO, with_name: String = "") -> GraphFrame:
+    var new_group: = add_new_group(at_pos_offset, with_title, with_size, with_name)
     
     set_group_custom_accent_color(new_group, with_color)
     return new_group
+
+func _recreate_new_groups(group_infos: Dictionary[String, Dictionary]) -> void:
+    if editor.undo_manager.undo_redo.is_committing_action():
+        return
+    for group_name in group_infos.keys():
+        var group_info: = group_infos[group_name]
+        var accent_color: String = group_info.get("accent_color", "")
+        var pos: Vector2 = group_info["at_pos_offset"]
+        var new_group: GraphFrame = null
+        if accent_color:
+            new_group = add_new_colored_group(accent_color, pos, group_info["title"], group_info["size"], group_name)
+        else:
+            new_group = add_new_group(pos, group_info["title"], group_info["size"], group_name)
+        if "into_group" in group_info:
+            var parent_group: = get_node(NodePath(group_info["into_group"])) as GraphFrame
+            if parent_group:
+                _assign_group_relation({ "group": parent_group, "member": new_group })
 
 func add_new_group_title_centered(at_pos_offset: Vector2) -> GraphFrame:
     var new_group_size: = ANESettings.default_group_size
@@ -1887,13 +1934,11 @@ func add_new_group_pending_title_undo_step(at_pos_offset: Vector2, into_group: G
         # regardless of if the default title is changed or not
         add_ge_to_group(new_group, into_group, true)
     var title_edit_popup: = open_group_title_edit(new_group)
-    title_edit_popup.tree_exiting.connect(create_new_group_with_undo.bind(new_group, into_group))
+    title_edit_popup.tree_exiting.connect(create_new_group_titled_undo_step.bind(new_group, into_group))
 
-func create_new_group_with_undo(new_group: GraphFrame, into_group: GraphFrame) -> void:
+func create_new_group_titled_undo_step(new_group: GraphFrame, into_group: GraphFrame) -> void:
     var undo_step: = editor.undo_manager.start_or_continue_graph_undo_step("Add New Group", self)
-    undo_step.created_ge_names.append(new_group.name as String)
-    if into_group:
-        undo_step.add_group_relations([{ "group": into_group, "member": new_group }])
+    undo_step.add_new_group(new_group, into_group)
     editor.undo_manager.commit_if_new()
 
 func set_groups_shrinkwrap_with_undo(groups: Array[GraphFrame], shrinkwrap: bool) -> void:
@@ -1929,6 +1974,7 @@ func bring_group_to_front(group: GraphFrame) -> void:
 
 func get_color_name_menu() -> PopupMenu:
     var color_name_menu: PopupMenu = PopupMenu.new()
+    color_name_menu.add_item("Use Default")
     for color_name in ThemeColorVariants.get_theme_colors():
         var theme_color: Color = ThemeColorVariants.get_theme_color(color_name)
         color_name_menu.add_icon_item(Util.get_icon_for_color(theme_color), color_name)
@@ -2085,3 +2131,9 @@ func _get_tooltip(at_local_position: Vector2) -> String:
         if group_local_rect.has_point(at_local_position):
             return group.tooltip_text
     return ""
+
+func on_group_settings_updated() -> void:
+    for group in get_all_groups():
+        if not group.get_meta("has_custom_color", false):
+            remove_group_accent_color(group)
+    refresh_graph_elements_in_frame_status()

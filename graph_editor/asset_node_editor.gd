@@ -44,6 +44,8 @@ enum ContextMenuItems {
     CREATE_NEW_NODE,
     CREATE_NEW_GROUP,
     
+    SET_GROUP_SIZE_AS_DEFAULT,
+    
     NEW_FILE,
 }
 
@@ -126,6 +128,8 @@ func _ready() -> void:
     
     graph_node_factory.name = "GraphNodeFactory"
     add_child(graph_node_factory, true)
+    
+    theme = ThemeColorVariants.get_theme_color_variant("blue-purple")
 
 func is_different_from_file_version() -> bool:
     return undo_manager.undo_redo.get_version() != file_history_version
@@ -254,8 +258,6 @@ func on_settings_menu_index_pressed(index: int, settings_menu: PopupMenu) -> voi
     match menu_item_text:
         "Customize Theme Colors":
             popup_menu_root.show_theme_editor()
-    if index == 1:
-        ANESettings.set_subtree_greedy_mode(not ANESettings.select_subtree_is_greedy)
 
 func on_popup_menu_opened() -> void:
     for graph in graphs:
@@ -1628,3 +1630,7 @@ func _set_gn_title(graph_node: CustomGraphNode, new_title: String) -> void:
     var the_an: = get_gn_main_asset_node(graph_node)
     the_an.title = new_title
     graph_node.title = new_title
+
+func update_all_ges_themes() -> void:
+    for graph in graphs:
+        graph.update_all_ges_themes()

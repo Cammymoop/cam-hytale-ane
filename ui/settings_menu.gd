@@ -11,10 +11,38 @@ var display_scales: Array[Dictionary] = [
 ]
 
 var display_scale_submenu: PopupMenu = null
+var default_group_color_submenu: PopupMenu = null
+
+var titlebar_doubleclick_is_greedy_idx: int = -1
+
+var default_group_color_menu_idx: int = -1
+var reset_group_size_idx: int = -1
+var toggle_default_group_shrinkwrap_idx: int = -1
 
 func _ready() -> void:
     var popup_menu: = get_popup()
+    popup_menu.index_pressed.connect(on_settings_menu_index_pressed)
+    about_to_popup.connect(on_about_to_popup)
     
+    titlebar_doubleclick_is_greedy_idx = popup_menu.item_count
+    popup_menu.add_check_item("Doubleclick to Select Subtree is Greedy", titlebar_doubleclick_is_greedy_idx)
+    
+    setup_display_scale_submenu()
+    setup_group_settings_items()
+
+func on_settings_menu_index_pressed(index: int) -> void:
+    if index == titlebar_doubleclick_is_greedy_idx:
+        ANESettings.set_subtree_greedy_mode(not ANESettings.select_subtree_is_greedy)
+    elif index == reset_group_size_idx:
+        ANESettings.reset_default_group_size()
+    elif index == toggle_default_group_shrinkwrap_idx:
+        ANESettings.set_default_is_group_shrinkwrap(not ANESettings.default_is_group_shrinkwrap)
+
+func on_about_to_popup() -> void:
+    update_group_options()
+    
+func setup_display_scale_submenu() -> void:
+    var popup_menu: = get_popup()
     display_scale_submenu = PopupMenu.new()
     display_scale_submenu.name = "DisplayScaleSubmenu"
     var cur_display_scale_idx: = get_cur_display_scale_idx()
@@ -57,3 +85,53 @@ func on_display_scale_submenu_index_pressed(index: int) -> void:
     var display_scale: = display_scales[index]
     update_cur_display_scale_selected()
     ANESettings.set_custom_display_scale(display_scale["scale"])
+
+
+func setup_group_settings_items() -> void:
+    var popup_menu: = get_popup()
+
+    popup_menu.add_separator("Group Settings")
+    default_group_color_submenu = PopupMenu.new()
+    default_group_color_submenu.name = "DefaultGroupColorSubmenu"
+    default_group_color_submenu.index_pressed.connect(on_default_group_color_submenu_index_pressed)
+    default_group_color_submenu.about_to_popup.connect(update_group_color_options)
+
+    default_group_color_menu_idx = popup_menu.item_count
+    var item_text: = "Default Group Color"
+    popup_menu.add_submenu_node_item(item_text, default_group_color_submenu)
+    
+    toggle_default_group_shrinkwrap_idx = popup_menu.item_count
+    popup_menu.add_check_item("Shrinkwrap New Groups By Default", toggle_default_group_shrinkwrap_idx)
+    popup_menu.set_item_checked(toggle_default_group_shrinkwrap_idx, ANESettings.default_is_group_shrinkwrap)
+    
+    reset_group_size_idx = popup_menu.item_count
+    popup_menu.add_item("Reset New Group Default Size", reset_group_size_idx)
+    
+
+func _get_color_icon(color_name: String) -> Texture2D:
+    return Util.get_icon_for_color(ThemeColorVariants.get_theme_color(color_name))
+
+func update_group_options() -> void:
+    var popup_menu: = get_popup()
+    popup_menu.set_item_checked(toggle_default_group_shrinkwrap_idx, ANESettings.default_is_group_shrinkwrap)
+    update_group_color_main_option()
+
+func update_group_color_main_option() -> void:
+    var popup_menu: = get_popup()
+    popup_menu.set_item_icon(default_group_color_menu_idx, _get_color_icon(ANESettings.default_group_color))
+
+func update_group_color_options() -> void:
+    default_group_color_submenu.clear()
+    for color_name in ThemeColorVariants.get_theme_colors():
+        var color_idx: = default_group_color_submenu.item_count
+        default_group_color_submenu.add_icon_item(_get_color_icon(color_name), color_name)
+        default_group_color_submenu.set_item_as_radio_checkable(color_idx, true)
+        if color_name == ANESettings.default_group_color:
+            default_group_color_submenu.set_item_checked(color_idx, true)
+
+func on_default_group_color_submenu_index_pressed(index: int) -> void:
+    var color_name: String = default_group_color_submenu.get_item_text(index)
+    if not ThemeColorVariants.has_theme_color(color_name):
+        return
+    ANESettings.set_default_group_color(color_name)
+    update_group_color_main_option()

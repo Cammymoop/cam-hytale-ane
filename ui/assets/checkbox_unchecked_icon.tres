@@ -1,5 +1,5 @@
 [gd_resource type="DPITexture" format=3 uid="uid://3o3i270yvcvh"]
 
 [resource]
-_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><rect width=\"12\" height=\"12\" x=\"2\" y=\"2\" fill=\"#fff\" fill-opacity=\".6\" stroke=\"#fff\" stroke-opacity=\"1.0\" stroke-width=\"3\" rx=\"2.0\"/></svg>
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><rect width=\"12\" height=\"12\" x=\"2\" y=\"2\" fill=\"#1a1a1a\" fill-opacity=\"1.0\" stroke=\"#ffffff\" stroke-opacity=\"1.0\" stroke-width=\"3\" rx=\"2.0\"/></svg>
 "

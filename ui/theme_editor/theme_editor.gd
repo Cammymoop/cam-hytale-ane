@@ -20,11 +20,14 @@ func reset_theme_editor() -> void:
 
 func update_theme() -> void:
     ThemeColorVariants.recreate_variants()
-    update_graph_edit_theme()
+    update_graph_element_themes()
 
-func update_graph_edit_theme() -> void:
-    var graph_edit: CHANE_AssetNodeGraphEdit = get_tree().current_scene.find_child("ANGraphEdit")
-    graph_edit.update_all_ges_themes()
+func update_graph_element_themes() -> void:
+    var editor: = get_tree().current_scene as CHANE_AssetNodeEditor
+    if not editor:
+        push_warning("Theme editor: Editor not found, cannot refresh theme")
+    prints("updating graph element themes")
+    editor.update_all_ges_themes()
 
 func on_save_custom_theme() -> void:
     TypeColors.save_custom_theme(GlobalToaster.show_toast_message)

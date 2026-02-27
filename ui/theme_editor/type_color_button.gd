@@ -39,6 +39,19 @@ func update_visuals() -> void:
     add_theme_stylebox_override("hover", styleboxes["hover"])
     add_theme_stylebox_override("pressed", styleboxes["pressed"])
     
+    var actual_color: Color = TypeColors.get_actual_color_for_type(type_name)
+    if actual_color.ok_hsl_l < 0.54:
+        _set_font_colors(Color.WHITE)
+    else:
+        _set_font_colors(Color.BLACK)
+
+func _set_font_colors(with_color: Color) -> void:
+    add_theme_color_override("font_color", with_color)
+    add_theme_color_override("font_hover_color", with_color)
+    add_theme_color_override("font_pressed_color", with_color)
+    add_theme_color_override("font_hover_pressed_color", with_color)
+    add_theme_color_override("font_focus_color", with_color)
+    
 func on_pressed() -> void:
     update_color_name_options()
 
@@ -53,7 +66,7 @@ func reset_to_default() -> void:
 
 func on_color_idx_selected(idx: int) -> void:
     var color_name: String = popup_menu.get_item_text(idx)
-    if not color_name in ThemeColorVariants.theme_colors:
+    if not ThemeColorVariants.has_theme_color(color_name):
         return
     TypeColors.custom_color_names[type_name] = color_name
     update_visuals()

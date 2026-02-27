@@ -3,6 +3,7 @@ extends RefCounted
 
 var created_names_to_select: Array[String] = []
 var new_default_graph_nodes_info: Dictionary[String, Dictionary] = {}
+var created_groups_infos: Dictionary[String, Dictionary] = {}
 
 var added_connections: Array[Dictionary] = []
 var removed_connections: Array[Dictionary] = []
@@ -82,7 +83,23 @@ func add_new_default_graph_node_for(new_an_id: String, new_gn_name: String, new_
 		"at_pos_offset": new_gn_position_offset,
 	}
 	added_connections.append_array(new_connections)
-	add_group_relations(new_group_relations)
+	add_named_group_relations(new_group_relations)
+
+func add_new_group(group: GraphFrame, into_group: GraphFrame = null) -> void:
+	var group_info: = {
+		"title": group.title,
+		"at_pos_offset": group.position_offset,
+		"size": group.size,
+	}
+	if group.get_meta("has_custom_color", false):
+		group_info["accent_color"] = group.get_meta("custom_color_name", "")
+	else:
+		group_info["accent_color"] = ""
+	if into_group:
+		group_info["into_group"] = into_group.name
+
+	created_groups_infos[group.name] = group_info
+	created_names_to_select.append(group.name)
 
 func add_group_relations(group_relations: Array[Dictionary]) -> void:
 	for group_relation in group_relations:
@@ -90,6 +107,9 @@ func add_group_relations(group_relations: Array[Dictionary]) -> void:
 			"group": group_relation["group"].name as String,
 			"member": group_relation["member"].name as String,
 		})
+
+func add_named_group_relations(named_group_relations: Array[Dictionary]) -> void:
+	added_group_relations.append_array(named_group_relations)
 
 func add_ges_into_group(ges_to_include: Array[GraphElement], group: GraphFrame) -> void:
 	for ge in ges_to_include:
@@ -126,6 +146,9 @@ func register_action(undo_redo: UndoRedo, graph: CHANE_AssetNodeGraphEdit, edito
 		var ge: = graph.get_node_or_null(NodePath(ge_name)) as GraphElement
 		if ge:
 			resized_ges_to[ge_name] = ge.size
+	
+	if created_groups_infos.size() > 0:
+		undo_redo.add_do_method(graph._recreate_new_groups.bind(created_groups_infos.duplicate()))
 	
 	# Nodes created as a new default by selecting a new asset node
 	for new_gn_name in new_default_graph_nodes_info.keys():
@@ -185,8 +208,11 @@ func register_action(undo_redo: UndoRedo, graph: CHANE_AssetNodeGraphEdit, edito
 			undo_redo.add_undo_method(graph.undo_redo_delete_fragment_ges.bind(finfo["counter_start"], finfo["num_ges"]))
 	
 	# New default GNs undo = delete by name
-	for new_ge_name in new_default_graph_nodes_info.keys():
-		undo_redo.add_undo_method(graph.undo_redo_delete_ge_names.bind([new_ge_name]))
+	if new_default_graph_nodes_info.size() > 0:
+		undo_redo.add_undo_method(graph.undo_redo_delete_ge_names.bind(new_default_graph_nodes_info.keys()))
+	
+	if created_groups_infos.size() > 0:
+		undo_redo.add_undo_method(graph.undo_redo_delete_ge_names.bind(created_groups_infos.keys()))
 	
 	undo_redo.add_undo_method(graph.select_ges_by_names.bind(selected_before_names))
 

@@ -35,8 +35,9 @@ func clear_children() -> void:
 
 func get_button_styleboxes(color_name: String) -> Dictionary:
     if color_name not in type_color_styleboxes:
-        ThemeColorVariants._make_theme_color_variant(color_name, ThemeColorVariants.get_theme_color(color_name))
-        type_color_styleboxes[color_name] = ThemeColorVariants.get_button_styleboxes(ThemeColorVariants.theme_colors[color_name])
+        var theme_color: Color = ThemeColorVariants.get_theme_color(color_name)
+        ThemeColorVariants._make_theme_color_variant(color_name, theme_color)
+        type_color_styleboxes[color_name] = ThemeColorVariants.get_button_styleboxes(theme_color)
     return type_color_styleboxes[color_name]
 
 func clear_color_name(color_name: String) -> void:

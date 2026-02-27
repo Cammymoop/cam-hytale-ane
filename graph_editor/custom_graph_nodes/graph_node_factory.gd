@@ -36,18 +36,10 @@ func make_new_graph_node_for_asset_node(asset_node: HyAssetNode, is_newly_create
     var node_schema: Dictionary = {}
     if asset_node.an_type and asset_node.an_type != "Unknown":
         node_schema = SchemaManager.schema.node_schema[asset_node.an_type]
-
-    var output_type: String = node_schema.get("output_value_type", "")
-    var theme_var_color: String = TypeColors.get_color_for_type(output_type)
-    if ThemeColorVariants.has_theme_color(theme_var_color):
-        graph_node.theme = ThemeColorVariants.get_theme_color_variant(theme_var_color)
-    else:
-        push_warning("No theme color variant found for color '%s'" % theme_var_color)
-        print_debug("No theme color variant found for color '%s'" % theme_var_color)
     
     graph_node.resizable = true
     graph_node.size = Vector2(gn_min_width, 0)
-    if not output_type:
+    if not graph_node.get_output_value_type():
         graph_node.ignore_invalid_connection_type = true
 
     graph_node.title = asset_node.title
@@ -57,6 +49,13 @@ func make_new_graph_node_for_asset_node(asset_node: HyAssetNode, is_newly_create
     if not is_special:
         setup_base_output_input_info(graph_node, asset_node, node_schema)
         setup_common_graph_node_controls(graph_node, asset_node, node_schema)
+
+    var theme_var_color: String = TypeColors.get_color_for_type(graph_node.get_theme_value_type())
+    if ThemeColorVariants.has_theme_color(theme_var_color):
+        graph_node.theme = ThemeColorVariants.get_theme_color_variant(theme_var_color)
+    else:
+        push_warning("No theme color variant found for color '%s'" % theme_var_color)
+        print_debug("No theme color variant found for color '%s'" % theme_var_color)
     
     if centered:
         graph_node.position_offset -= graph_node.size / 2

@@ -74,29 +74,34 @@ func on_value_changed(value: Variant, setting_name: String) -> void:
     var undo_step: UndoStep = null
     var is_new_step: bool = false
     var is_reuse_step: bool = false
+    
+    var setting_gd_type: int = setting_gd_types[setting_name]
+    
+    var last_undo_step_matches: bool = editor.undo_manager.get_last_committed_undo_step() == last_string_change_undo_step
+    last_undo_step_matches = last_undo_step_matches and last_string_change_undo_step != null
 
-    if not editor.undo_manager.is_creating_undo_step() and editor.undo_manager.get_last_committed_undo_step() == last_string_change_undo_step:
+    if setting_gd_type == TYPE_STRING and not editor.undo_manager.is_creating_undo_step() and last_undo_step_matches:
         undo_step = last_string_change_undo_step
         is_reuse_step = true
     else:
         undo_step = editor.undo_manager.start_or_continue_undo_step(undo_action_name)
         is_new_step = editor.undo_manager.is_new_step
-        if setting_gd_types[setting_name] == TYPE_STRING:
+        if setting_gd_type == TYPE_STRING:
             last_string_change_undo_step = undo_step
         else:
             last_string_change_undo_step = null
 
         undo_step.register_an_settings_before_change(asset_node)
 
-    if setting_gd_types[setting_name] == TYPE_STRING:
+    if setting_gd_type == TYPE_STRING:
         asset_node.settings[setting_name] = str(value)
-    elif setting_gd_types[setting_name] == TYPE_FLOAT:
+    elif setting_gd_type == TYPE_FLOAT:
         asset_node.settings[setting_name] = float(value)
-    elif setting_gd_types[setting_name] == TYPE_INT:
+    elif setting_gd_type == TYPE_INT:
         asset_node.settings[setting_name] = int(value)
-    elif setting_gd_types[setting_name] == TYPE_BOOL:
+    elif setting_gd_type == TYPE_BOOL:
         asset_node.settings[setting_name] = bool(value)
-    elif setting_gd_types[setting_name] == TYPE_ARRAY:
+    elif setting_gd_type == TYPE_ARRAY:
         if not asset_node.settings.has(setting_name):
             asset_node.settings[setting_name] = []
         asset_node.settings[setting_name].assign(value)

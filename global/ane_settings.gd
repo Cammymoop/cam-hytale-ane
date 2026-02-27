@@ -1,15 +1,19 @@
 extends Node
 
+signal group_settings_updated()
+
 var settings_file_path: String = "user://CHANE_settings.json"
 
 const MENU_ICON_SIZE: = 14
+
+const DEFAULT_GROUP_SIZE: Vector2 = Vector2(460, 300)
 
 @export var display_decimal_places: = 3
 @export var custom_display_scale: float = -1
 
 @export var default_group_color: String = "blue-purple"
 @export var default_is_group_shrinkwrap: bool = true
-@export var default_group_size: Vector2 = Vector2(460, 300)
+@export var default_group_size: Vector2 = DEFAULT_GROUP_SIZE
 @export var auto_color_imported_nested_groups: bool = true
 
 @export var new_node_menu_height_ratio: = 0.85
@@ -55,6 +59,24 @@ func get_current_custom_scale() -> float:
     if custom_display_scale == -1:
         return 1.0
     return custom_display_scale
+
+func set_default_group_color(new_default_group_color: String) -> void:
+    default_group_color = new_default_group_color
+    group_settings_updated.emit()
+    update_saved_settings()
+
+func set_default_is_group_shrinkwrap(new_default_is_group_shrinkwrap: bool) -> void:
+    default_is_group_shrinkwrap = new_default_is_group_shrinkwrap
+    group_settings_updated.emit()
+    update_saved_settings()
+
+func reset_default_group_size() -> void:
+    set_default_group_size(DEFAULT_GROUP_SIZE)
+
+func set_default_group_size(new_default_group_size: Vector2) -> void:
+    default_group_size = new_default_group_size
+    group_settings_updated.emit()
+    update_saved_settings()
 
 func get_settings_dict() -> Dictionary:
     return {

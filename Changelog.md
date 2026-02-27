@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.2
+### Fixes:
+- Fixed multiple bugs with undo on settings, and a bug where if the first thing you do is edit a setting it breaks the undo
+- Fixed regression in 0.4.0 causing errors when trying to add new groups
+- Fixed regression in 0.4.0 where updating the theme colors doesn't update existing graph nodes
+
+### Improvements:
+- Group settings are now editable in the settings menu
+  - Color used for all groups without a specific accent color selected
+  - Whether new groups have shrinkwrap enabled by default
+  - Size of newly created groups can be reset to default from the settings menu, to set it to a new size right click on a group of that size and select "Set Group Size As Default for New Groups"
+- Theme color and readability improvements
+
 ## 0.4.1
 Fixed a critical bug in 0.4.0 where ctr_right clicking to cut connections then undoing would add many duplicate copies of connected asset nodes on save
 
