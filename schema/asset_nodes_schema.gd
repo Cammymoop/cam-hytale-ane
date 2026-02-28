@@ -2903,7 +2903,7 @@ func get_value_set_values(value_set: String) -> Array:
     },
     "WeightedPath": {
 		"id_prefix_override": "WeightedPath.Prefab.Prop",
-        "display_name": "Weighted Path",
+        "display_name": "Weighted Prefab Path",
         "output_value_type": "WeightedPath",
         "settings": {
             "Path": { "gd_type": TYPE_STRING, "default_value": "" },

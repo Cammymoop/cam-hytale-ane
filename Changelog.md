@@ -11,7 +11,8 @@
   - Color used for all groups without a specific accent color selected
   - Whether new groups have shrinkwrap enabled by default
   - Size of newly created groups can be reset to default from the settings menu, to set it to a new size right click on a group of that size and select "Set Group Size As Default for New Groups"
-- Theme color and readability improvements
+- Improved (hopefully) the theme in a lot of minor ways, working toward making it easier to make a custom theme to replace the default
+- You can now set the interface color from the settings menu, this is used for the main menu nodes at the top and also for context menus
 
 ## 0.4.1
 Fixed a critical bug in 0.4.0 where ctr_right clicking to cut connections then undoing would add many duplicate copies of connected asset nodes on save

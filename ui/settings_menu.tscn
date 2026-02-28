@@ -7,7 +7,4 @@ offset_right = 8.0
 offset_bottom = 8.0
 text = "Settings"
 switch_on_hover = true
-item_count = 1
-popup/item_0/text = "Customize Theme Colors"
-popup/item_0/id = 0
 script = ExtResource("1_h6jc8")

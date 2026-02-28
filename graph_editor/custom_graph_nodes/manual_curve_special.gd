@@ -1,3 +1,4 @@
+@tool
 extends CustomGraphNode
 class_name ManualCurveSpecialGN
 
@@ -42,6 +43,8 @@ func _notification(what: int) -> void:
         graph_container = $GraphContainer
 
 func _ready() -> void:
+    if Engine.is_editor_hint():
+        return
     graph_container.add_theme_constant_override("margin_bottom", ANESettings.GRAPH_NODE_MARGIN_BOTTOM_EXTRA)
     mode_buttons.allow_all_off = false
     mode_buttons.option_changed.connect(on_mode_changed)
@@ -73,6 +76,8 @@ func _ready() -> void:
     export_as_edit.focus_exited.connect(check_show_export_as)
 
 func _enter_tree() -> void:
+    if Engine.is_editor_hint():
+        return
     var new_graph_edit: = get_parent() as CHANE_AssetNodeGraphEdit
     if new_graph_edit:
         if not new_graph_edit.zoom_changed.is_connected(on_zoom_changed):
@@ -80,6 +85,8 @@ func _enter_tree() -> void:
     setup_ports(new_graph_edit)
 
 func _exit_tree() -> void:
+    if Engine.is_editor_hint():
+        return
     var old_graph_edit: = get_parent() as CHANE_AssetNodeGraphEdit
     if old_graph_edit:
         if old_graph_edit.zoom_changed.is_connected(on_zoom_changed):

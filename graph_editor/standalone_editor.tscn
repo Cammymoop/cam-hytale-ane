@@ -4,75 +4,7 @@
 [ext_resource type="Script" uid="uid://b2hqpos1gajgs" path="res://graph_editor/asset_node_graph_edit.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://jlck4iceuf5m" path="res://graph_editor/asset_node_editor.gd" id="2_272bh"]
 [ext_resource type="PackedScene" uid="uid://cvawkmmdq1u7j" path="res://ui/popup_menus/popup_menu_root.tscn" id="5_7mycd"]
-[ext_resource type="Script" uid="uid://crugojabvgfmf" path="res://ui/toast_message_container.gd" id="17_yaehf"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_074og"]
-bg_color = Color(0.31061712, 0.31061712, 0.31061706, 0.84705883)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="Animation" id="Animation_yaehf"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("PanelContainer:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Color(1, 1, 1, 1)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("PanelContainer:visible")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [false]
-}
-
-[sub_resource type="Animation" id="Animation_074og"]
-resource_name = "show"
-length = 0.76666665
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("PanelContainer:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.76666665),
-"transitions": PackedFloat32Array(1, 0.4204483, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("PanelContainer:visible")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.76666665),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_cegan"]
-_data = {
-&"RESET": SubResource("Animation_yaehf"),
-&"show": SubResource("Animation_074og")
-}
+[ext_resource type="PackedScene" uid="uid://b5bc0pmsw6q4o" path="res://ui/toast_message_container.tscn" id="5_8lsar"]
 
 [node name="AssetNodeEditor" type="Control" unique_id=1109592141 node_paths=PackedStringArray("popup_menu_root")]
 layout_mode = 3
@@ -107,49 +39,6 @@ popup_menu_root = NodePath("../PopupMenuRoot")
 layout_mode = 1
 metadata/_edit_lock_ = true
 
-[node name="ToastMessageContainer" type="Control" parent="." unique_id=1771569462]
+[node name="ToastMessageContainer" parent="." unique_id=1473941058 instance=ExtResource("5_8lsar")]
 unique_name_in_owner = true
-z_index = 3
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("17_yaehf")
-metadata/_edit_lock_ = true
-
-[node name="PanelContainer" type="PanelContainer" parent="ToastMessageContainer" unique_id=657494300]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_074og")
-
-[node name="MarginContainer" type="MarginContainer" parent="ToastMessageContainer/PanelContainer" unique_id=1764117911]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 8
-
-[node name="ToastMessageLabel" type="Label" parent="ToastMessageContainer/PanelContainer/MarginContainer" unique_id=1658145036]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "Saved"
-
-[node name="ToastAnimator" type="AnimationPlayer" parent="ToastMessageContainer" unique_id=1892830028]
-libraries/ = SubResource("AnimationLibrary_cegan")

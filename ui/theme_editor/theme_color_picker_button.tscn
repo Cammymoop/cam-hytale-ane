@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://ccclyrbp400xu" path="res://ui/custom_controls/custom_color_picker_button.gd" id="1_bx71a"]
 
 [node name="ColorPickerButton" type="ColorPickerButton" unique_id=1396439560]
-custom_minimum_size = Vector2(0, 32)
-color = Color(0.050980393, 0.44705883, 0.64705884, 1)
+custom_minimum_size = Vector2(34, 32)
+color = Color(0.050174303, 0.58674806, 0.77163494, 1)
 edit_alpha = false
 script = ExtResource("1_bx71a")
 
@@ -18,6 +18,6 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="CenterContainer" unique_id=160198550]
-z_index = 1
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "blue"

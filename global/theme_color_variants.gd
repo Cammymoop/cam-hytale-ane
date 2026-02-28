@@ -167,7 +167,6 @@ func _make_theme_color_variant(color_name: String, color_color: Color) -> void:
             var sat_ratio: float = base_mapped_to.ok_hsl_s / base_theme_base_color_s
             new_color_map[mapped_color] = Color.from_ok_hsl(new_h, sat_ratio * new_s, shade_ratio * new_l, alpha)
         new_icon.color_map = new_color_map
-        prints("new color map for theme %s: %s" % [color_name, new_icon.color_map.values()])
         new_theme.set_icon(icon_name, theme_class, new_icon)
     
     var recolor_line_stylebox: = func(line_stylebox_name: String, theme_class: String) -> void:

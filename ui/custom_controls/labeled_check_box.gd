@@ -3,7 +3,7 @@ class_name LabeledCheckBox
 
 signal toggled(is_pressed: bool)
 
-var text: String = "":
+@export var text: String = "":
     set(value):
         var label: = get_node("Label")
         label.text = value

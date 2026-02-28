@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dhprb6qaxt4u0" path="res://ui/assets/graph_node_port_default.tres" id="2_6tukj"]
 [ext_resource type="FontFile" uid="uid://43145ahrbd7d" path="res://ui/assets/font/dejavu-sans.book.ttf" id="5_11ing"]
 [ext_resource type="StyleBox" uid="uid://dmp45p55gnjwj" path="res://ui/assets/editing_stylebox.tres" id="5_lsmgg"]
+[ext_resource type="Texture2D" uid="uid://bmj77pobv5dag" path="res://ui/assets/radio_unchecked.tres" id="6_wdmlg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h2yge"]
 content_margin_left = 4.0
@@ -89,6 +90,7 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 6.0
 bg_color = Color(0.40263012, 0.8000348, 0.55822635, 1)
+border_width_right = 1
 border_width_bottom = 3
 border_color = Color(0.2692263, 0.4324749, 0.3313223, 1)
 corner_radius_top_left = 4
@@ -101,6 +103,7 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 6.0
 bg_color = Color(0.4190617, 0.71656096, 0.5291036, 1)
+border_width_right = 1
 border_width_bottom = 3
 border_color = Color(0.2692263, 0.4324749, 0.3313223, 1)
 corner_radius_top_left = 4
@@ -384,9 +387,7 @@ content_margin_left = 4.0
 content_margin_top = 0.0
 content_margin_right = 4.0
 content_margin_bottom = 0.0
-color = Color(0.20784314, 0.37254903, 0.26666668, 1)
-grow_begin = 3.0
-grow_end = 3.0
+color = Color(0.5633887, 0.6287513, 0.58274746, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wdmlg"]
 content_margin_left = 4.0
@@ -585,6 +586,7 @@ PopupMenu/constants/item_end_padding = 0
 PopupMenu/constants/item_start_padding = 0
 PopupMenu/font_sizes/font_size = 14
 PopupMenu/icons/checked = SubResource("DPITexture_kh6sg")
+PopupMenu/icons/radio_unchecked = ExtResource("6_wdmlg")
 PopupMenu/icons/unchecked = SubResource("DPITexture_wdmlg")
 PopupMenu/styles/hover = SubResource("StyleBoxFlat_mpiv5")
 PopupMenu/styles/labeled_separator_left = SubResource("StyleBoxLine_mpiv5")

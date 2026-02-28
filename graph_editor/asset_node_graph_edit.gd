@@ -211,15 +211,7 @@ func setup_settings_menu() -> void:
     menu_hbox.add_child(settings_menu_btn)
     menu_hbox.move_child(settings_menu_btn, 0)
 
-    settings_menu_menu.index_pressed.connect(on_settings_menu_index_pressed)
-    settings_menu_menu.about_to_popup.connect(on_settings_menu_about_to_popup)
-
-func on_settings_menu_about_to_popup() -> void:
-    var dbl_click_is_greedy: = ANESettings.select_subtree_is_greedy
-    settings_menu_menu.set_item_checked(1, dbl_click_is_greedy)
-
-func on_settings_menu_index_pressed(index: int) -> void:
-    editor.on_settings_menu_index_pressed(index, settings_menu_menu)
+    settings_menu_menu.index_pressed.connect(editor.on_settings_menu_index_pressed.bind(settings_menu_btn))
 
 func snap_ge(ge: GraphElement) -> void:
     if snapping_enabled:
@@ -1490,13 +1482,6 @@ func actually_right_click_gn(graph_node: CustomGraphNode) -> void:
     context_menu.add_separator()
     set_context_menu_select_options(context_menu, true, false)
     
-    context_menu.add_check_item("Check item", 1000)
-    context_menu.set_item_checked(context_menu.get_item_index(1000), true)
-    context_menu.add_check_item("Uncheck item", 1001)
-    context_menu.set_item_checked(context_menu.get_item_index(1001), false)
-    prints("unchecked icon color map: %s" % [get_theme_icon("unchecked", "PopupMenu").color_map])
-    prints("unchecked icon source: %s" % [get_theme_icon("unchecked", "PopupMenu").get_source()])
-
     add_child(context_menu, true)
 
     context_menu.position = get_popup_pos_at_mouse()
@@ -1857,12 +1842,10 @@ func _set_groups_accent_colors(name_colors: Dictionary[String, String]) -> void:
         else:
             set_group_custom_accent_color(group, accent_color_name)
 
-func set_group_custom_accent_color(the_group: GraphFrame, group_color_name: String, as_custom: bool = true) -> void:
-    if not as_custom:
+func set_group_custom_accent_color(the_group: GraphFrame, group_color_name: String) -> void:
+    if not group_color_name or not ThemeColorVariants.has_theme_color(group_color_name):
         remove_group_accent_color(the_group)
         return
-    if not group_color_name or not ThemeColorVariants.has_theme_color(group_color_name):
-        group_color_name = get_default_group_color_name()
 
     the_group.set_meta("has_custom_color", true)
     the_group.set_meta("custom_color_name", group_color_name)
@@ -1871,7 +1854,7 @@ func set_group_custom_accent_color(the_group: GraphFrame, group_color_name: Stri
 func remove_group_accent_color(group: GraphFrame) -> void:
     group.set_meta("has_custom_color", false)
     group.set_meta("custom_color_name", "")
-    group.theme = ThemeColorVariants.get_theme_color_variant(get_default_group_color_name())
+    group.theme = ThemeColorVariants.get_theme_color_variant(ANESettings.get_default_group_color())
 
 func _make_new_group(group_title: String = "Group", group_size: Vector2 = Vector2(100, 100), with_name: String = "") -> GraphFrame:
     var new_group: = GraphFrame.new()
@@ -2020,9 +2003,9 @@ func add_group_child(the_group: GraphFrame, with_snap: bool = false) -> void:
     if with_snap:
         snap_ge(the_group)
     var custom_color_name: String = the_group.get_meta("custom_color_name", "")
-    var has_custom_color: bool = the_group.get_meta("has_custom_color", false)
-    set_group_custom_accent_color(the_group, custom_color_name, has_custom_color)
-    
+    if not the_group.get_meta("has_custom_color", false):
+        custom_color_name = ""
+    set_group_custom_accent_color(the_group, custom_color_name)
 
     bring_group_to_front(the_group)
 

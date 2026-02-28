@@ -1,89 +1,98 @@
 [gd_scene format=3 uid="uid://bwhg0fuyjqeh1"]
 
 [ext_resource type="Script" uid="uid://up6yt53g65m1" path="res://ui/theme_editor/theme_editor.gd" id="1_ayfwk"]
+[ext_resource type="Theme" uid="uid://b41s546mbu1eb" path="res://ui/assets/theme/default/theme_editor_theme.tres" id="1_f3bh5"]
 [ext_resource type="Texture2D" uid="uid://c5yfuettbwecl" path="res://ui/assets/x_icon.tres" id="2_f3bh5"]
-[ext_resource type="Theme" uid="uid://cavvrgn7xx6ho" path="res://ui/assets/theme/default/grey_theme.tres" id="3_832gf"]
 [ext_resource type="Script" uid="uid://c63ilmr6rjoox" path="res://ui/theme_editor/theme_colors_flow.gd" id="4_62tn8"]
 [ext_resource type="PackedScene" uid="uid://cln0fptfbhe8t" path="res://ui/theme_editor/theme_color_picker_button.tscn" id="5_lt2nm"]
 [ext_resource type="Script" uid="uid://dyc1epdruun6x" path="res://ui/custom_controls/custom_line_edit.gd" id="6_803yc"]
 [ext_resource type="Script" uid="uid://cn8t60w06bwpc" path="res://ui/theme_editor/type_colors_flow.gd" id="7_ttcg5"]
 [ext_resource type="Script" uid="uid://dm0dehdgpmrnk" path="res://ui/theme_editor/type_color_button.gd" id="8_gnkjj"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ycdy4"]
-bg_color = Color(0.32915878, 0.32915822, 0.3291585, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[node name="ThemeEditorBGPanel" type="Panel" unique_id=2089651654]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_f3bh5")
+theme_type_variation = &"BackgroundPanel"
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w48qg"]
-bg_color = Color(0.7835238, 0.78352326, 0.7835235, 1)
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1646310189]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="ThemeEditor" type="PanelContainer" unique_id=2006185018 node_paths=PackedStringArray("theme_colors_flow", "type_colors_flow")]
-visible = false
+[node name="ThemeEditor" type="PanelContainer" parent="CenterContainer" unique_id=2006185018 node_paths=PackedStringArray("theme_colors_flow", "type_colors_flow")]
 custom_minimum_size = Vector2(900, 0)
-theme_override_styles/panel = SubResource("StyleBoxFlat_ycdy4")
+layout_mode = 2
+theme_type_variation = &"PanelMain"
 script = ExtResource("1_ayfwk")
 theme_colors_flow = NodePath("VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow")
 type_colors_flow = NodePath("VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/TypeColorsFlow")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=574100058]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/ThemeEditor" unique_id=574100058]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/ThemeEditor/VBoxContainer" unique_id=1886220473]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1886220473]
+[node name="Label" type="Label" parent="CenterContainer/ThemeEditor/VBoxContainer/MarginContainer" unique_id=1593314684]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="VBoxContainer/MarginContainer" unique_id=1593314684]
-layout_mode = 2
+theme_type_variation = &"PanelTitlebarLabel"
 text = "Customize Theme"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer" unique_id=1422320296]
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/MarginContainer" unique_id=1422320296]
 layout_mode = 2
 alignment = 2
 
-[node name="Button" type="Button" parent="VBoxContainer/MarginContainer/HBoxContainer" unique_id=1904344042]
+[node name="Button" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1904344042]
 layout_mode = 2
 icon = ExtResource("2_f3bh5")
 flat = true
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=876635932]
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer/ThemeEditor/VBoxContainer" unique_id=876635932]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_w48qg")
+theme_type_variation = &"PanelContentPanel"
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer" unique_id=2017269707]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer" unique_id=2017269707]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer" unique_id=1744829259]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer/MarginContainer" unique_id=1744829259]
+[node name="Label" type="Label" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=710390683]
 layout_mode = 2
-theme = ExtResource("3_832gf")
-
-[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=710390683]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Colors:"
 
-[node name="ThemeColorsFlow" type="HFlowContainer" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1249624062 node_paths=PackedStringArray("type_colors_flow")]
+[node name="ThemeColorsFlow" type="HFlowContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1249624062 node_paths=PackedStringArray("type_colors_flow")]
 layout_mode = 2
 theme_override_constants/v_separation = 6
 script = ExtResource("4_62tn8")
 type_colors_flow = NodePath("../TypeColorsFlow")
 
-[node name="ColorPickerButton" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow" unique_id=1396439560 instance=ExtResource("5_lt2nm")]
+[node name="ColorPickerButton" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow" unique_id=1396439560 instance=ExtResource("5_lt2nm")]
 layout_mode = 2
 
-[node name="AddColorBtn" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow" unique_id=1278555667]
+[node name="AddColorBtn" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow" unique_id=1278555667]
 layout_mode = 2
+theme_type_variation = &"AddColorButton"
 text = "ADD COLOR"
 
-[node name="PopupPanel" type="PopupPanel" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn" unique_id=1603665632]
+[node name="PopupPanel" type="PopupPanel" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn" unique_id=1603665632]
 oversampling_override = 1.0
 initial_position = 1
 size = Vector2i(150, 48)
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel" unique_id=117034830]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel" unique_id=117034830]
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 146.0
@@ -93,63 +102,66 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer" unique_id=230840532]
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer" unique_id=230840532]
 layout_mode = 2
 alignment = 1
 
-[node name="LineEdit" type="LineEdit" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer/HBoxContainer" unique_id=1235454685]
+[node name="LineEdit" type="LineEdit" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer/HBoxContainer" unique_id=1235454685]
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("6_803yc")
 
-[node name="Button" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer/HBoxContainer" unique_id=949912926]
+[node name="Button" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/AddColorBtn/PopupPanel/MarginContainer/HBoxContainer" unique_id=949912926]
 layout_mode = 2
 text = "Add"
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=978576885]
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=978576885]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1356560800]
+[node name="Label2" type="Label" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1356560800]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Assign Colors to Connection Types:"
 
-[node name="TypeColorsFlow" type="HFlowContainer" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=386363863]
+[node name="TypeColorsFlow" type="HFlowContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=386363863]
 layout_mode = 2
 theme_override_constants/v_separation = 6
 script = ExtResource("7_ttcg5")
 
-[node name="TypeColorButton" type="MenuButton" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/TypeColorsFlow" unique_id=1833279273]
+[node name="TypeColorButton" type="MenuButton" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/TypeColorsFlow" unique_id=1833279273]
 layout_mode = 2
 text = "Density"
 flat = false
 script = ExtResource("8_gnkjj")
 
-[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1671998423]
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1671998423]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1720073916]
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1720073916]
 layout_mode = 2
 alignment = 1
 
-[node name="SaveThemeBtn" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2029169880]
+[node name="SaveThemeBtn" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2029169880]
 layout_mode = 2
+theme_type_variation = &"BigButton"
 text = "Save Custom Theme"
 
-[node name="ReloadThemeBtn" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1434695900]
+[node name="ReloadThemeBtn" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1434695900]
 layout_mode = 2
+theme_type_variation = &"BigButton"
 text = "Reload Custom Theme"
 
-[node name="ResetThemeBtn" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2059881185]
+[node name="ResetThemeBtn" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2059881185]
 layout_mode = 2
+theme_type_variation = &"BigButton"
 text = "Reset to Defaults"
 
-[node name="CloseBtn" type="Button" parent="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1782109176]
+[node name="CloseBtn" type="Button" parent="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1782109176]
 layout_mode = 2
+theme_type_variation = &"BigButton"
 text = "Close"
 
-[connection signal="pressed" from="VBoxContainer/MarginContainer/HBoxContainer/Button" to="." method="on_close_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveThemeBtn" to="." method="on_save_custom_theme"]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ReloadThemeBtn" to="." method="on_load_custom_theme"]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ResetThemeBtn" to="." method="on_reset_theme_to_default"]
-[connection signal="pressed" from="VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CloseBtn" to="." method="on_close_button_pressed"]
+[connection signal="pressed" from="CenterContainer/ThemeEditor/VBoxContainer/MarginContainer/HBoxContainer/Button" to="CenterContainer/ThemeEditor" method="on_close_button_pressed"]
+[connection signal="pressed" from="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/SaveThemeBtn" to="CenterContainer/ThemeEditor" method="on_save_custom_theme"]
+[connection signal="pressed" from="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ReloadThemeBtn" to="CenterContainer/ThemeEditor" method="on_load_custom_theme"]
+[connection signal="pressed" from="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ResetThemeBtn" to="CenterContainer/ThemeEditor" method="on_reset_theme_to_default"]
+[connection signal="pressed" from="CenterContainer/ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/CloseBtn" to="CenterContainer/ThemeEditor" method="on_close_button_pressed"]

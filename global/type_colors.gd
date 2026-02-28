@@ -83,9 +83,9 @@ func get_actual_color(color_name: String) -> Color:
 func get_color_for_type(type_name: String) -> String:
     if type_name in custom_color_names:
         return custom_color_names[type_name]
-    if type_name not in type_colors:
-        return fallback_color
-    return type_colors[type_name]
+    if type_name in type_colors:
+        return type_colors[type_name]
+    return fallback_color
 
 func get_default_color_name_for_type(type_name: String) -> String:
     if not type_colors.has(type_name):
@@ -104,7 +104,7 @@ func get_label_color_for_type(type_name: String) -> Color:
 func get_label_stylebox_for_type(type_name: String) -> StyleBoxFlat:
     return get_color_label_stylebox(get_color_for_type(type_name))
 
-func save_custom_theme(message_callback: Callable) -> void:
+func save_custom_theme(show_toast: bool = false) -> void:
     if Engine.is_editor_hint():
         return
     print("saving custom theme")
@@ -125,9 +125,10 @@ func save_custom_theme(message_callback: Callable) -> void:
         GlobalToaster.show_toast_message("Error saving custom theme colors")
         return
     file.store_string(JSON.stringify(custom_theme_dict))
-    message_callback.call("Custom Colors Saved")
+    if show_toast:
+        GlobalToaster.show_toast_message("Custom Colors Saved")
 
-func load_custom_theme(message_callback: Callable = Callable()) -> void:
+func load_custom_theme(show_toast: bool = false) -> void:
     if Engine.is_editor_hint():
         return
     if not FileAccess.file_exists(CUSTOM_THEME_FILE_PATH):
@@ -147,8 +148,8 @@ func load_custom_theme(message_callback: Callable = Callable()) -> void:
         print_debug("Error parsing custom theme file")
     
     if not file or not parsed_dict:
-        if message_callback.is_valid():
-            message_callback.call("Error loading custom theme colors")
+        if show_toast:
+            GlobalToaster.show_toast_message("Error loading custom theme colors")
         return
     
     var loaded_custom_theme_colors: Dictionary[String, Color] = {}
@@ -160,11 +161,12 @@ func load_custom_theme(message_callback: Callable = Callable()) -> void:
     custom_color_names.clear()
     custom_color_names.merge(parsed_dict["custom_type_colors"])
     ThemeColorVariants.recreate_variants()
-    if message_callback.is_valid():
-        message_callback.call("Custom Colors Loaded")
+    if show_toast:
+        GlobalToaster.show_toast_message("Custom Colors Loaded")
 
-func reset_theme_to_default(message_callback: Callable) -> void:
+func reset_theme_to_default(show_toast: bool = false) -> void:
     ThemeColorVariants.custom_theme_colors = {}
     custom_color_names = {}
     ThemeColorVariants.recreate_variants()
-    message_callback.call("Theme Reset to Defaults")
+    if show_toast:
+        GlobalToaster.show_toast_message("Theme Reset to Defaults")

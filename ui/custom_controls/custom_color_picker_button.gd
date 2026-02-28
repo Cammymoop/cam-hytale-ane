@@ -1,3 +1,4 @@
+@tool
 extends ColorPickerButton
 
 static var has_updated_stylebox: = false
@@ -21,7 +22,7 @@ func set_color_name(new_name: String) -> void:
     custom_minimum_size.x = 0
     name_label.text = new_name
     await get_tree().process_frame
-    custom_minimum_size.x = name_label.size.x + name_padding
+    custom_minimum_size.x = name_label.size.x + get_theme_constant("color_name_h_padding")
 
 func on_color_changed(new_color: Color) -> void:
     if new_color.ok_hsl_l < 0.54:
@@ -37,10 +38,13 @@ func setup_picker() -> void:
     if not has_updated_stylebox:
         has_updated_stylebox = true
         var popup_panel: = get_popup()
-        var popup_panel_stylebox: = popup_panel.get_theme_stylebox("panel") as StyleBoxFlat
+        var popup_panel_stylebox: = popup_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
         popup_panel_stylebox.bg_color = Color.WHITE
+        popup_panel.add_theme_stylebox_override("panel", popup_panel_stylebox)
 
 func _gui_input(event: InputEvent) -> void:
+    if Engine.is_editor_hint():
+        return
     if not event is InputEventMouseButton or event.button_index != MOUSE_BUTTON_RIGHT:
         return
     if not event.is_pressed():

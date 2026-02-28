@@ -1,3 +1,4 @@
+@tool
 class_name CustomGraphNode
 extends GraphNode
 
@@ -6,6 +7,8 @@ signal titlebar_double_clicked(graph_node: CustomGraphNode)
 
 var is_in_graph_group: bool = false
 var in_group_with_theme: Theme = null
+
+@export var preview_mode: bool = false
 
 @export_storage var slots_start_at_index: int = 0
 @export_storage var num_outputs: int = 0
@@ -69,6 +72,10 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw_port(slot_index: int, port_pos: Vector2i, is_left: bool, _connection_color: Color) -> void:
+    if Engine.is_editor_hint():
+        if preview_mode:
+            _draw_preview_port(slot_index, port_pos, is_left)
+        return
     var base_icon: = get_theme_icon("port", "GraphNode") as DPITexture
     
     var port_idx: int = 0 if is_left else get_input_port_idx_at_slot(slot_index)
@@ -83,6 +90,16 @@ func _draw_port(slot_index: int, port_pos: Vector2i, is_left: bool, _connection_
     draw_texture_rect(base_icon, Rect2(port_pos - (Vector2i.ONE * 2) + icon_offset, p_size + (Vector2i.ONE * 4)), false, port_color.darkened(0.5))
 
     draw_texture_rect(base_icon, Rect2(port_pos + icon_offset, p_size), false, port_color)
+
+func _draw_preview_port(slot_index: int, port_pos: Vector2i, _is_left: bool) -> void:
+    var base_icon: = get_theme_icon("port", "GraphNode") as DPITexture
+    var p_size: Vector2i = base_icon.get_size() / 2.
+    var icon_offset: Vector2i = -(Vector2(p_size / 2.).round())
+    var connection_color: Color = get_theme_stylebox("normal", "LineEdit").bg_color
+    set_slot_color_right(slot_index, connection_color)
+    set_slot_color_left(slot_index, connection_color)
+    draw_texture_rect(base_icon, Rect2(port_pos - (Vector2i.ONE * 2) + icon_offset, p_size + (Vector2i.ONE * 4)), false, connection_color.darkened(0.5))
+    draw_texture_rect(base_icon, Rect2(port_pos + icon_offset, p_size), false, connection_color)
 
 func get_input_port_idx_at_slot(at_slot_idx: int) -> int:
     var port_idx: int = 0
@@ -128,7 +145,10 @@ func get_output_value_type() -> String:
     return output_value_types.get("OUT", "Unknown")
 
 func get_theme_value_type() -> String:
-    return get_output_value_type()
+    var output_value_type: String = get_output_value_type()
+    if not output_value_type or output_value_type == "Unknown":
+        return ""
+    return output_value_type
 
 func get_input_value_type_list() -> Array[String]:
     var value_types: Array[String] = []
@@ -210,6 +230,8 @@ func update_is_in_graph_group(new_value: bool, group_theme: Theme = null) -> voi
     queue_redraw()
 
 func _draw() -> void:
+    if Engine.is_editor_hint():
+        return
     # Draw indicator if this node is in a group
     if is_in_graph_group:
         var from_theme: = in_group_with_theme if in_group_with_theme else theme
@@ -232,6 +254,8 @@ func get_export_import_tooltip() -> String:
     if not get_meta("hy_asset_node_id", ""):
         return ""
     var asset_node: = get_settings_syncer().asset_node
+    if asset_node.an_type == "WeightedPath":
+        return "Prefab Path: \"%s\"" % asset_node.settings["Path"]
     if asset_node.settings.get("ExportAs", ""):
         var out_value_type: = SchemaManager.schema.get_output_value_type(asset_node.an_type)
         return "Exported %s : %s (%s)" % [out_value_type, asset_node.settings["ExportAs"], title]
@@ -245,5 +269,7 @@ func get_export_import_tooltip() -> String:
         return ""
 
 func _get_tooltip(_at_position: Vector2) -> String:
+    if Engine.is_editor_hint():
+        return ""
     var export_import_tooltip: = get_export_import_tooltip()
     return export_import_tooltip if export_import_tooltip else title

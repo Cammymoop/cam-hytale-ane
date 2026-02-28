@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://cc8upbos3f5bj"]
+
+[ext_resource type="Script" uid="uid://b2hqpos1gajgs" path="res://graph_editor/asset_node_graph_edit.gd" id="2_tnb3o"]
+[ext_resource type="Script" uid="uid://brblh8d35q2mb" path="res://graph_editor/custom_graph_nodes/custom_graph_node.gd" id="3_njgep"]
+[ext_resource type="PackedScene" uid="uid://dhggpy8ho2wwa" path="res://ui/custom_controls/labeled_check_box.tscn" id="4_7ed0a"]
+[ext_resource type="StyleBox" uid="uid://6t41widrytu5" path="res://ui/assets/theme/default/base_label_stylebox.tres" id="4_tnb3o"]
+
+[node name="CHANE_AssetNodeGraphEdit" type="GraphEdit" unique_id=588573111]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+grid_pattern = 1
+connections = Array[Dictionary]([{
+"from_node": &"CustomGraphNode",
+"from_port": 0,
+"keep_alive": true,
+"to_node": &"CustomGraphNode2",
+"to_port": 0
+}])
+script = ExtResource("2_tnb3o")
+metadata/_custom_type_script = "uid://b2hqpos1gajgs"
+
+[node name="GraphFrame" type="GraphFrame" parent="." unique_id=1786946062]
+layout_mode = 0
+offset_left = 631.0
+offset_top = 33.0
+offset_right = 957.0
+offset_bottom = 151.0
+mouse_filter = 1
+position_offset = Vector2(631, 33)
+title = "Graph Frame (Group)"
+
+[node name="CustomGraphNode" type="GraphNode" parent="." unique_id=1835238764]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 51.0
+offset_right = 297.0
+offset_bottom = 186.0
+mouse_filter = 1
+position_offset = Vector2(34, 51)
+title = "Graph Node"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(0.1, 0.1, 0.1, 0.6)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(0.1, 0.1, 0.1, 0.6)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+slot/2/left_enabled = false
+slot/2/left_type = 0
+slot/2/left_color = Color(1, 1, 1, 1)
+slot/2/left_icon = null
+slot/2/right_enabled = false
+slot/2/right_type = 0
+slot/2/right_color = Color(1, 1, 1, 1)
+slot/2/right_icon = null
+slot/2/draw_stylebox = true
+script = ExtResource("3_njgep")
+preview_mode = true
+metadata/_custom_type_script = "uid://brblh8d35q2mb"
+
+[node name="Label" type="Label" parent="CustomGraphNode" unique_id=1146798170]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_styles/normal = ExtResource("4_tnb3o")
+text = "Input Connection"
+horizontal_alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CustomGraphNode" unique_id=1381200449]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Button" type="Button" parent="CustomGraphNode/HBoxContainer" unique_id=794329513]
+layout_mode = 2
+theme_type_variation = &"ButtonOptLeft"
+text = "Left"
+
+[node name="Button2" type="Button" parent="CustomGraphNode/HBoxContainer" unique_id=1948896770]
+layout_mode = 2
+theme_type_variation = &"ButtonOptRight"
+text = "Right"
+
+[node name="LabeledCheckBox" parent="CustomGraphNode" unique_id=1574992569 instance=ExtResource("4_7ed0a")]
+layout_mode = 2
+alignment = 2
+text = "LabeledCheck"
+
+[node name="CustomGraphNode2" type="GraphNode" parent="." unique_id=1395087320]
+layout_mode = 0
+offset_left = 358.0
+offset_top = 91.0
+offset_right = 545.0
+offset_bottom = 167.0
+mouse_filter = 1
+position_offset = Vector2(358, 91)
+title = "Graph Node 2"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(0.1, 0.1, 0.1, 0.6)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(0.1, 0.1, 0.1, 0.6)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+script = ExtResource("3_njgep")
+preview_mode = true
+metadata/_custom_type_script = "uid://brblh8d35q2mb"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CustomGraphNode2" unique_id=132392798]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CustomGraphNode2/HBoxContainer" unique_id=1327881322]
+layout_mode = 2

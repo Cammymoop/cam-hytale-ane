@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://bu054s5t5ne4i"]
+
+[ext_resource type="Theme" uid="uid://cv3cabit36ilb" path="res://ui/assets/theme/default/main_theme.tres" id="1_50myg"]
+[ext_resource type="PackedScene" uid="uid://bwhg0fuyjqeh1" path="res://ui/popup_menus/theme_editor.tscn" id="1_65fi4"]
+[ext_resource type="Script" uid="uid://dm0dehdgpmrnk" path="res://ui/theme_editor/type_color_button.gd" id="3_rdkpd"]
+
+[node name="Control" type="Control" unique_id=839623107]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_50myg")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1296312312]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.09239707, 0.09239706, 0.09239706, 1)
+
+[node name="ThemeEditor" parent="." unique_id=2006185018 instance=ExtResource("1_65fi4")]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -450.0
+offset_top = -88.5
+offset_right = 450.0
+offset_bottom = 88.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorPickerButton" parent="ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow" parent_id_path=PackedInt32Array(2006185018, 1249624062) index="0" unique_id=1396439560]
+custom_minimum_size = Vector2(42, 32)
+
+[node name="TypeColorButton" parent="ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/TypeColorsFlow" parent_id_path=PackedInt32Array(2006185018, 386363863) index="0" unique_id=1833279273]
+theme = ExtResource("1_50myg")
+text = "SomeValueType"
+
+[node name="TypeColorButton2" type="MenuButton" parent="ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/TypeColorsFlow" parent_id_path=PackedInt32Array(2006185018, 386363863) index="1" unique_id=1183399707]
+layout_mode = 2
+text = "Density"
+flat = false
+script = ExtResource("3_rdkpd")
+
+[editable path="ThemeEditor"]
+[editable path="ThemeEditor/VBoxContainer/PanelContainer/MarginContainer/VBoxContainer/ThemeColorsFlow/ColorPickerButton"]

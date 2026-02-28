@@ -13,6 +13,8 @@ const FragmentStore: = preload("res://graph_editor/fragment_store.gd")
 const UndoManager = preload("res://graph_editor/undo_redo/undo_manager.gd")
 const UndoStep = preload("res://graph_editor/undo_redo/undo_step.gd")
 
+const SettingsMenu = preload("res://ui/settings_menu.gd")
+
 enum ContextMenuItems {
     COPY_NODES = 1,
     CUT_NODES,
@@ -109,6 +111,9 @@ func _ready() -> void:
     FileDialogHandler.requested_open_file.connect(_on_requested_open_file)
     FileDialogHandler.requested_save_file.connect(_on_requested_save_file)
     
+    ANESettings.interface_color_changed.connect(on_interface_color_changed)
+    on_interface_color_changed()
+    
     popup_menu_root.new_gn_menu.node_type_picked.connect(on_new_node_type_picked)
     popup_menu_root.new_gn_menu.cancelled.connect(on_new_node_menu_cancelled)
     popup_menu_root.popup_menu_opened.connect(on_popup_menu_opened)
@@ -128,8 +133,6 @@ func _ready() -> void:
     
     graph_node_factory.name = "GraphNodeFactory"
     add_child(graph_node_factory, true)
-    
-    theme = ThemeColorVariants.get_theme_color_variant("blue-purple")
 
 func is_different_from_file_version() -> bool:
     return undo_manager.undo_redo.get_version() != file_history_version
@@ -253,11 +256,9 @@ func on_file_menu_index_pressed(index: int, file_menu: PopupMenu, _graph: CHANE_
             print("---")
 
 
-func on_settings_menu_index_pressed(index: int, settings_menu: PopupMenu) -> void:
-    var menu_item_text: = settings_menu.get_item_text(index)
-    match menu_item_text:
-        "Customize Theme Colors":
-            popup_menu_root.show_theme_editor()
+func on_settings_menu_index_pressed(index: int, settings_menu: SettingsMenu) -> void:
+    if index == settings_menu.customize_theme_colors_idx:
+        popup_menu_root.show_theme_editor()
 
 func on_popup_menu_opened() -> void:
     for graph in graphs:
@@ -446,9 +447,6 @@ func prompt_and_make_new_file(workspace_id: String) -> void:
 func _make_new_file_with_workspace_id(workspace_id: String) -> void:
     setup_new_graph(workspace_id)
 
-func set_root_node(new_root_node: HyAssetNode, new_root_graph_node: CustomGraphNode) -> void:
-    root_asset_node = new_root_node
-    root_graph_node = new_root_graph_node
 
 func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     clear_loaded_graph()
@@ -458,19 +456,19 @@ func setup_new_graph(workspace_id: String = DEFAULT_HY_WORKSPACE_ID) -> void:
     raw_metadata[CHANE_HyAssetNodeSerializer.MetadataKeys.WorkspaceId] = workspace_id
 
     var root_node_type: = SchemaManager.schema.resolve_root_asset_node_type(workspace_id, {}) as String
-    prints("setup_new_graph: root node type: %s" % root_node_type)
     var new_root_node: HyAssetNode = get_new_asset_node(root_node_type)
-    prints("new file root node id: %s" % new_root_node.an_node_id)
     var screen_center_pos: Vector2 = get_viewport_rect().size / 2
     var new_gn: CustomGraphNode = make_and_add_graph_node(focused_graph, new_root_node, screen_center_pos, true, true)
-    set_root_node(new_root_node, new_gn)
-    prints("new file root graph node: %s, position: %s" % [new_gn.get_path(), new_gn.position_offset])
+    _set_root_nodes(new_root_node, new_gn)
+
     focused_graph.scroll_to_graph_element(new_gn)
     #gn_lookup[new_root_node.an_node_id] = new_gn
     is_loaded = true
     file_helper.editing_new_file()
     
     file_history_version = undo_manager.undo_redo.get_version()
+    
+    new_session_started()
 
 func _on_requested_open_file(path: String) -> void:
     if _skip_load:
@@ -516,12 +514,22 @@ func on_got_loaded_data(graph_data: Dictionary) -> void:
     serializer.serialized_pos_offset = Vector2.ZERO
     var parse_graph_result: = serializer.deserialize_entire_graph(graph_data) as CHANE_HyAssetNodeSerializer.EntireGraphParseResult
     if not parse_graph_result.success:
+        file_helper.editing_new_file()
         push_error("Failed to deserialize graph")
         CHANE_HyAssetNodeSerializer.debug_dump_tree_results(parse_graph_result.root_tree_result)
-        GlobalToaster.show_toast_message("Failed to setup node graph :(")
+        GlobalToaster.show_toast_message("Something went wrong loading the file :(")
         return
     
     setup_edited_graph_from_parse_result(parse_graph_result)
+    
+    new_session_started()
+    
+func new_session_started() -> void:
+    ANESettings.root_node_changed(get_root_theme_color(), true)
+
+func change_root_node_to_gn(new_root_graph_node: CustomGraphNode) -> void:
+    _set_root_nodes(get_gn_main_asset_node(new_root_graph_node), new_root_graph_node)
+    ANESettings.root_node_changed(get_root_theme_color(), false)
 
 func setup_edited_graph_from_parse_result(parse_graph_result: CHANE_HyAssetNodeSerializer.EntireGraphParseResult) -> void:
     hy_workspace_id = parse_graph_result.hy_workspace_id
@@ -554,8 +562,9 @@ func create_loaded_graph_elements(graph_result: CHANE_HyAssetNodeSerializer.Enti
             break
     if not found_root_graph_node:
         push_error("create_loaded_graph_elements: Could not find root graph node asset node id: %s" % graph_result.root_node.an_node_id)
+        clear_loaded_graph()
         return
-    set_root_node(graph_result.root_node, found_root_graph_node)
+    _set_root_nodes(graph_result.root_node, found_root_graph_node)
     
     if ANESettings.auto_color_imported_nested_groups:
         for graph in graphs:
@@ -762,10 +771,13 @@ func clear_loaded_graph() -> void:
     # Asset Nodes and Aux Data are RefCounted
     all_asset_nodes.clear()
     asset_node_aux_data.clear()
-    root_asset_node = null
-    root_graph_node = null
+    _set_root_nodes(null, null)
     raw_metadata.clear()
     is_loaded = false
+
+func _set_root_nodes(new_root_asset_node: HyAssetNode, new_root_graph_node: CustomGraphNode) -> void:
+    root_asset_node = new_root_asset_node
+    root_graph_node = new_root_graph_node
 
 func get_new_asset_node(asset_node_type: String, id_prefix: String = "") -> HyAssetNode:
     asset_node_type = SchemaManager.schema.normalize_asset_node_type(asset_node_type)
@@ -1634,3 +1646,12 @@ func _set_gn_title(graph_node: CustomGraphNode, new_title: String) -> void:
 func update_all_ges_themes() -> void:
     for graph in graphs:
         graph.update_all_ges_themes()
+
+func get_root_theme_color() -> String:
+    if not is_loaded or not root_graph_node:
+        return TypeColors.fallback_color
+    return TypeColors.get_color_for_type(root_graph_node.get_theme_value_type())
+
+func on_interface_color_changed() -> void:
+    var interface_color: = ANESettings.get_current_interface_color()
+    theme = ThemeColorVariants.get_theme_color_variant(interface_color)

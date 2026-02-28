@@ -23,7 +23,7 @@ script = ExtResource("2_t68xp")
 focus_stop = NodePath("FocusStop")
 non_focus_stop = NodePath("NonFocusStop")
 new_gn_menu = NodePath("NonFocusStop/NewGNMenu")
-theme_editor_menu = NodePath("FocusStop/CenterContainer/ThemeEditor")
+theme_editor_menu = NodePath("FocusStop/ThemeEditorBGPanel/CenterContainer/ThemeEditor")
 save_confirm = NodePath("FocusStop/CenterContainer/SaveConfirm")
 new_file_type_chooser = NodePath("NonFocusStop/NewFileTypeChooser")
 
@@ -52,7 +52,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.6901961)
+color = Color(0, 0, 0, 0)
 
 [node name="CenterContainer" type="CenterContainer" parent="FocusStop" unique_id=2057887793]
 layout_mode = 1
@@ -66,8 +66,8 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ThemeEditor" parent="FocusStop/CenterContainer" unique_id=2006185018 instance=ExtResource("5_gl00s")]
-layout_mode = 2
-
 [node name="SaveConfirm" parent="FocusStop/CenterContainer" unique_id=1313053296 instance=ExtResource("6_goyjf")]
 layout_mode = 2
+
+[node name="ThemeEditorBGPanel" parent="FocusStop" unique_id=2006185018 instance=ExtResource("5_gl00s")]
+layout_mode = 1
