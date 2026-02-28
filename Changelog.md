@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+### Improvements:
+- Window title now shows the current file name
+- On startup, ensure the window is no larger than the available screen space on the current screen, also the default startup size is slightly smaller
+
 ## 0.4.2
 ### Fixes:
 - Fixed multiple bugs with undo on settings, and a bug where if the first thing you do is edit a setting it breaks the undo

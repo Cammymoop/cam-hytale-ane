@@ -66,6 +66,8 @@ var serializer: = CHANE_HyAssetNodeSerializer.new()
 @export var use_json_positions: = true
 @export var json_positions_scale: Vector2 = Vector2(0.6, 0.6)
 
+@export var is_main_window: = true
+
 @onready var graph_node_factory: GraphNodeFactory = GraphNodeFactory.new()
 @onready var special_gn_factory: SpecialGNFactory = graph_node_factory.special_gn_factory
 
@@ -133,6 +135,18 @@ func _ready() -> void:
     
     graph_node_factory.name = "GraphNodeFactory"
     add_child(graph_node_factory, true)
+    
+    if is_main_window:
+        get_window().min_size = Vector2i(200, 140)
+        ensure_main_window_fits()
+
+func ensure_main_window_fits() -> void:
+    if not is_main_window or not get_window().mode == Window.MODE_WINDOWED:
+        return
+    var window: = get_window()
+    var cur_screen_size: = DisplayServer.screen_get_usable_rect(window.current_screen)
+    if window.size.x > cur_screen_size.size.x or window.size.y > cur_screen_size.size.y:
+        window.size = Vector2i(mini(window.size.x, cur_screen_size.size.x), mini(window.size.y, cur_screen_size.size.y))
 
 func is_different_from_file_version() -> bool:
     return undo_manager.undo_redo.get_version() != file_history_version
@@ -144,7 +158,12 @@ func an_aux_position_sort_func(a: HyAssetNode, b: HyAssetNode) -> bool:
         return aux_a.position.x <= aux_b.position.x
     return aux_a.position.y < aux_b.position.y
 
+func update_main_window_title() -> void:
+    if is_main_window:
+        get_window().title = file_helper.get_cur_file_name().trim_suffix(".json")
+
 func on_after_file_saved() -> void:
+    update_main_window_title()
     file_history_version = undo_manager.undo_redo.get_version()
     undo_manager.prevent_merges()
 
@@ -521,6 +540,9 @@ func on_got_loaded_data(graph_data: Dictionary) -> void:
         return
     
     setup_edited_graph_from_parse_result(parse_graph_result)
+    
+    if is_loaded:
+        update_main_window_title()
     
     new_session_started()
     
